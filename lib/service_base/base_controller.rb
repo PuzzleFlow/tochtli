@@ -39,8 +39,22 @@ module ServiceBase
 			if (message_handler = fetch_message_handler(delivery_info.routing_key))
 				@message = message_handler.create_message(delivery_info, properties, payload)
 				@delivery_info = delivery_info
-				message_handler.call(self)
-				true
+
+				Rails.logger.debug "\n\nAMQP Message #{@message.class.name} at #{Time.now}"
+				Rails.logger.debug "Processing by #{self.class.name}"
+				Rails.logger.debug "\tMessage: #{@message.attributes.inspect}."
+				Rails.logger.debug "\tProperties: #{properties.inspect}."
+				Rails.logger.debug "\tDelivery info: #{delivery_info.inspect}."
+
+				begin
+					message_handler.call(self)
+					true
+				rescue Exception => ex
+					Rails.logger.error "\n#{ex.class.name} (#{ex.message})"
+					Rails.logger.error ex.backtrace.join("\n")
+					reply ErrorMessage.new(message: ex.message) if @message.properties.reply_to
+					false
+				end
 			else
 				false
 			end
@@ -86,11 +100,11 @@ module ServiceBase
 		end
 
 		def queue_name
-			self.class.name.underscore
+			ControllerManager.controller_queue_name(self)
 		end
 
 		def create_queue
-			@queue = @rabbit_connection.queue(self.queue_name, self.class.routing_keys)
+			@queue = ControllerManager.create_controller_queue(self.class)
 		end
 
 		def subscribe_queue
@@ -100,11 +114,12 @@ module ServiceBase
 		end
 
 		def reply(reply_message)
+			Rails.logger.debug @message.properties.inspect
 			raise "The 'reply_to' queue name is not specified" unless @message.properties.reply_to
 
 			@rabbit_connection.publish(@message.properties.reply_to,
 																 reply_message,
-																 :correlation_id => @message.properties.correlation_id)
+																 :correlation_id => @message.id)
 		end
 
 		class MessageHandler

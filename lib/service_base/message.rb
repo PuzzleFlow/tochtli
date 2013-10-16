@@ -7,7 +7,7 @@ module ServiceBase
 		class_attribute :routing_key, :instance_writer => false
 		class_attribute :attribute_names, :instance_writer => false
 
-		attr_reader :properties
+		attr_reader :id, :properties
 
 		def self.inherited(subclass)
 			subclass.attribute_names = Set.new
@@ -31,6 +31,11 @@ module ServiceBase
 		def initialize(attributes={}, properties=nil)
 			self.attributes = attributes if attributes
 			@properties = properties
+			@id = if properties && properties.message_id
+							properties.message_id
+						else
+							self.class.generate_id
+						end
 		end
 
 		def attributes
@@ -46,5 +51,12 @@ module ServiceBase
 			end
 		end
 
+		def self.generate_id
+			SecureRandom.uuid
+		end
+	end
+
+	class ErrorMessage < Message
+		attributes :message
 	end
 end

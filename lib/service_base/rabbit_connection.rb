@@ -47,8 +47,8 @@ module ServiceBase
 			raise ConnectionFailed.new("Unable create exchange: '#{exchange_name}': #{ex.message}")
 		end
 
-		def queue(name, routing_keys=[])
-			queue = @channel.queue(name, durable: true)
+		def queue(name, routing_keys=[], options={})
+			queue = @channel.queue(name, {durable: true}.merge(options))
 			routing_keys.each do |routing_key|
 				queue.bind(@exchange, routing_key: routing_key)
 			end
@@ -74,7 +74,7 @@ module ServiceBase
 					routing_key: routing_key,
 					persistent: true,
 					timestamp: Time.now.to_i,
-					message_id: generate_id,
+					message_id: message.id,
 					type: message.class.name.underscore,
 					content_type: "application/json"
 			}.merge(options)
@@ -89,7 +89,7 @@ module ServiceBase
 
 		class Config < Hash
 			DEFAULTS = {
-					:exchange_name => "puzzleflow_services",
+					:exchange_name => "puzzleflow.services",
 					:automatically_recover => true,
 					:network_recovery_interval => 1
 			}

@@ -1,11 +1,14 @@
+require 'service_base/engine'
+
 module ServiceBase
 	autoload :RabbitConnection, 'service_base/rabbit_connection'
 	autoload :BaseController, 'service_base/base_controller'
 	autoload :ControllerManager, 'service_base/controller_manager'
 	autoload :Message, 'service_base/message'
 	autoload :MessageMap, 'service_base/message_map'
-	autoload :TestCase, 'service_base/test_case'
-	autoload :IntegrationTest, 'service_base/integration_test'
+	autoload :ReplyQueue, 'service_base/reply_queue'
+	autoload :RabbitClient, 'service_base/rabbit_client'
+	autoload :Test, 'service_base/test'
 
 	def self.start_services(rabbit_config=nil)
 		preload_service_messages

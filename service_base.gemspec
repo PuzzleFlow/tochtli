@@ -18,4 +18,5 @@ Gem::Specification.new do |s|
 
 	s.add_dependency "rails", "3.2.12"
 	s.add_dependency "bunny", "~> 0.10.8"
+	s.add_dependency "dalli", "~> 2.6.4"
 end

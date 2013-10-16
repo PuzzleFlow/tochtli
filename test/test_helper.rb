@@ -1,8 +1,11 @@
 # Configure Rails Environment
 ENV["RAILS_ENV"] = "test"
 
-require File.expand_path("../dummy/config/environment.rb",  __FILE__)
-require "rails/test_help"
+SOLUTION_NAME = 'basic' unless defined?(SOLUTION_NAME)
+require File.expand_path('../../../plugins/common_tools/test/common_test_helper', File.dirname(__FILE__))
+
+ServiceBase.preload_service_messages
+ServiceBase.preload_service_controllers
 
 Rails.backtrace_cleaner.remove_silencers!
 
