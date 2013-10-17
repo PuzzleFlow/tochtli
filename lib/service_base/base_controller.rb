@@ -21,11 +21,12 @@ module ServiceBase
 			self.static_message_handlers[routing_key] = MessageHandler.new(routing_key, message_class, method_name)
 		end
 
-		def initialize(rabbit_connection, cache)
+		def initialize(rabbit_connection, cache, configuration_store)
 			@rabbit_connection = rabbit_connection
 			@channel = @rabbit_connection.channel
 			@exchange = @rabbit_connection.exchange
 			@cache = cache
+			@configuration_store = configuration_store
 
 			setup_routing
 		end

@@ -4,7 +4,7 @@ module ServiceBase
 	class ControllerManager
 		include Singleton
 
-		attr_reader :rabbit_connection, :cache
+		attr_reader :rabbit_connection, :cache, :configuration_store
 
 		# Settings for tests
 		cattr_accessor :queue_name_prefix
@@ -25,14 +25,16 @@ module ServiceBase
 			@controller_classes << controller_class
 		end
 
-		def start(rabbit_or_config=nil)
+		def start(rabbit_or_config=nil, logger=nil)
 			@cache = ActiveSupport::Cache::DalliStore.new
+			@configuration_store = ServiceBase::Configuration::ActiveRecordStore.new
 
 			@rabbit_connection = rabbit_or_config.is_a?(RabbitConnection) ? rabbit_or_config : RabbitConnection.new(rabbit_or_config)
 			@rabbit_connection.connect
 
 			@controller_classes.each do |controller_class|
-				controller = controller_class.new(@rabbit_connection, @cache)
+				logger.info "Starting #{controller_class}..." if logger
+				controller = controller_class.new(@rabbit_connection, @cache, @configuration_store)
 				controller.start
 				@controllers << controller
 			end

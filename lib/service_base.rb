@@ -2,6 +2,7 @@ require 'service_base/engine'
 
 module ServiceBase
 	autoload :RabbitConnection, 'service_base/rabbit_connection'
+	autoload :Configuration, 'service_base/configuration'
 	autoload :BaseController, 'service_base/base_controller'
 	autoload :ControllerManager, 'service_base/controller_manager'
 	autoload :Message, 'service_base/message'
@@ -10,10 +11,17 @@ module ServiceBase
 	autoload :RabbitClient, 'service_base/rabbit_client'
 	autoload :Test, 'service_base/test'
 
-	def self.start_services(rabbit_config=nil)
+	def self.start_services(rabbit_config=nil, logger=nil)
 		preload_service_messages
 		preload_service_controllers
-		ControllerManager.start(rabbit_config)
+		ControllerManager.start(rabbit_config, logger)
+	rescue
+		if logger
+			logger.error "Error during service start"
+			logger.error "#{$!.class}: #{$!}"
+			logger.error $!.backtrace.join("\n")
+		end
+		raise
 	end
 
 	def self.preload_service_messages
