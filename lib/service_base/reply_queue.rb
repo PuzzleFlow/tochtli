@@ -45,7 +45,13 @@ module ServiceBase
 					timeout_thread.join # make sure timeout thread is dead
 				end
 
-				handler.call(reply)
+				unless reply.is_a?(ServiceBase::ErrorMessage)
+
+					handler.call(reply)
+
+				else
+					handler.on_error(reply)
+				end
 
 			else
 				raise "Unexpected message delivery: #{reply.properties.correlation_id}, #{reply.inspect}"

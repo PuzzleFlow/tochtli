@@ -53,7 +53,7 @@ module ServiceBase
 				rescue Exception => ex
 					Rails.logger.error "\n#{ex.class.name} (#{ex.message})"
 					Rails.logger.error ex.backtrace.join("\n")
-					reply ErrorMessage.new(message: ex.message) if @message.properties.reply_to
+					reply ErrorMessage.new(error: ex.class.name.demodulize, message: ex.message) if @message.properties.reply_to
 					false
 				end
 			else

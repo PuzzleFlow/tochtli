@@ -57,6 +57,6 @@ module ServiceBase
 	end
 
 	class ErrorMessage < Message
-		attributes :message
+		attributes :error, :message
 	end
 end
