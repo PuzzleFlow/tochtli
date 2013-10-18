@@ -21,9 +21,10 @@ module ServiceBase
 				@controller_manager.stop
 			end
 
-			def publish(message, reply_message_class=nil, timeout=1.0)
+			def publish(message, options={})
 				@reply = nil
-				@reply_message_class = reply_message_class
+				timeout = options.fetch(:timeout, 1.0)
+				@reply_message_class = options[:expect]
 
 				@client.reply_queue.register_message_handler message do |reply|
 					@reply = reply
@@ -32,7 +33,7 @@ module ServiceBase
 				end
 				@client.publish message
 
-				if reply_message_class
+				if @reply_message_class
 					@mutex.synchronize { @cv.wait(@mutex, timeout) }
 
 					raise "Reply on #{message.class.name} timeout" unless @reply
