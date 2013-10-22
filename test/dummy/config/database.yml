@@ -1,0 +1,15 @@
+development:
+  adapter: postgresql
+  host: localhost
+  port: 5432
+  database: dummy_service
+  username: postgres
+  password: heaven777
+
+test:
+  adapter: postgresql
+  host: localhost
+  port: 5432
+  database: dummy_service_test
+  username: postgres
+  password: heaven777

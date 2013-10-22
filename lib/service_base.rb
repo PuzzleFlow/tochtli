@@ -1,4 +1,5 @@
-require 'service_base/engine'
+require 'service_base/engine' if defined?(::Rails)
+require 'active_support/core_ext'
 
 module ServiceBase
 	autoload :RabbitConnection, 'service_base/rabbit_connection'
@@ -12,8 +13,8 @@ module ServiceBase
 	autoload :Test, 'service_base/test'
 
 	def self.start_services(rabbit_config=nil, logger=nil)
-		preload_service_messages
-		preload_service_controllers
+		eager_load_service_messages
+		eager_load_service_controllers
 		ControllerManager.start(rabbit_config, logger)
 	rescue
 		if logger
@@ -24,7 +25,7 @@ module ServiceBase
 		raise
 	end
 
-	def self.preload_service_messages
+	def self.eager_load_service_messages
 		Rails::Engine::Railties.engines.each do |engine|
 			next unless engine.paths["service/messages"]
 			engine.paths["service/messages"].existent.each do |load_path|
@@ -35,7 +36,7 @@ module ServiceBase
 		end
 	end
 
-	def self.preload_service_controllers
+	def self.eager_load_service_controllers
 		Rails::Engine::Railties.engines.each do |engine|
 			next unless engine.paths["service/controllers"]
 			engine.paths["service/controllers"].existent.each do |load_path|
@@ -43,6 +44,12 @@ module ServiceBase
 					require file
 				end
 			end
+		end
+	end
+
+	def self.eager_load_service_files(service_path, type)
+		Dir.glob("#{service_path}/service/#{type}/**/*.rb").sort.each do |file|
+			require file
 		end
 	end
 end

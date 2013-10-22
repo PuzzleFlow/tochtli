@@ -1,3 +1,5 @@
+require 'singleton'
+
 module ServiceBase
 	class MessageMap
 		include Singleton

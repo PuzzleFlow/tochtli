@@ -1,11 +1,24 @@
 # Configure Rails Environment
 ENV["RAILS_ENV"] = "test"
 
-SOLUTION_NAME = 'basic' unless defined?(SOLUTION_NAME)
-require File.expand_path('../../../plugins/common_tools/test/common_test_helper', File.dirname(__FILE__))
+#require 'rubygems'
+#ENV['BUNDLE_GEMFILE'] = File.expand_path('../../Gemfile', __FILE__)
+#require 'bundler'
+#Bundler.setup
 
-ServiceBase.preload_service_messages
-ServiceBase.preload_service_controllers
+require File.expand_path("../dummy/config/environment.rb",  __FILE__)
+require "rails/test_help"
+#require 'test/unit'
+#require 'active_support/test_case'
+
+#SOLUTION_NAME = 'basic' unless defined?(SOLUTION_NAME)
+#require File.expand_path('../../../plugins/common_tools/test/common_test_helper', File.dirname(__FILE__))
+
+#$: << File.expand_path('../../lib')
+#require 'service_base'
+
+ServiceBase.eager_load_service_messages
+ServiceBase.eager_load_service_controllers
 
 Rails.backtrace_cleaner.remove_silencers!
 

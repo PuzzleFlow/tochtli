@@ -6,7 +6,7 @@ module ServiceBase
 		end
 
 		initializer :eager_load_messages, :before => :bootstrap_hook do
-			ServiceBase.preload_service_messages
+			ServiceBase.eager_load_service_messages
 		end
 
 	end

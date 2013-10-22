@@ -1,3 +1,5 @@
+require 'active_model'
+
 module ServiceBase
 	class Message
 		include ActiveModel::Naming
