@@ -10,6 +10,7 @@ module ServiceBase
 	autoload :MessageMap, 'service_base/message_map'
 	autoload :ReplyQueue, 'service_base/reply_queue'
 	autoload :RabbitClient, 'service_base/rabbit_client'
+	autoload :ClientProxy, 'service_base/client_proxy'
 	autoload :Test, 'service_base/test'
 
 	def self.start_services(rabbit_config=nil, logger=nil)
