@@ -44,6 +44,8 @@ module ServiceBase
 				@controller.render unless @controller.performed?
 				EM.next_tick { @controller.env['async.callback'].call @controller.to_a }
 			end
+		rescue Exception
+			handle_exception $!
 		end
 
 		def on_timeout
@@ -52,9 +54,13 @@ module ServiceBase
 			handle_exception exception
 		end
 
-		def on_error(error, message)
-			exception = InternalServiceError.new("#{error} from #{@client.service_friendly_name}: #{message}")
-			exception.set_backtrace caller(0)
+		def on_error(error_or_exception, message)
+			if error_or_exception.is_a?(Exception)
+				exception = error_or_exception
+			else
+				exception = InternalServiceError.new("#{error_or_exception} from #{@client.service_friendly_name}: #{message}")
+				exception.set_backtrace caller(0)
+			end
 			handle_exception exception
 		end
 
@@ -76,6 +82,7 @@ module ServiceBase
 
 			Rails.logger.error "Reported service error message:"
 			Rails.logger.error exception.message
+			Rails.logger.error exception.backtrace.join("\n") unless exception.is_a?(InternalServiceError)
 
 		rescue Exception
 			Rails.logger.error $!

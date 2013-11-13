@@ -21,26 +21,39 @@ module ServiceBase
 				@controller_manager.stop
 			end
 
+			private
+
 			def publish(message, options={})
 				@reply = nil
 				timeout = options.fetch(:timeout, 1.0)
 				@reply_message_class = options[:expect]
+				@reply_handler = options[:reply_handler]
 
-				@client.reply_queue.register_message_handler message do |reply|
-					@reply = reply
-					assert_kind_of @reply_message_class, @reply, "Unexpected reply"
-					@mutex.synchronize { @cv.signal }
+				if @reply_message_class || @reply_handler
+					handler = @reply_handler || method(:synchronous_reply_handler)
+					@client.reply_queue.register_message_handler message, &handler
 				end
+
 				@client.publish message
 
-				if @reply_message_class
-					@mutex.synchronize { @cv.wait(@mutex, timeout) }
-
-					raise "Reply on #{message.class.name} timeout" unless @reply
-					raise @reply.message if @reply.is_a?(ServiceBase::ErrorMessage)
-
-					@reply
+				if @reply_message_class && !@reply_handler
+					synchronous_timeout_handler(message, timeout)
 				end
+			end
+
+			def synchronous_reply_handler(reply)
+				@reply = reply
+				assert_kind_of @reply_message_class, @reply, "Unexpected reply"
+				@mutex.synchronize { @cv.signal }
+			end
+
+			def synchronous_timeout_handler(message, timeout)
+				@mutex.synchronize { @cv.wait(@mutex, timeout) }
+
+				raise "Reply on #{message.class.name} timeout" unless @reply
+				raise @reply.message if @reply.is_a?(ServiceBase::ErrorMessage)
+
+				@reply
 			end
 		end
 	end

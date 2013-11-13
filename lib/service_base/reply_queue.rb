@@ -15,10 +15,12 @@ module ServiceBase
 		end
 
 		def register_message_handler(message, handler=nil, timeout=nil, &block)
+			Rails.logger.debug "[ServiceBase::ReplyQueue] Registering message '#{message.id}' handler: #{handler.class.name}"
 			@message_handlers[message.id] = handler || block
 			if timeout
 				timeout_thread = Thread.start do
 					sleep timeout
+					Rails.logger.debug "[ServiceBase::ReplyQueue] TIMEOUT on message '#{message.id}' reply: #{timeout}"
 					handle_timeout message
 				end
 				@message_timeout_threads[message.id] = timeout_thread
@@ -35,10 +37,16 @@ module ServiceBase
 		rescue Exception
 			Rails.logger.error $!
 			Rails.logger.error $!.backtrace.join("\n")
-			raise
+			begin
+				handler.on_error($!)
+			rescue Exception
+				Rails.logger.error "Unable to handle exception: #{$!}"
+				Rails.logger.error $!.backtrace.join("\n")
+			end
 		end
 
 		def handle_reply(reply)
+			Rails.logger.debug "[ServiceBase::ReplyQueue] Reply for message '#{reply.properties.correlation_id}':\n\t#{reply.inspect})"
 			if (handler = @message_handlers.delete(reply.properties.correlation_id))
 				if (timeout_thread = @message_timeout_threads.delete(reply.properties.correlation_id))
 					timeout_thread.kill
