@@ -17,7 +17,11 @@ module ServiceBase
 				@controller.cleanup
 
 				unless @controller.process_message(delivery_info, properties, payload)
-					raise "Message #{message.class.name} not processed by #{@controller}."
+					if (reply = @connection.publications.first) && reply[:message].is_a?(ServiceBase::ErrorMessage)
+						raise "Process error: #{reply[:message].message}"
+					else
+						raise "Message #{message.class.name} not processed by #{@controller}."
+					end
 				end
 
 				reply = @connection.publications.first
