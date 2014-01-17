@@ -42,7 +42,7 @@ module ServiceBase
 			@exchange = @channel.topic(exchange_name, durable: true)
 
 		rescue Bunny::TCPConnectionFailed => ex
-			raise ConnectionFailed.new("Unable to connect to: '#{bunny_config.url}': #{ex.message}")
+			raise ConnectionFailed.new("Unable to connect to: '#{bunny_config[:url]}': #{ex.message}")
 		rescue Bunny::PreconditionFailed => ex
 			raise ConnectionFailed.new("Unable create exchange: '#{exchange_name}': #{ex.message}")
 		end
