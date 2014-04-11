@@ -6,6 +6,9 @@ module ServiceBase
 		end
 
 		delegate :client_id, to: :@client
+		cattr_accessor :custom_exceptions do
+			{}
+		end
 
 		protected
 
@@ -27,6 +30,10 @@ module ServiceBase
 					throw :async if final_command
 				end
 			RUBY
+		end
+
+		def self.handle_exception(exception, method_name)
+			custom_exceptions[exception] = method_name
 		end
 	end
 
@@ -66,10 +73,16 @@ module ServiceBase
 
 		private
 
+		def handled_response(exception)
+			exception_method = ClientProxy.custom_exceptions[exception.to_s]
+			custom_response = nil
+
+			custom_response = @controller.uas_proxy.send(exception_method) if  @controller.uas_proxy.respond_to?(exception_method)
+		end
+
 		def handle_exception(exception)
 			if @controller.request.xhr?
 				response = Rack::Response.new(exception.message, 500)
-				EM.next_tick { @controller.env['async.callback'].call response.to_a }
 			else
 				env = @controller.env
 				wrapper = ActionDispatch::ExceptionWrapper.new(env, exception)
@@ -77,13 +90,14 @@ module ServiceBase
 				env["action_dispatch.exception"] = wrapper.exception
 				env["PATH_INFO"] = "/#{status}"
 				response = Rails.application.routes.call(env)
-				EM.next_tick { @controller.env['async.callback'].call response.to_a }
 			end
+
+			final_response = handled_response(exception) || response.to_a
+			EM.next_tick { @controller.env['async.callback'].call final_response }
 
 			Rails.logger.error "Reported service error message:"
 			Rails.logger.error exception.message
 			Rails.logger.error exception.backtrace.join("\n") unless exception.is_a?(InternalServiceError)
-
 		rescue Exception
 			Rails.logger.error $!
 			Rails.logger.error $!.backtrace.join("\n")
