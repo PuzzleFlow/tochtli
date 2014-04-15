@@ -75,9 +75,15 @@ module ServiceBase
 
 		def handled_response(exception)
 			exception_method = ClientProxy.custom_exceptions[exception.to_s]
-			custom_response = nil
+			custom_response(exception_method)
+		end
 
-			custom_response = @controller.uas_proxy.send(exception_method) if  @controller.uas_proxy.respond_to?(exception_method)
+		def custom_response(method)
+			if method != nil && @controller.uas_proxy.respond_to?(method)
+				response = @controller.uas_proxy.send(method)
+			end
+
+			response
 		end
 
 		def handle_exception(exception)
