@@ -1,26 +1,26 @@
 module ServiceBase
 	class ReplyQueue
-		attr_reader :connection
+		attr_reader :connection, :logger
 		delegate :name, :to => :@queue
 
-		def initialize(rabbit_connection)
+		def initialize(rabbit_connection, logger=nil)
 			@connection = rabbit_connection
-			@channel = @connection.channel
-			@exchange = @connection.exchange
-			@queue = @channel.queue('', exclusive: true, auto_delete: true)
-			@queue.bind(@exchange, routing_key: @queue.name)
-			@queue.subscribe(block: false, &method(:on_delivery))
+			@logger = logger || rabbit_connection.logger
+			@queue = @connection.channel.queue('', exclusive: true, auto_delete: true)
+			@queue.bind @connection.exchange, routing_key: @queue.name
+
+			@consumer = @queue.subscribe(block: false, &method(:on_delivery))
 			@message_handlers = {}
 			@message_timeout_threads = {}
 		end
 
 		def register_message_handler(message, handler=nil, timeout=nil, &block)
-			Rails.logger.debug "[ServiceBase::ReplyQueue] Registering message '#{message.id}' handler: #{handler.class.name}"
+			logger.debug "[ServiceBase::ReplyQueue] Registering message '#{message.id}' handler: #{handler.class.name}"
 			@message_handlers[message.id] = handler || block
 			if timeout
 				timeout_thread = Thread.start do
 					sleep timeout
-					Rails.logger.debug "[ServiceBase::ReplyQueue] TIMEOUT on message '#{message.id}' reply: #{timeout}"
+					logger.warn "[ServiceBase::ReplyQueue] TIMEOUT on message '#{message.id}' reply: #{timeout}"
 					handle_timeout message
 				end
 				@message_timeout_threads[message.id] = timeout_thread
@@ -35,18 +35,12 @@ module ServiceBase
 			handle_reply reply
 
 		rescue Exception
-			Rails.logger.error $!
-			Rails.logger.error $!.backtrace.join("\n")
-			begin
-				handler.on_error($!)
-			rescue Exception
-				Rails.logger.error "Unable to handle exception: #{$!}"
-				Rails.logger.error $!.backtrace.join("\n")
-			end
+			logger.error $!
+			logger.error $!.backtrace.join("\n")
 		end
 
 		def handle_reply(reply)
-			Rails.logger.debug "[ServiceBase::ReplyQueue] Reply for message '#{reply.properties.correlation_id}':\n\t#{reply.inspect})"
+			logger.debug "[ServiceBase::ReplyQueue] Reply for message '#{reply.properties.correlation_id}':\n\t#{reply.inspect})"
 			if (handler = @message_handlers.delete(reply.properties.correlation_id))
 				if (timeout_thread = @message_timeout_threads.delete(reply.properties.correlation_id))
 					timeout_thread.kill
@@ -55,14 +49,22 @@ module ServiceBase
 
 				unless reply.is_a?(ServiceBase::ErrorMessage)
 
-					handler.call(reply)
+					begin
+
+						handler.call(reply)
+
+					rescue Exception
+						logger.error $!
+						logger.error $!.backtrace.join("\n")
+						handler.on_error($!)
+					end
 
 				else
 					handler.on_error(reply)
 				end
 
 			else
-				raise "Unexpected message delivery: #{reply.properties.correlation_id}, #{reply.inspect}"
+				logger.error "[ServiceBase::ReplyQueue] Unexpected message delivery '#{reply.properties.correlation_id}':\n\t#{reply.inspect})"
 			end
 		end
 
@@ -73,6 +75,10 @@ module ServiceBase
 			else
 				raise "Internal error, timeout handler not found for message: #{original_message.id}, #{original_message.inspect}"
 			end
+		end
+
+		class Consumer < Bunny::Consumer
+
 		end
 	end
 end

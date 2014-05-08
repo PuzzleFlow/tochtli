@@ -6,14 +6,15 @@ module ServiceBase
 
 		attr_reader :rabbit_connection, :reply_queue, :configuration_store
 
-		def initialize(rabbit_connection=nil)
+		def initialize(rabbit_connection=nil, logger=nil)
 			if rabbit_connection
 				@rabbit_connection = rabbit_connection
 			else
 				@rabbit_connection = ServiceBase::RabbitConnection.new(self.class.rabbit_config)
 				@rabbit_connection.connect
 			end
-			@reply_queue = ServiceBase::ReplyQueue.new(self.rabbit_connection)
+			@logger = logger || @rabbit_connection.logger
+			@reply_queue = ServiceBase::ReplyQueue.new(self.rabbit_connection, @logger)
 			@configuration_store = ServiceBase::Configuration::ActiveRecordStore.new
 		end
 

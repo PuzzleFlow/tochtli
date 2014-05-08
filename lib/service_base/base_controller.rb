@@ -3,7 +3,7 @@ module ServiceBase
 		class_attribute :routing_keys,
 										:static_message_handlers
 
-		attr_reader :message
+		attr_reader :logger, :message
 
 		def self.inherited(controller)
 			controller.routing_keys = Set.new
@@ -21,12 +21,11 @@ module ServiceBase
 			self.static_message_handlers[routing_key] = MessageHandler.new(routing_key, message_class, method_name)
 		end
 
-		def initialize(rabbit_connection, cache, configuration_store)
+		def initialize(rabbit_connection, cache, configuration_store, logger)
 			@rabbit_connection = rabbit_connection
-			@channel = @rabbit_connection.channel
-			@exchange = @rabbit_connection.exchange
 			@cache = cache
 			@configuration_store = configuration_store
+			@logger = logger
 
 			setup_routing
 		end
@@ -41,18 +40,18 @@ module ServiceBase
 				@message = message_handler.create_message(delivery_info, properties, payload)
 				@delivery_info = delivery_info
 
-				Rails.logger.debug "\n\nAMQP Message #{@message.class.name} at #{Time.now}"
-				Rails.logger.debug "Processing by #{self.class.name}"
-				Rails.logger.debug "\tMessage: #{@message.attributes.inspect}."
-				Rails.logger.debug "\tProperties: #{properties.inspect}."
-				Rails.logger.debug "\tDelivery info: #{delivery_info.inspect}."
+				logger.debug "\n\nAMQP Message #{@message.class.name} at #{Time.now}"
+				logger.debug "Processing by #{self.class.name} [Thread: #{Thread.current.object_id}]"
+				logger.debug "\tMessage: #{@message.attributes.inspect}."
+				logger.debug "\tProperties: #{properties.inspect}."
+				logger.debug "\tDelivery info: exchange: #{delivery_info[:exchange]}, routing_key: #{delivery_info[:routing_key]}."
 
 				begin
 					message_handler.call(self)
 					true
 				rescue Exception => ex
-					Rails.logger.error "\n#{ex.class.name} (#{ex.message})"
-					Rails.logger.error ex.backtrace.join("\n")
+					logger.error "\n#{ex.class.name} (#{ex.message})"
+					logger.error ex.backtrace.join("\n")
 					reply ErrorMessage.new(error: ex.class.name.demodulize, message: ex.message) if @message.properties.reply_to
 					false
 				end
@@ -115,12 +114,11 @@ module ServiceBase
 		end
 
 		def reply(reply_message)
-			Rails.logger.debug @message.properties.inspect
 			raise "The 'reply_to' queue name is not specified" unless @message.properties.reply_to
-
 			@rabbit_connection.publish(@message.properties.reply_to,
 																 reply_message,
-																 :correlation_id => @message.id)
+																 mandatory: true,
+																 correlation_id: @message.id)
 		end
 
 		class MessageHandler

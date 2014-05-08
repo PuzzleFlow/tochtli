@@ -101,12 +101,12 @@ module ServiceBase
 			final_response = handled_response(exception) || response.to_a
 			EM.next_tick { @controller.env['async.callback'].call final_response }
 
-			Rails.logger.error "Reported service error message:"
-			Rails.logger.error exception.message
-			Rails.logger.error exception.backtrace.join("\n") unless exception.is_a?(InternalServiceError)
+			@controller.logger.error "Reported service error message:"
+			@controller.logger.error exception.message
+			@controller.logger.error exception.backtrace.join("\n") unless exception.is_a?(InternalServiceError)
 		rescue Exception
-			Rails.logger.error $!
-			Rails.logger.error $!.backtrace.join("\n")
+			@controller.logger.error $!
+			@controller.logger.error $!.backtrace.join("\n")
 			response = Rack::Response.new("Internal Error: #{$!}", 500)
 			EM.next_tick { @controller.env['async.callback'].call response.to_a }
 		end

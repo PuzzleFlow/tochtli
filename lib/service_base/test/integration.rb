@@ -1,16 +1,18 @@
 module ServiceBase
 	module Test
 		class Integration < ActiveSupport::TestCase
-			RabbitClient.rabbit_config = {:exchange_name => "puzzleflow.tests"}
+			RabbitClient.rabbit_config = {:exchange_name => "puzzleflow.tests", :log_level => Logger::WARN}
 			ControllerManager.queue_name_prefix = 'tests/'
 			ControllerManager.queue_durable = false
 			ControllerManager.queue_auto_delete = true
 
 			setup do
-				@client = ServiceBase::RabbitClient.new
+				@logger = Logger.new(File.join(Rails.root, 'log/test_service_integration.log'))
+				@logger.level = Logger::WARN
+				@client = ServiceBase::RabbitClient.new(nil, @logger)
 				@connection = @client.rabbit_connection
 				@controller_manager = ServiceBase::ControllerManager.instance
-				@controller_manager.start(@connection)
+				@controller_manager.start(@connection, @logger)
 
 				# Reply support
 				@mutex = Mutex.new
@@ -31,7 +33,11 @@ module ServiceBase
 
 				if @reply_message_class || @reply_handler
 					handler = @reply_handler || method(:synchronous_reply_handler)
-					@client.reply_queue.register_message_handler message, &handler
+					if handler.is_a?(Proc)
+						@client.reply_queue.register_message_handler message, &handler
+					else
+						@client.reply_queue.register_message_handler message, handler, timeout
+					end
 				end
 
 				@client.publish message
