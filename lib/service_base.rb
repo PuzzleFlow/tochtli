@@ -12,6 +12,7 @@ module ServiceBase
 	autoload :RabbitClient, 'service_base/rabbit_client'
 	autoload :ClientProxy, 'service_base/client_proxy'
 	autoload :Test, 'service_base/test'
+	autoload :ServiceCache, 'service_base/service_cache'
 
 	def self.start_services(rabbit_config=nil, logger=nil)
 		eager_load_service_messages

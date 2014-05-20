@@ -1,5 +1,3 @@
-require 'active_support/cache/dalli_store'
-
 module ServiceBase
 	class ControllerManager
 		include Singleton
@@ -27,7 +25,7 @@ module ServiceBase
 
 		def start(rabbit_or_config=nil, logger=nil)
 			@logger = logger
-			@cache = ActiveSupport::Cache::DalliStore.new
+			@cache = ServiceBase::ServiceCache.create
 			@configuration_store = ServiceBase::Configuration::ActiveRecordStore.new
 
 			@rabbit_connection = rabbit_or_config.is_a?(RabbitConnection) ? rabbit_or_config : RabbitConnection.new(rabbit_or_config)

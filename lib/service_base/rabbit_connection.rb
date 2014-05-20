@@ -134,7 +134,7 @@ module ServiceBase
 					config = YAML.load_file(config)
 				end
 
-				new.merge!(DEFAULTS.merge(config || {}))
+				new.merge!(DEFAULTS.merge(config || {})).symbolize_keys
 			end
 		end
 
