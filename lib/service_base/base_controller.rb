@@ -58,6 +58,9 @@ module ServiceBase
 			else
 				false
 			end
+		rescue Exception => ex
+			logger.error "\n#{ex.class.name} (#{ex.message})"
+			logger.error ex.backtrace.join("\n")
 		ensure
 			cleanup
 		end
