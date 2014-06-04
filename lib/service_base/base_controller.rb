@@ -120,7 +120,6 @@ module ServiceBase
 			raise "The 'reply_to' queue name is not specified" unless @message.properties.reply_to
 			@rabbit_connection.publish(@message.properties.reply_to,
 																 reply_message,
-																 mandatory: true,
 																 correlation_id: @message.id)
 		end
 
