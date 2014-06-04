@@ -11,6 +11,8 @@ module ServiceBase
 
 		attr_reader :id, :properties
 
+		self.include_root_in_json = false
+
 		def self.inherited(subclass)
 			subclass.attribute_names = Set.new
 		end
