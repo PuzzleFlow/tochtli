@@ -70,6 +70,7 @@ module ServiceBase
 			exchange.publish(payload, {
 					routing_key: routing_key,
 					persistent: true,
+					mandatory: true,
 					timestamp: Time.now.to_i,
 					message_id: message.id,
 					type: message.class.name.underscore,
@@ -126,8 +127,13 @@ module ServiceBase
 
 			def self.load(config=nil)
 				if config.nil?
-					config_path = Rails.root.join('config/rabbit.yml')
-					if File.exist?(config_path)
+					if Object.const_defined?(:Rails)
+						config_path = Rails.root.join('config/rabbit.yml')
+					else
+						config_path = nil
+					end
+
+					if config_path && File.exist?(config_path)
 						config = YAML.load_file(config_path)
 					end
 				elsif config.is_a?(String)

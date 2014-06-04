@@ -53,7 +53,7 @@ class RabbitConnectionTest < ActiveSupport::TestCase
 			consumer = Proc.new do |delivery_info, metadata, payload|
 				consumed += 1
 				consumer_threads << Thread.current
-				connection.publish metadata.reply_to, TestMessage.new(text: "Response to #{payload}"), mandatory: true
+				connection.publish metadata.reply_to, TestMessage.new(text: "Response to #{payload}")
 			end
 
 			queue = connection.channel.queue('', auto_delete: true)
@@ -76,7 +76,7 @@ class RabbitConnectionTest < ActiveSupport::TestCase
 				t = Thread.new do
 					message_count.times do |i|
 						connection.publish queue.name, TestMessage.new(text: "Message #{i}"),
-															 mandatory: true, reply_to: reply_queue.name
+															 reply_to: reply_queue.name
 					end
 				end
 				t.abort_on_exception = true

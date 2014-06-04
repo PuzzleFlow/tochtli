@@ -25,5 +25,19 @@ module ServiceBase
 			end
 			@rabbit_connection.publish message.routing_key, message, options
 		end
+
+		def publish_and_wait(message, timeout, options={})
+			mutex = Mutex.new
+			cv    = ConditionVariable.new
+			if options[:handler]
+				options[:handler].cv = cv rescue nil
+				options[:handler].mutex = mutex rescue nil
+			end
+			Thread.new do
+				publish message, options
+			end
+
+			mutex.synchronize { cv.wait(mutex, timeout.to_f) }
+		end
 	end
 end
