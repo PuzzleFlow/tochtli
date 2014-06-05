@@ -132,7 +132,7 @@ module ServiceBase
 
 			def create_message(delivery_info, properties, payload)
 				message = @message_class.new(nil, properties)
-				message.from_json(payload)
+				message.from_json(payload, false)
 				raise InvalidMessageError.new(message.errors.full_messages.join(", "), message) if message.invalid?
 				message
 			end

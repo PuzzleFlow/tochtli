@@ -30,7 +30,7 @@ module ServiceBase
 		def on_delivery(delivery_info, metadata, payload)
 			reply_class = metadata.type.camelize.constantize
 			reply = reply_class.new({}, metadata)
-			reply.from_json payload
+			reply.from_json payload, false
 
 			handle_reply reply
 
