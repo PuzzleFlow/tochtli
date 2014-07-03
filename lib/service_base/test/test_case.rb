@@ -55,6 +55,10 @@ module ServiceBase
 			def publish(routing_key, message, options={})
 				@publications << options.merge(routing_key: routing_key, message: message)
 			end
+
+			def logger
+				Logger.new(STDOUT)
+			end
 		end
 
 		class TestRabbitChannel

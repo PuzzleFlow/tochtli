@@ -1,5 +1,6 @@
 require 'service_base/engine' if defined?(::Rails)
 require 'active_support/core_ext'
+require 'bunny'
 
 module ServiceBase
 	autoload :RabbitConnection, 'service_base/rabbit_connection'
@@ -25,6 +26,15 @@ module ServiceBase
 			logger.error $!.backtrace.join("\n")
 		end
 		raise
+	end
+
+	def self.services_running?
+		ControllerManager.running?
+	end
+
+	def self.restart_services(rabbit_config=nil, logger=nil)
+		ControllerManager.stop if ControllerManager.running?
+		ControllerManager.start(rabbit_config, logger)
 	end
 
 	def self.eager_load_service_messages

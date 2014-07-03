@@ -10,7 +10,7 @@ module ServiceBase
 			@config = config.is_a?(RabbitConnection::Config) ? config : RabbitConnection::Config.load(config)
 			@exchange_name = @config.delete(:exchange_name)
 			@work_pool_size = @config.delete(:work_pool_size)
-			@channel_pool = channel_pool ? channel_pool : ChannelPool.new
+			@channel_pool = channel_pool ? channel_pool : Hash.new
 		end
 
 		def connect
@@ -25,8 +25,10 @@ module ServiceBase
 		end
 
 		def disconnect
-			@channel_pool.close
 			@connection.close if @connection
+		rescue Bunny::ClientTimeout
+			false
+		ensure
 			@connection = nil
 		end
 
@@ -108,12 +110,6 @@ module ServiceBase
 			def initialize(channel, exchange)
 				@channel = channel
 				@exchange = exchange
-			end
-		end
-
-		class ChannelPool < Hash
-			def close
-				each_value {|wrap| wrap.channel.close }
 			end
 		end
 

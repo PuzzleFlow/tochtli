@@ -49,6 +49,10 @@ module ServiceBase
 				begin
 					message_handler.call(self)
 					true
+				rescue Bunny::Exception
+					# Possible connection error - the controller manager would try to restart connection
+					on_connection_lost $!
+					false
 				rescue Exception => ex
 					logger.error "\n#{ex.class.name} (#{ex.message})"
 					logger.error ex.backtrace.join("\n")
@@ -121,6 +125,13 @@ module ServiceBase
 			@rabbit_connection.publish(@message.properties.reply_to,
 																 reply_message,
 																 correlation_id: @message.id)
+		end
+
+		def on_connection_lost(exception)
+			logger.error "\nConnection lost: #{exception.class.name} (#{exception.message})"
+			logger.error exception.backtrace.join("\n")
+
+			ServiceBase::ControllerManager.stop
 		end
 
 		class MessageHandler

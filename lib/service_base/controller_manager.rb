@@ -40,7 +40,14 @@ module ServiceBase
 		end
 
 		def stop
+			@controllers.each {|controller| controller.stop rescue nil }
+			@controllers.clear
+
 			@rabbit_connection.disconnect if @rabbit_connection.open?
+		end
+
+		def running?
+			@rabbit_connection && @rabbit_connection.open?
 		end
 
 		def create_controller_queue(controller_class)
@@ -52,7 +59,7 @@ module ServiceBase
 		end
 
 		class << self
-			delegate :register, :start, :create_controller_queue, :logger, :to => :instance
+			delegate :register, :start, :stop, :create_controller_queue, :logger, :to => :instance
 		end
 	end
 end

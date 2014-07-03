@@ -10,6 +10,14 @@ class ControllerTest < ServiceBase::Test::Integration
 		attributes :text
 	end
 
+	class ErrorMessage < ServiceBase::Message
+		bind_topic 'test.controller.error'
+	end
+
+	class FailureMessage < ServiceBase::Message
+		bind_topic 'test.controller.failure'
+	end
+
 	class TestEchoReply < ServiceBase::Message
 		attributes :original_text
 	end
@@ -20,17 +28,18 @@ class ControllerTest < ServiceBase::Test::Integration
 		def echo
 			reply TestEchoReply.new(:original_text => message.text)
 		end
+
+		def error
+			raise "Error"
+		end
+
+		def failure
+			@rabbit_connection.connection.close # simulate network failure
+			reply TestEchoReply.new(:original_text => 'should not get it')
+		end
 	end
 
-	test 'echo command' do
-		message = TestMessage.new(:text => 'Hello world!')
-
-		publish message, :expect => TestEchoReply
-
-		assert_equal message.text, @reply.original_text
-	end
-
-	class PerformanceTestReplyHandler
+	class TestReplyHandler
 		attr_reader :pending_replies, :errors, :timeouts
 
 		def initialize(expected_replies)
@@ -61,9 +70,39 @@ class ControllerTest < ServiceBase::Test::Integration
 		end
 	end
 
+	test 'echo command' do
+		message = TestMessage.new(:text => 'Hello world!')
+
+		publish message, :expect => TestEchoReply
+
+		assert_equal message.text, @reply.original_text
+	end
+
+	test 'error' do
+		message = ErrorMessage.new
+		handler = TestReplyHandler.new(1)
+
+		publish message, :reply_handler => handler, :timeout => 0.1.second
+
+		handler.wait(0.15.seconds)
+
+		assert_equal 1, handler.errors
+	end
+
+	test 'network failure' do
+		message = FailureMessage.new
+		handler = TestReplyHandler.new(1)
+
+		publish message, :reply_handler => handler, :timeout => 0.1.second
+
+		handler.wait(2.seconds)
+
+		assert_equal 1, handler.timeouts
+	end
+
 	test 'echo performance' do
 		count = 10_000
-		handler = PerformanceTestReplyHandler.new(count)
+		handler = TestReplyHandler.new(count)
 
 		start_t = Time.now
 

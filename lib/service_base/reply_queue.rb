@@ -77,8 +77,7 @@ module ServiceBase
 			end
 		end
 
-		class Consumer < Bunny::Consumer
-
+		class Consumer < ::Bunny::Consumer
 		end
 	end
 end
