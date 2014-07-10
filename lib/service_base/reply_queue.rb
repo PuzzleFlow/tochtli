@@ -20,7 +20,7 @@ module ServiceBase
 			if timeout
 				timeout_thread = Thread.start do
 					sleep timeout
-					logger.warn "[ServiceBase::ReplyQueue] TIMEOUT on message '#{message.id}' reply: #{timeout}"
+					logger.warn "[ServiceBase::ReplyQueue] TIMEOUT on message '#{message.id}' timeout: #{timeout}"
 					handle_timeout message
 				end
 				@message_timeout_threads[message.id] = timeout_thread

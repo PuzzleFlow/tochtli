@@ -15,9 +15,13 @@ module ServiceBase
 	autoload :Test, 'service_base/test'
 	autoload :ServiceCache, 'service_base/service_cache'
 
-	def self.start_services(rabbit_config=nil, logger=nil)
+	# Should be invoked only once
+	def self.load_services
 		eager_load_service_messages
 		eager_load_service_controllers
+	end
+
+	def self.start_services(rabbit_config=nil, logger=nil)
 		ControllerManager.start(rabbit_config, logger)
 	rescue
 		if logger

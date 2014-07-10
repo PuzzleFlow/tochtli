@@ -28,6 +28,8 @@ module ServiceBase
 			@cache = ServiceBase::ServiceCache.create
 			@configuration_store = ServiceBase::Configuration::ActiveRecordStore.new
 
+			@logger.info @controller_classes.inspect
+
 			@rabbit_connection = rabbit_or_config.is_a?(RabbitConnection) ? rabbit_or_config : RabbitConnection.new(rabbit_or_config)
 			@rabbit_connection.connect
 
@@ -59,7 +61,7 @@ module ServiceBase
 		end
 
 		class << self
-			delegate :register, :start, :stop, :create_controller_queue, :logger, :to => :instance
+			delegate :register, :start, :stop, :running?, :create_controller_queue, :logger, :to => :instance
 		end
 	end
 end

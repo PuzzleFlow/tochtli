@@ -73,21 +73,14 @@ module ServiceBase
 
 		private
 
-		def handled_response(exception)
-			exception_method = ClientProxy.custom_exceptions[exception.to_s]
-			custom_response(exception_method)
-		end
-
-		def custom_response(method)
-			if method != nil && @controller.uas_proxy.respond_to?(method)
-				response = @controller.uas_proxy.send(method)
-			end
-
-			response
+		def custom_exception_response(method)
+			@controller.uas_proxy.send(method)
 		end
 
 		def handle_exception(exception)
-			if @controller.request.xhr?
+			if custom_exception_method = ClientProxy.custom_exceptions[exception.to_s]
+				response = custom_exception_response(custom_exception_method)
+			elsif @controller.request.xhr?
 				response = Rack::Response.new(exception.message, 500)
 			else
 				env = @controller.env
@@ -98,8 +91,7 @@ module ServiceBase
 				response = Rails.application.routes.call(env)
 			end
 
-			final_response = handled_response(exception) || response.to_a
-			EM.next_tick { @controller.env['async.callback'].call final_response }
+			EM.next_tick { @controller.env['async.callback'].call response }
 
 			@controller.logger.error "Reported service error message:"
 			@controller.logger.error exception.message
