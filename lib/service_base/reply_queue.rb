@@ -15,12 +15,11 @@ module ServiceBase
 		end
 
 		def register_message_handler(message, handler=nil, timeout=nil, &block)
-			logger.debug "[ServiceBase::ReplyQueue] Registering message '#{message.id}' handler: #{handler.class.name}"
 			@message_handlers[message.id] = handler || block
 			if timeout
 				timeout_thread = Thread.start do
 					sleep timeout
-					logger.warn "[ServiceBase::ReplyQueue] TIMEOUT on message '#{message.id}' timeout: #{timeout}"
+					logger.warn "[#{Time.now} AMQP] TIMEOUT on message '#{message.id}' timeout: #{timeout}"
 					handle_timeout message
 				end
 				@message_timeout_threads[message.id] = timeout_thread
@@ -32,6 +31,8 @@ module ServiceBase
 			reply = reply_class.new({}, metadata)
 			reply.from_json payload, false
 
+			logger.debug "[#{Time.now} AMQP] Replay for #{reply.properties.correlation_id}: #{reply.inspect}"
+
 			handle_reply reply
 
 		rescue Exception
@@ -40,7 +41,6 @@ module ServiceBase
 		end
 
 		def handle_reply(reply)
-			logger.debug "[ServiceBase::ReplyQueue] Reply for message '#{reply.properties.correlation_id}':\n\t#{reply.inspect})"
 			if (handler = @message_handlers.delete(reply.properties.correlation_id))
 				if (timeout_thread = @message_timeout_threads.delete(reply.properties.correlation_id))
 					timeout_thread.kill

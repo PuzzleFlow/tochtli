@@ -39,8 +39,9 @@ module ServiceBase
 			if (message_handler = fetch_message_handler(delivery_info.routing_key))
 				@message = message_handler.create_message(delivery_info, properties, payload)
 				@delivery_info = delivery_info
-
-				logger.debug "\n\nAMQP Message #{@message.class.name} at #{Time.now}"
+				
+				start_time = Time.now
+				logger.debug "\n\nAMQP Message #{@message.class.name} at #{start_time}"
 				logger.debug "Processing by #{self.class.name} [Thread: #{Thread.current.object_id}]"
 				logger.debug "\tMessage: #{@message.attributes.inspect}."
 				logger.debug "\tProperties: #{properties.inspect}."
@@ -48,6 +49,8 @@ module ServiceBase
 
 				begin
 					message_handler.call(self)
+
+					logger.debug "Message #{properties[:message_id]} processed in %.1fms." % [(Time.now - start_time) / 1000]
 					true
 				rescue Bunny::Exception
 					# Possible connection error - the controller manager would try to restart connection
@@ -122,6 +125,9 @@ module ServiceBase
 
 		def reply(reply_message)
 			raise "The 'reply_to' queue name is not specified" unless @message.properties.reply_to
+
+			logger.debug "\tSending  replay on #{@message.id} to #{@message.properties.reply_to}: #{reply_message.inspect}."
+
 			@rabbit_connection.publish(@message.properties.reply_to,
 																 reply_message,
 																 correlation_id: @message.id)

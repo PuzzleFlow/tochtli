@@ -19,6 +19,8 @@ module ServiceBase
 		end
 
 		def publish(message, options={})
+			@logger.debug "[#{Time.now} AMQP] Publishing message #{message.id} to #{message.routing_key}"
+
 			options[:reply_to] = @reply_queue.name
 			if (message_handler = options[:handler])
 				@reply_queue.register_message_handler message, message_handler, options[:timeout]
