@@ -65,7 +65,7 @@ module ServiceBase
 			if error_or_exception.is_a?(Exception)
 				exception = error_or_exception
 			else
-				exception = InternalServiceError.new("#{error_or_exception} from #{@client.service_friendly_name}: #{message}")
+				exception = InternalServiceError.new(error_or_exception, "#{error_or_exception} from #{@client.service_friendly_name}: #{message}")
 				exception.set_backtrace caller(0)
 			end
 			handle_exception exception
@@ -78,7 +78,7 @@ module ServiceBase
 		end
 
 		def handle_exception(exception)
-			if custom_exception_method = ClientProxy.custom_exceptions[exception.to_s]
+			if exception.is_a?(InternalServiceError) && (custom_exception_method = ClientProxy.custom_exceptions[exception.service_error])
 				response = custom_exception_response(custom_exception_method)
 			elsif @controller.request.xhr?
 				response = Rack::Response.new(exception.message, 500)
@@ -105,5 +105,11 @@ module ServiceBase
 	end
 
 	class InternalServiceError < StandardError
+		attr_reader :service_error
+
+		def initialize(service_error, message)
+			@service_error = service_error
+			super message
+		end
 	end
 end

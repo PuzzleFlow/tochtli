@@ -12,6 +12,7 @@ module ServiceBase
 			if defined?(Rails)
 				@store = Rails.cache
 			else
+				ServiceBase.logger.warning "Using private cache (memcached on localhost)!"
 				@store = ActiveSupport::Cache::DalliStore.new
 			end
 		end

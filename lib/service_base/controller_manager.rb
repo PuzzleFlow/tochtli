@@ -24,7 +24,7 @@ module ServiceBase
 		end
 
 		def start(rabbit_or_config=nil, logger=nil)
-			@logger = logger
+			@logger = logger || ServiceBase.logger
 			@cache = ServiceBase::ServiceCache.create
 			@configuration_store = ServiceBase::Configuration::ActiveRecordStore.new
 
