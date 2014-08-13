@@ -50,7 +50,7 @@ module ServiceBase
 				begin
 					message_handler.call(self)
 
-					logger.debug "Message #{properties[:message_id]} processed in %.1fms." % [(Time.now - start_time) / 1000]
+					logger.debug "Message #{properties[:message_id]} processed in %.1fms." % [(Time.now - start_time) * 1000]
 					true
 				rescue Bunny::Exception
 					# Possible connection error - the controller manager would try to restart connection
