@@ -9,11 +9,18 @@ module ServiceBase
 		end
 
 		def initialize
+
 			if defined?(Rails)
 				@store = Rails.cache
 			else
-				ServiceBase.logger.warning "Using private cache (memcached on localhost)!"
-				@store = ActiveSupport::Cache::DalliStore.new
+				defaults = {
+					value_max_bytes: 4194304, # 4MB as max value, remember to configure memcache with -I
+					compress: true
+				}
+				host = config.fetch(:host, "localhost:11211")
+				opts = config.fetch(:opts, {}).merge(defaults)
+
+				@store = ActiveSupport::Cache::DalliStore.new(host, opts)
 			end
 		end
 
