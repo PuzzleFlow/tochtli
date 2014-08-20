@@ -9,7 +9,6 @@ module ServiceBase
 		end
 
 		def initialize
-
 			if defined?(Rails)
 				@store = Rails.cache
 			else
