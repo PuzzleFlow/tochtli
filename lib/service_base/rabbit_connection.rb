@@ -64,7 +64,12 @@ module ServiceBase
 		end
 
 		def publish(routing_key, message, options={})
-			payload = message.to_json
+			begin
+				payload = message.to_json
+			rescue Exception
+				raise "Unable to serialize message to JSON: #{$!}"
+			end
+
 			exchange.on_return do |return_info, properties, content|
 				logger.error "Message #{properties[:message_id]} dropped: #{return_info[:reply_text]} [#{return_info[:reply_code]}]"
 			end

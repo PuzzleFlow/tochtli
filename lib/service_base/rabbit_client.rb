@@ -19,6 +19,8 @@ module ServiceBase
 		end
 
 		def publish(message, options={})
+			raise InvalidMessageError.new(message.errors.full_messages.join(", "), message) if message.invalid?
+
 			@logger.debug "[#{Time.now} AMQP] Publishing message #{message.id} to #{message.routing_key}"
 
 			options[:reply_to] = @reply_queue.name

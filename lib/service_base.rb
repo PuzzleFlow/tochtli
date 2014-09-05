@@ -12,8 +12,16 @@ module ServiceBase
 	autoload :ReplyQueue, 'service_base/reply_queue'
 	autoload :RabbitClient, 'service_base/rabbit_client'
 	autoload :ClientProxy, 'service_base/client_proxy'
+	autoload :AsyncClientProxy, 'service_base/async_client_proxy'
 	autoload :Test, 'service_base/test'
 	autoload :ServiceCache, 'service_base/service_cache'
+
+	class InvalidMessageError < StandardError
+		def initialize(message, service_message)
+			super(message)
+			@service_message = service_message
+		end
+	end
 
 	class << self
 		# Global logger for services (default: RAILS_ROOT/log/services.log)

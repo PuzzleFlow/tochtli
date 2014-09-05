@@ -1,14 +1,45 @@
 module ServiceBase
 	module Test
-		class Integration < ActiveSupport::TestCase
+		# Rack app for asynchronous clients
+		class AsyncClientTestApp
+			def initialize(app, timeout)
+				@app = app
+				@timeout = timeout
+			end
+
+			def call(env)
+				response = nil
+				env['async.callback'] = Proc.new do |async_response|
+					response = async_response
+				end
+
+				EM.run do
+					catch(:async) do
+						response = @app.call(env)
+						EM.stop
+					end
+
+					EM.add_timer(@timeout) { EM.stop }
+					EM.add_periodic_timer(0.1) do
+						EM.stop if response
+					end
+				end
+
+				response || Rack::Response.new(['Asynchronous request timeout'], 501).to_a
+			end
+		end
+
+		class Integration < ActionDispatch::IntegrationTest
 			RabbitClient.rabbit_config = {:exchange_name => "puzzleflow.tests", :log_level => Logger::WARN}
 			ControllerManager.queue_name_prefix = 'tests/'
 			ControllerManager.queue_durable = false
 			ControllerManager.queue_auto_delete = true
 
+			self.app = AsyncClientTestApp.new(Rails.application, 2.seconds)
+
 			setup do
 				@logger = Logger.new(File.join(Rails.root, 'log/test_service_integration.log'))
-				@logger.level = Logger::WARN
+				@logger.level = Logger::DEBUG
 				@client = ServiceBase::RabbitClient.new(nil, @logger)
 				@connection = @client.rabbit_connection
 				@controller_manager = ServiceBase::ControllerManager.instance

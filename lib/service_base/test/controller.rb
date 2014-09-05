@@ -10,7 +10,8 @@ module ServiceBase
 			setup do
 				@cache = ActiveSupport::Cache::MemoryStore.new
 				@configuration_store = ServiceBase::Configuration::ActiveRecordStore.new
-				@controller = self.controller_class.new(@connection, @cache, @configuration_store)
+				@logger = Rails.logger
+				@controller = self.controller_class.new(@connection, @cache, @configuration_store, @logger)
 			end
 
 		end

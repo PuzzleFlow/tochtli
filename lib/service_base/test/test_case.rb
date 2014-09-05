@@ -87,10 +87,15 @@ module ServiceBase
 		end
 
 		class TestDeliveryInfo
-			attr_reader :routing_key
+			attr_reader :routing_key, :exchange
 
-			def initialize(routing_key)
+			def initialize(routing_key, exchange='TestExchange')
 				@routing_key = routing_key
+				@exchange = exchange
+			end
+
+			def [](key)
+				send(key)
 			end
 		end
 
@@ -101,6 +106,10 @@ module ServiceBase
 				@reply_to = reply_to
 				@message_id = message_id
 				@correlation_id = correlation_id
+			end
+
+			def [](key)
+				send(key)
 			end
 		end
 

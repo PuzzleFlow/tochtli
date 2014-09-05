@@ -37,17 +37,17 @@ module ServiceBase
 
 		def process_message(delivery_info, properties, payload)
 			if (message_handler = fetch_message_handler(delivery_info.routing_key))
-				@message = message_handler.create_message(delivery_info, properties, payload)
-				@delivery_info = delivery_info
-				
-				start_time = Time.now
-				logger.debug "\n\nAMQP Message #{@message.class.name} at #{start_time}"
-				logger.debug "Processing by #{self.class.name} [Thread: #{Thread.current.object_id}]"
-				logger.debug "\tMessage: #{@message.attributes.inspect}."
-				logger.debug "\tProperties: #{properties.inspect}."
-				logger.debug "\tDelivery info: exchange: #{delivery_info[:exchange]}, routing_key: #{delivery_info[:routing_key]}."
-
 				begin
+					@message = message_handler.create_message(delivery_info, properties, payload)
+					@delivery_info = delivery_info
+
+					start_time = Time.now
+					logger.debug "\n\nAMQP Message #{@message.class.name} at #{start_time}"
+					logger.debug "Processing by #{self.class.name} [Thread: #{Thread.current.object_id}]"
+					logger.debug "\tMessage: #{@message.attributes.inspect}."
+					logger.debug "\tProperties: #{properties.inspect}."
+					logger.debug "\tDelivery info: exchange: #{delivery_info[:exchange]}, routing_key: #{delivery_info[:routing_key]}."
+
 					message_handler.call(self)
 
 					logger.debug "Message #{properties[:message_id]} processed in %.1fms." % [(Time.now - start_time) * 1000]
@@ -56,11 +56,6 @@ module ServiceBase
 					# Possible connection error - the controller manager would try to restart connection
 					on_connection_lost $!
 					false
-				rescue Exception => ex
-					logger.error "\n#{ex.class.name} (#{ex.message})"
-					logger.error ex.backtrace.join("\n")
-					reply ErrorMessage.new(error: ex.class.name.demodulize, message: ex.message) if @message.properties.reply_to
-					false
 				end
 			else
 				false
@@ -68,6 +63,10 @@ module ServiceBase
 		rescue Exception => ex
 			logger.error "\n#{ex.class.name} (#{ex.message})"
 			logger.error ex.backtrace.join("\n")
+			if properties[:reply_to]
+				reply ErrorMessage.new(error: ex.class.name, message: ex.message), properties[:reply_to], properties[:message_id]
+			end
+			false
 		ensure
 			cleanup
 		end
@@ -123,14 +122,19 @@ module ServiceBase
 			end
 		end
 
-		def reply(reply_message)
-			raise "The 'reply_to' queue name is not specified" unless @message.properties.reply_to
+		def reply(reply_message, reply_to=nil, message_id=nil)
+			if @message
+				reply_to ||= @message.properties.reply_to
+				message_id ||= @message.id
+			end
 
-			logger.debug "\tSending  replay on #{@message.id} to #{@message.properties.reply_to}: #{reply_message.inspect}."
+			raise "The 'reply_to' queue name is not specified" unless reply_to
 
-			@rabbit_connection.publish(@message.properties.reply_to,
+			logger.debug "\tSending  replay on #{message_id} to #{reply_to}: #{reply_message.inspect}."
+
+			@rabbit_connection.publish(reply_to,
 																 reply_message,
-																 correlation_id: @message.id)
+																 correlation_id: message_id)
 		end
 
 		def on_connection_lost(exception)
@@ -159,11 +163,5 @@ module ServiceBase
 			end
 		end
 
-		class InvalidMessageError < StandardError
-			def initialize(message, service_message)
-				super(message)
-				@service_message = service_message
-			end
-		end
 	end
 end

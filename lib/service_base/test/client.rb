@@ -3,7 +3,8 @@ module ServiceBase
 		class Client < ServiceBase::Test::TestCase
 
 			setup do
-				@client = ServiceBase::RabbitClient.new(@connection)
+				@logger = Rails.logger
+				@client = ServiceBase::RabbitClient.new(@connection, @logger)
 				@reply_queue = @client.reply_queue
 			end
 

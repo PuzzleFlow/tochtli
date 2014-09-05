@@ -7,8 +7,7 @@ require "rails/test_help"
 #SOLUTION_NAME = 'basic' unless defined?(SOLUTION_NAME)
 #require File.expand_path('../../../plugins/common_tools/test/common_test_helper', File.dirname(__FILE__))
 
-ServiceBase.eager_load_service_messages
-ServiceBase.eager_load_service_controllers
+ServiceBase.load_services
 
 Rails.backtrace_cleaner.remove_silencers!
 
