@@ -40,13 +40,26 @@ module ServiceBase
 
 		def start_services(rabbit_config=nil, logger=nil)
 			ControllerManager.start(rabbit_config, logger)
+			true
 		rescue
 			if logger
 				logger.error "Error during service start"
 				logger.error "#{$!.class}: #{$!}"
 				logger.error $!.backtrace.join("\n")
 			end
-			raise
+			false
+		end
+
+		def stop_services(logger=nil)
+			ControllerManager.stop
+			true
+		rescue
+			if logger
+				logger.error "Error during service stop"
+				logger.error "#{$!.class}: #{$!}"
+				logger.error $!.backtrace.join("\n")
+			end
+			false
 		end
 
 		def services_running?
@@ -56,6 +69,14 @@ module ServiceBase
 		def restart_services(rabbit_config=nil, logger=nil)
 			ControllerManager.stop if ControllerManager.running?
 			ControllerManager.start(rabbit_config, logger)
+			true
+		rescue
+			if logger
+				logger.error "Error during service restart"
+				logger.error "#{$!.class}: #{$!}"
+				logger.error $!.backtrace.join("\n")
+			end
+			false
 		end
 
 		def eager_load_service_messages
