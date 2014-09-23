@@ -15,7 +15,7 @@ module ServiceBase
 			end
 			@logger = logger || @rabbit_connection.logger
 			@reply_queue = ServiceBase::ReplyQueue.new(self.rabbit_connection, @logger)
-			@configuration_store = ServiceBase::Configuration::ActiveRecordStore.new
+			@configuration_store = ServiceBase::Configuration::ActiveRecordStore.new if defined?(ActiveRecord)
 		end
 
 		def publish(message, options={})

@@ -88,31 +88,27 @@ module ServiceBase
 		end
 
 		def eager_load_service_messages
-			Rails::Engine::Railties.engines.each do |engine|
-				next unless engine.paths["service/messages"]
-				engine.paths["service/messages"].existent.each do |load_path|
-					Dir.glob("#{load_path}/**/*.rb").sort.each do |file|
-						require file
-					end
+			existent_engine_paths('messages').each do |load_path|
+				Dir.glob("#{load_path}/**/*.rb").sort.each do |file|
+					require file
 				end
 			end
 		end
 
 		def eager_load_service_controllers
-			Rails::Engine::Railties.engines.each do |engine|
-				next unless engine.paths["service/controllers"]
-				engine.paths["service/controllers"].existent.each do |load_path|
-					Dir.glob("#{load_path}/**/*.rb").sort.each do |file|
-						require file
-					end
+			existent_engine_paths('controllers').each do |load_path|
+				Dir.glob("#{load_path}/**/*.rb").sort.each do |file|
+					require file
 				end
 			end
 		end
 
-		def eager_load_service_files(service_path, type)
-			Dir.glob("#{service_path}/service/#{type}/**/*.rb").sort.each do |file|
-				require file
-			end
+		def existent_engine_paths(type)
+			engines = ::Rails::Engine.subclasses.map(&:instance)
+			engines += [ Rails.application ]
+			engines.collect do |railtie|
+				railtie.paths["service/#{type}"].try(:existent)
+			end.compact.flatten
 		end
 	end
 end
