@@ -44,10 +44,10 @@ class ControllerTest < ServiceBase::Test::Integration
 
 		def initialize(expected_replies)
 			@pending_replies = expected_replies
-			@errors = 0
-			@timeouts = 0
-			@mutex = Mutex.new
-			@cv = ConditionVariable.new
+			@errors          = 0
+			@timeouts        = 0
+			@mutex           = Mutex.new
+			@cv              = ConditionVariable.new
 		end
 
 		def call(reply)
@@ -101,25 +101,31 @@ class ControllerTest < ServiceBase::Test::Integration
 	end
 
 	test 'echo performance' do
-		count = 10_000
-		handler = TestReplyHandler.new(count)
+		begin
+			@logger.level = Logger::ERROR # mute logger to speed up test
 
-		start_t = Time.now
+			count   = 2_000
+			handler = TestReplyHandler.new(count)
 
-		count.times do |i|
-			message = TestMessage.new(:text => "#{i}: Hello world!")
-			publish message, :expect => TestEchoReply, :reply_handler => handler, :timeout => 20.seconds
+			start_t = Time.now
+
+			count.times do |i|
+				message = TestMessage.new(:text => "#{i}: Hello world!")
+				publish message, :expect => TestEchoReply, :reply_handler => handler, :timeout => 6.seconds
+			end
+
+			handler.wait(6.seconds)
+
+			end_t = Time.now
+			time  = end_t - start_t
+
+			assert_equal 0, handler.errors
+			assert_equal 0, handler.timeouts
+			assert_equal 0, handler.pending_replies
+
+			puts "Published: #{count} in #{time} (#{count/time}req/s)"
+		ensure
+			@logger.level = Logger::DEBUG
 		end
-
-		handler.wait(20.seconds)
-
-		end_t = Time.now
-		time = end_t - start_t
-
-		assert_equal 0, handler.errors
-		assert_equal 0, handler.timeouts
-		assert_equal 0, handler.pending_replies
-
-		puts "Published: #{count} in #{time} (#{count/time}req/s)"
 	end
 end

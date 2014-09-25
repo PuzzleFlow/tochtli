@@ -89,6 +89,7 @@ module ServiceBase
 
 		def create_channel_wrap(thread=Thread.current)
 			raise ConnectionFailed.new("Channel already created for thread #{thread.object_id}") if @channel_pool[thread.object_id]
+			raise ConnectionFailed.new("Unable to create channel. Connection lost.") unless @connection
 
 			channel = @connection.create_channel(nil, @work_pool_size)
 			exchange = channel.topic(@exchange_name, durable: true)

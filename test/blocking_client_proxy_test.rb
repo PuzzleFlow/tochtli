@@ -21,8 +21,7 @@ class BlockingClientProxyTest < ActionController::TestCase
 		end
 	end
 
-	class ClientProxy < ServiceBase::
-	::Blocking
+	class ClientProxy < ServiceBase::ClientProxy::Blocking
 		delegate_command :sleepy_command, :buggy_command
 	end
 

@@ -23,15 +23,11 @@ class AsyncClientProxyTest < ActionController::TestCase
 
 	class AsyncClientProxy < ServiceBase::ClientProxy::Async
 		delegate_command :sleepy_command, :buggy_command
-
-		handle_exception 'StandardError', :on_standard_error
-
-		def on_standard_error(error)
-			Rack::Response.new(["Handled Error: #{error.message}"], 501, {})
-		end
 	end
 
 	class TestController < ActionController::Base
+		rescue_from StandardError, with: :standard_error
+
 		def sleepy
 			client_proxy.sleepy_command(:param) do |response|
 				render :text => response
@@ -45,6 +41,10 @@ class AsyncClientProxyTest < ActionController::TestCase
 		end
 
 		protected
+
+		def standard_error(exception)
+			render :text => "Handled Error: #{exception.message}", :status => 501
+		end
 
 		def client_proxy
 			unless @client_proxy
@@ -96,6 +96,6 @@ class AsyncClientProxyTest < ActionController::TestCase
 			EventMachine.next_tick { EM.stop }
 		end
 
-		assert_equal "Handled Error: StandardError from Test Service: Bug!", @async_response.body[0]
+		assert_equal "Handled Error: StandardError from Test Service: Bug!", @async_response[2].body
 	end
 end

@@ -64,7 +64,12 @@ module ServiceBase
 			logger.error "\n#{ex.class.name} (#{ex.message})"
 			logger.error ex.backtrace.join("\n")
 			if properties[:reply_to]
-				reply ErrorMessage.new(error: ex.class.name, message: ex.message), properties[:reply_to], properties[:message_id]
+				begin
+					reply ErrorMessage.new(error: ex.class.name, message: ex.message), properties[:reply_to], properties[:message_id]
+				rescue
+					logger.error "Unable to send error message: #{$!}"
+					logger.error $!.backtrace.join("\n")
+				end
 			end
 			false
 		ensure
