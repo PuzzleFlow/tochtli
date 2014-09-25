@@ -13,7 +13,14 @@ module ServiceBase
 									namespace :add do
 										desc "Add migration paths from #{railtie_name} to application migration paths"
 										task :migrations do
-											Rails.application.paths["db/migrate"].concat config.paths["db/migrate"].map { |p| File.expand_path(p, config.root) }
+											# Skip if working with current engine, would be added by railties task
+											unless defined?(ENGINE_PATH) && ENGINE_PATH == root.to_s
+												if ActiveRecord.const_defined?(:Tasks) # Rails 4.1
+													ActiveRecord::Tasks::DatabaseTasks.migrations_paths += config.paths["db/migrate"].to_a
+												else
+													ActiveRecord::Migrator.migrations_paths += config.paths["db/migrate"].to_a
+												end
+											end
 										end
 									end
 								end
