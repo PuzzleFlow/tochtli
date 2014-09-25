@@ -1,5 +1,6 @@
 require_relative 'test_helper'
 require 'benchmark'
+require 'eventmachine'
 
 Thread.abort_on_exception = true
 
@@ -59,8 +60,8 @@ class AsyncClientProxyTest < ActionController::TestCase
 
 	setup do
 		Rails.application.routes.draw do
-			match '/sleepy' => 'async_client_proxy_test/test#sleepy'
-			match '/buggy' => 'async_client_proxy_test/test#buggy'
+			post '/sleepy' => 'async_client_proxy_test/test#sleepy'
+			post '/buggy' => 'async_client_proxy_test/test#buggy'
 		end
 
 		@controller.env['async.callback'] = Proc.new do |response|

@@ -59,8 +59,8 @@ class BlockingClientProxyTest < ActionController::TestCase
 
 	setup do
 		Rails.application.routes.draw do
-			match '/sleepy' => 'blocking_client_proxy_test/test#sleepy'
-			match '/buggy' => 'blocking_client_proxy_test/test#buggy'
+			post '/sleepy' => 'blocking_client_proxy_test/test#sleepy'
+			post '/buggy' => 'blocking_client_proxy_test/test#buggy'
 		end
 	end
 
