@@ -7,10 +7,10 @@ module ServiceBase
 		delegate :logger, to: :@connection
 
 		def initialize(config = nil, channel_pool=nil)
-			@config = config.is_a?(RabbitConnection::Config) ? config : RabbitConnection::Config.load(config)
-			@exchange_name = @config.delete(:exchange_name)
+			@config         = config.is_a?(RabbitConnection::Config) ? config : RabbitConnection::Config.load(config)
+			@exchange_name  = @config.delete(:exchange_name)
 			@work_pool_size = @config.delete(:work_pool_size)
-			@channel_pool = channel_pool ? channel_pool : Hash.new
+			@channel_pool   = channel_pool ? channel_pool : Hash.new
 		end
 
 		def connect
@@ -52,7 +52,7 @@ module ServiceBase
 		end
 
 		def queue(name, routing_keys=[], options={})
-			queue = channel.queue(name, {durable: true}.merge(options))
+			queue = channel.queue(name, { durable: true }.merge(options))
 			routing_keys.each do |routing_key|
 				queue.bind(exchange, routing_key: routing_key)
 			end
@@ -75,12 +75,12 @@ module ServiceBase
 			end
 
 			exchange.publish(payload, {
-					routing_key: routing_key,
-					persistent: true,
-					mandatory: true,
-					timestamp: Time.now.to_i,
-					message_id: message.id,
-					type: message.class.name.underscore,
+					routing_key:  routing_key,
+					persistent:   true,
+					mandatory:    true,
+					timestamp:    Time.now.to_i,
+					message_id:   message.id,
+					type:         message.class.name.underscore,
 					content_type: "application/json"
 			}.merge(options))
 		end
@@ -91,10 +91,10 @@ module ServiceBase
 			raise ConnectionFailed.new("Channel already created for thread #{thread.object_id}") if @channel_pool[thread.object_id]
 			raise ConnectionFailed.new("Unable to create channel. Connection lost.") unless @connection
 
-			channel = @connection.create_channel(nil, @work_pool_size)
+			channel  = @connection.create_channel(nil, @work_pool_size)
 			exchange = channel.topic(@exchange_name, durable: true)
 
-			channel_wrap = ChannelWrap.new(channel, exchange)
+			channel_wrap                    = ChannelWrap.new(channel, exchange)
 			@channel_pool[thread.object_id] = channel_wrap
 
 			channel_wrap
@@ -114,35 +114,43 @@ module ServiceBase
 			attr_reader :channel, :exchange
 
 			def initialize(channel, exchange)
-				@channel = channel
+				@channel  = channel
 				@exchange = exchange
 			end
 		end
 
 		class Config < Hash
 			DEFAULTS = {
-					:exchange_name => "puzzleflow.services",
-					:work_pool_size => 1,
-					:automatically_recover => true,
+					:exchange_name             => "puzzleflow.services",
+					:work_pool_size            => 1,
+					:automatically_recover     => true,
 					:network_recovery_interval => 1
 			}
 
 			def self.load(config=nil)
-				if config.nil?
-					if Object.const_defined?(:Rails)
-						config_path = Rails.root.join('config/rabbit.yml')
-					else
-						config_path = nil
-					end
+				config = case config
+									 when String
+										 YAML.load_file(config).symbolize_keys
+									 when Hash
+										 config.symbolize_keys
+									 when nil
+										 {}
+									 else
+										 raise "Unexpected configuration: #{config.inspect}, Hash or String expected."
+								 end
 
-					if config_path && File.exist?(config_path)
-						config = YAML.load_file(config_path)
+				defaults = DEFAULTS
+
+				if defined?(Rails)
+					config_path = Rails.root.join('config/rabbit.yml')
+					if config_path.exist?
+						rails_config = YAML.load_file(config_path)
+						raise "Unexpected rabbit.yml: #{rails_config.inspect}, Hash expected." unless rails_config.is_a?(Hash)
+						defaults = defaults.merge(rails_config.symbolize_keys)
 					end
-				elsif config.is_a?(String)
-					config = YAML.load_file(config)
 				end
 
-				new.merge!(DEFAULTS.merge(config || {})).symbolize_keys
+				new.merge!(defaults.merge(config))
 			end
 		end
 
