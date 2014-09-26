@@ -4,6 +4,14 @@ begin
 rescue LoadError
   puts 'You must `gem install bundler` and `bundle install` to run rake tasks'
 end
+
+# Bundler setup fix
+# Bundler adds "-Ipath" option which does not work when path contains space
+# Fix the path by adding ""
+if ENV['RUBYOPT'] =~ /^(.*)-I(.+) -rbundler\/setup(.*)$/
+	ENV['RUBYOPT'] = %Q(#{$1}"-I#{$2}" -rbundler/setup#{$3})
+end
+
 begin
   require 'rdoc/task'
 rescue LoadError
