@@ -3,8 +3,7 @@ Gemfile
 History.txt
 MIT-LICENSE
 Manifest.txt
-README.rdoc
-README.txt
+README.md
 Rakefile
 db/migrate/20131017134818_create_configuration_store.rb
 lib/service_base.rb
