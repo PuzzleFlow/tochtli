@@ -33,7 +33,7 @@ Hoe.spec 'service_base' do
 	dependency "hoe", "~> 3.7.1", :development
 	dependency 'hoe-gemspec', '~> 1.0.0', :development
 	dependency 'geminabox', '~> 0.12.4', :development
-	dependency 'hoe-geminabox', '~> 0.3.0', :development
+	dependency 'hoe-geminabox', '~> 0.3.1', :development
 	dependency 'hoe-git', '~> 1.6.0', :development
 	dependency "pg", "0.17.0", :development
 	dependency "pg-hstore", "~> 1.2.0", :development
