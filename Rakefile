@@ -27,7 +27,6 @@ Hoe.spec 'service_base' do
 	developer 'PuzzleFlow Team', 'support@puzzleflow.com'
 
 	self.group_name = 'puzzleflow'
-	self.readme_file = 'README.rdoc'
 	self.geminabox_server = 'https://gems.puzzleflow.com'
 
 	require_rubygems_version '>= 1.4'
