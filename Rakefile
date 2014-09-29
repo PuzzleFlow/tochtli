@@ -13,6 +13,36 @@ if ENV['RUBYOPT'] =~ /^(.*)-I(.+) -rbundler\/setup(.*)$/
 end
 
 begin
+	require 'hoe'
+rescue LoadError
+	abort "This Rakefile requires hoe (gem install hoe)"
+end
+
+# Set up Hoe plugins
+Hoe.plugin :bundler
+Hoe.plugin :git
+Hoe.plugin :geminabox
+
+Hoe.spec 'service_base' do
+	developer 'PuzzleFlow Team', 'support@puzzleflow.com'
+
+	self.group_name = 'puzzleflow'
+	self.geminabox_server = 'https://gems.puzzleflow.com'
+
+	require_rubygems_version '>= 1.4'
+
+	dependency "rails", ">= 3.2.15"
+	dependency "bunny", ">= 1.3.1"
+	dependency "dalli", "~> 2.6.4"
+	dependency "hoe", "~> 3.7.1", :development
+	dependency "pg", "0.17.0", :development
+	dependency "pg-hstore", "~> 1.2.0", :development
+	dependency "eventmachine", "~> 1.0.0", :development
+
+	license "MIT"
+end
+
+begin
   require 'rdoc/task'
 rescue LoadError
   require 'rdoc/rdoc'

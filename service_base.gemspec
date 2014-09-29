@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
 	s.add_dependency "rails"
 	s.add_dependency "bunny", ">= 1.3.1"
 	s.add_dependency "dalli", "~> 2.6.4"
+	s.add_development_dependency "hoe", "~> 3.7.1"
 	s.add_development_dependency "pg", "0.17.0"
 	s.add_development_dependency "pg-hstore", "~> 1.2.0"
 	s.add_development_dependency "eventmachine", "~> 1.0.0"
