@@ -1,14 +1,10 @@
 if RUBY_PLATFORM =~ /mswin/
-	source "https://support.puzzleflow.com/packages"
+	source 'https://gems.puzzleflow.com'
 else
 	source 'https://rubygems.org'
 end
 
 gem 'pg-binaries', require: 'pg_binaries'  if RUBY_PLATFORM =~ /mswin/
-gem 'hoe', '~> 3.7.1'
-gem 'hoe-git', '~> 1.6.0'
-gem 'hoe-geminabox', '~> 0.3.0'
-gem 'hoe-bundler', '~> 1.2.0'
 
 # Declare your gem's dependencies in service_base.gemspec.
 # Bundler will treat runtime dependencies like base dependencies, and

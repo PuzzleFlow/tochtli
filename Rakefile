@@ -19,7 +19,7 @@ rescue LoadError
 end
 
 # Set up Hoe plugins
-Hoe.plugin :bundler
+Hoe.plugin :gemspec
 Hoe.plugin :git
 Hoe.plugin :geminabox
 
@@ -35,27 +35,14 @@ Hoe.spec 'service_base' do
 	dependency "bunny", ">= 1.3.1"
 	dependency "dalli", "~> 2.6.4"
 	dependency "hoe", "~> 3.7.1", :development
+	dependency 'hoe-git', '~> 1.6.0', :development
+	dependency 'hoe-geminabox', '~> 0.3.0', :development
+	dependency 'hoe-gemspec', '~> 1.0.0', :development
 	dependency "pg", "0.17.0", :development
 	dependency "pg-hstore", "~> 1.2.0", :development
 	dependency "eventmachine", "~> 1.0.0", :development
 
 	license "MIT"
-end
-
-begin
-  require 'rdoc/task'
-rescue LoadError
-  require 'rdoc/rdoc'
-  require 'rake/rdoctask'
-  RDoc::Task = Rake::RDocTask
-end
-
-RDoc::Task.new(:rdoc) do |rdoc|
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title    = 'ServiceBase'
-  rdoc.options << '--line-numbers'
-  rdoc.rdoc_files.include('README.rdoc')
-  rdoc.rdoc_files.include('lib/**/*.rb')
 end
 
 APP_RAKEFILE = File.expand_path("../test/dummy/Rakefile", __FILE__)
@@ -71,6 +58,5 @@ Rake::TestTask.new(:test) do |t|
   t.pattern = 'test/**/*_test.rb'
   t.verbose = false
 end
-
 
 task :default => :test

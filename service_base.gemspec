@@ -1,26 +1,64 @@
-$:.push File.expand_path("../lib", __FILE__)
+# -*- encoding: utf-8 -*-
 
-# Maintain your gem's version:
-require "service_base/version"
-
-# Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
-	s.name = "service_base"
-	s.version = ServiceBase::VERSION
-	s.authors = ["PuzzleFlow Team"]
-	s.email = ["support@puzzleflow.com"]
-	s.homepage = "http://puzzleflow.com"
-	s.summary = "The base components used by services' implementation."
-	s.description = "This is a set of common tools used during implementation of PuzzleFlow services."
+  s.name = "service_base"
+  s.version = "0.1.1.20140929115115"
 
-	s.files = Dir["{app,config,db,lib}/**/*"] + ["MIT-LICENSE", "Rakefile", "README.rdoc"]
-	s.test_files = Dir["test/**/*"]
+  s.required_rubygems_version = Gem::Requirement.new(">= 1.4") if s.respond_to? :required_rubygems_version=
+  s.authors = ["PuzzleFlow Team"]
+  s.date = "2014-09-29"
+  s.description = "The base components used by services' implementation."
+  s.email = ["support@puzzleflow.com"]
+  s.extra_rdoc_files = ["History.txt", "Manifest.txt", "README.rdoc", "README.txt"]
+  s.files = [".autotest", "Gemfile", "History.txt", "MIT-LICENSE", "Manifest.txt", "README.rdoc", "README.txt", "Rakefile", "db/migrate/20131017134818_create_configuration_store.rb", "lib/service_base.rb", "lib/service_base/base_controller.rb", "lib/service_base/client_proxy.rb", "lib/service_base/client_proxy/async.rb", "lib/service_base/client_proxy/base.rb", "lib/service_base/client_proxy/blocking.rb", "lib/service_base/configuration.rb", "lib/service_base/controller_manager.rb", "lib/service_base/engine.rb", "lib/service_base/message.rb", "lib/service_base/message_map.rb", "lib/service_base/rabbit_client.rb", "lib/service_base/rabbit_connection.rb", "lib/service_base/reply_queue.rb", "lib/service_base/service_cache.rb", "lib/service_base/test.rb", "lib/service_base/test/client.rb", "lib/service_base/test/controller.rb", "lib/service_base/test/integration.rb", "lib/service_base/test/test_case.rb", "lib/service_base/version.rb", "service_base.gemspec", "test/async_client_proxy_test.rb", "test/blocking_client_proxy_test.rb", "test/configuration_store_test.rb", "test/controller_test.rb", "test/dummy/Rakefile", "test/dummy/config/application.rb", "test/dummy/config/boot.rb", "test/dummy/config/database.yml", "test/dummy/config/environment.rb", "test/rabbit_client_test.rb", "test/rabbit_connection_test.rb", "test/test_helper.rb", ".gemtest"]
+  s.homepage = "https://git.puzzleflow.com/puzzleflow/service_base"
+  s.licenses = ["MIT"]
+  s.rdoc_options = ["--main", "README.rdoc"]
+  s.require_paths = ["lib"]
+  s.rubyforge_project = "puzzleflow"
+  s.rubygems_version = "1.8.23"
+  s.summary = "The base components used by services' implementation."
+  s.test_files = ["test/test_helper.rb", "test/async_client_proxy_test.rb", "test/blocking_client_proxy_test.rb", "test/configuration_store_test.rb", "test/controller_test.rb", "test/rabbit_client_test.rb", "test/rabbit_connection_test.rb"]
 
-	s.add_dependency "rails"
-	s.add_dependency "bunny", ">= 1.3.1"
-	s.add_dependency "dalli", "~> 2.6.4"
-	s.add_development_dependency "hoe", "~> 3.7.1"
-	s.add_development_dependency "pg", "0.17.0"
-	s.add_development_dependency "pg-hstore", "~> 1.2.0"
-	s.add_development_dependency "eventmachine", "~> 1.0.0"
+  if s.respond_to? :specification_version then
+    s.specification_version = 3
+
+    if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
+      s.add_runtime_dependency(%q<rails>, [">= 3.2.15"])
+      s.add_runtime_dependency(%q<bunny>, [">= 1.3.1"])
+      s.add_runtime_dependency(%q<dalli>, ["~> 2.6.4"])
+      s.add_development_dependency(%q<rdoc>, ["~> 4.0"])
+      s.add_development_dependency(%q<hoe>, ["~> 3.7.1"])
+      s.add_development_dependency(%q<hoe-git>, ["~> 1.6.0"])
+      s.add_development_dependency(%q<hoe-geminabox>, ["~> 0.3.0"])
+      s.add_development_dependency(%q<hoe-gemspec>, ["~> 1.0.0"])
+      s.add_development_dependency(%q<pg>, ["= 0.17.0"])
+      s.add_development_dependency(%q<pg-hstore>, ["~> 1.2.0"])
+      s.add_development_dependency(%q<eventmachine>, ["~> 1.0.0"])
+    else
+      s.add_dependency(%q<rails>, [">= 3.2.15"])
+      s.add_dependency(%q<bunny>, [">= 1.3.1"])
+      s.add_dependency(%q<dalli>, ["~> 2.6.4"])
+      s.add_dependency(%q<rdoc>, ["~> 4.0"])
+      s.add_dependency(%q<hoe>, ["~> 3.7.1"])
+      s.add_dependency(%q<hoe-git>, ["~> 1.6.0"])
+      s.add_dependency(%q<hoe-geminabox>, ["~> 0.3.0"])
+      s.add_dependency(%q<hoe-gemspec>, ["~> 1.0.0"])
+      s.add_dependency(%q<pg>, ["= 0.17.0"])
+      s.add_dependency(%q<pg-hstore>, ["~> 1.2.0"])
+      s.add_dependency(%q<eventmachine>, ["~> 1.0.0"])
+    end
+  else
+    s.add_dependency(%q<rails>, [">= 3.2.15"])
+    s.add_dependency(%q<bunny>, [">= 1.3.1"])
+    s.add_dependency(%q<dalli>, ["~> 2.6.4"])
+    s.add_dependency(%q<rdoc>, ["~> 4.0"])
+    s.add_dependency(%q<hoe>, ["~> 3.7.1"])
+    s.add_dependency(%q<hoe-git>, ["~> 1.6.0"])
+    s.add_dependency(%q<hoe-geminabox>, ["~> 0.3.0"])
+    s.add_dependency(%q<hoe-gemspec>, ["~> 1.0.0"])
+    s.add_dependency(%q<pg>, ["= 0.17.0"])
+    s.add_dependency(%q<pg-hstore>, ["~> 1.2.0"])
+    s.add_dependency(%q<eventmachine>, ["~> 1.0.0"])
+  end
 end
