@@ -32,6 +32,7 @@ Hoe.spec 'service_base' do
 	dependency "dalli", "~> 2.6.4"
 	dependency "hoe", "~> 3.7.1", :development
 	dependency 'hoe-gemspec', '~> 1.0.0', :development
+	dependency 'geminabox', '~> 0.12.4', :development
 	dependency 'hoe-geminabox', '~> 0.3.0', :development
 	dependency 'hoe-git', '~> 1.6.0', :development
 	dependency "pg", "0.17.0", :development
