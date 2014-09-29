@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = "service_base"
-  s.version = "0.1.1.20140929115115"
+  s.version = "0.1.1.20140929115503"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.4") if s.respond_to? :required_rubygems_version=
   s.authors = ["PuzzleFlow Team"]
