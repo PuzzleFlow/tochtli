@@ -5,12 +5,7 @@ rescue LoadError
   puts 'You must `gem install bundler` and `bundle install` to run rake tasks'
 end
 
-# Bundler setup fix
-# Bundler adds "-Ipath" option which does not work when path contains space
-# Fix the path by adding ""
-if ENV['RUBYOPT'] =~ /^(.*)-I(.+) -rbundler\/setup(.*)$/
-	ENV['RUBYOPT'] = %Q(#{$1}"-I#{$2}" -rbundler/setup#{$3})
-end
+ENV['RUBY_FLAGS'] = '-I.' # do not show warnings (default is '-w -I...')- bunny is full of unused variables
 
 begin
 	require 'hoe'
@@ -20,14 +15,15 @@ end
 
 # Set up Hoe plugins
 Hoe.plugin :gemspec
-Hoe.plugin :git
 Hoe.plugin :geminabox
+Hoe.plugin :git
 
 Hoe.spec 'service_base' do
 	developer 'PuzzleFlow Team', 'support@puzzleflow.com'
 
 	self.group_name = 'puzzleflow'
 	self.geminabox_server = 'https://gems.puzzleflow.com'
+	self.testlib = :testunit
 
 	require_rubygems_version '>= 1.4'
 
@@ -35,28 +31,16 @@ Hoe.spec 'service_base' do
 	dependency "bunny", ">= 1.3.1"
 	dependency "dalli", "~> 2.6.4"
 	dependency "hoe", "~> 3.7.1", :development
-	dependency 'hoe-git', '~> 1.6.0', :development
-	dependency 'hoe-geminabox', '~> 0.3.0', :development
 	dependency 'hoe-gemspec', '~> 1.0.0', :development
+	dependency 'hoe-geminabox', '~> 0.3.0', :development
+	dependency 'hoe-git', '~> 1.6.0', :development
 	dependency "pg", "0.17.0", :development
 	dependency "pg-hstore", "~> 1.2.0", :development
 	dependency "eventmachine", "~> 1.0.0", :development
+	dependency "test-unit", ">= 2.1.2", :development
 
 	license "MIT"
 end
 
 APP_RAKEFILE = File.expand_path("../test/dummy/Rakefile", __FILE__)
 load 'rails/tasks/engine.rake'
-
-Bundler::GemHelper.install_tasks
-
-require 'rake/testtask'
-
-Rake::TestTask.new(:test) do |t|
-  t.libs << 'lib'
-  t.libs << 'test'
-  t.pattern = 'test/**/*_test.rb'
-  t.verbose = false
-end
-
-task :default => :test
