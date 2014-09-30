@@ -13,9 +13,12 @@ Hoe.plugin :gemspec
 Hoe.plugin :geminabox
 Hoe.plugin :git
 
+require './lib/service_base/version'
+
 Hoe.spec 'service_base' do
 	developer 'PuzzleFlow Team', 'support@puzzleflow.com'
 
+	self.version = ServiceBase::VERSION
 	self.group_name = 'puzzleflow'
 	self.geminabox_server = 'https://gems.puzzleflow.com'
 	self.testlib = :testunit
@@ -37,6 +40,9 @@ Hoe.spec 'service_base' do
 
 	license "MIT"
 end
+
+# Update Manifest.txt before release
+task :prerelease => "git:manifest"
 
 # Before loading Gemfile we need to have up-to-date gemspec.
 Rake::Task['gem:spec'].invoke

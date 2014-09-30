@@ -27,7 +27,6 @@ lib/service_base/test/controller.rb
 lib/service_base/test/integration.rb
 lib/service_base/test/test_case.rb
 lib/service_base/version.rb
-service_base.gemspec
 test/async_client_proxy_test.rb
 test/blocking_client_proxy_test.rb
 test/configuration_store_test.rb
