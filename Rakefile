@@ -1,9 +1,4 @@
 #!/usr/bin/env rake
-begin
-  require 'bundler/setup'
-rescue LoadError
-  puts 'You must `gem install bundler` and `bundle install` to run rake tasks'
-end
 
 ENV['RUBY_FLAGS'] = '-I.' # do not show warnings (default is '-w -I...')- bunny is full of unused variables
 
@@ -42,6 +37,13 @@ Hoe.spec 'service_base' do
 
 	license "MIT"
 end
+
+# Before loading Gemfile we need to have up-to-date gemspec.
+Rake::Task['gem:spec'].invoke
+
+require 'bundler/setup'
+
+# Setup Rails engine tasks
 
 APP_RAKEFILE = File.expand_path("../test/dummy/Rakefile", __FILE__)
 load 'rails/tasks/engine.rake'

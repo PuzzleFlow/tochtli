@@ -1,6 +1,6 @@
 .autotest
 Gemfile
-History.txt
+History.md
 MIT-LICENSE
 Manifest.txt
 README.md
