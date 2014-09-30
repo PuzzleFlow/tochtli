@@ -1,8 +1,5 @@
-.autotest
-.gemtest
 Gemfile
 History.md
-MIT-LICENSE
 Manifest.txt
 README.md
 Rakefile
