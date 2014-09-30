@@ -23,15 +23,12 @@ Hoe.spec 'service_base' do
 	dependency "rails", ">= 3.2.15"
 	dependency "bunny", ">= 1.3.1"
 	dependency "dalli", "~> 2.6.4"
-	dependency "hoe-puzzleflow", "0.1.0", :development
+	dependency "hoe-puzzleflow", "0.1.1", :development
 	dependency "pg", "0.17.0", :development
 	dependency "pg-hstore", "~> 1.2.0", :development
 	dependency "eventmachine", "~> 1.0.0", :development
 	dependency "test-unit", ">= 2.1.2", :development
 end
-
-# Before loading Gemfile we need to have up-to-date gemspec.
-Rake::Task['gem:spec'].invoke
 
 # Setup Rails engine tasks
 require 'bundler/setup'

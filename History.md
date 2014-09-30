@@ -8,6 +8,7 @@
 * 1 minor enhancements:
 
   * do not show ruby warnings (reset RUBY_FLAGS)
+  * hoe-puzzleflow used to unify hoe spec with other PuzzleFlow gems
 
 === 0.1.0 / 2014-09-29
 
