@@ -14,11 +14,11 @@ module ServiceBase
 										desc "Add migration paths from #{railtie_name} to application migration paths"
 										task :migrations do
 											# Skip if working with current engine, would be added by railties task
-											unless defined?(ENGINE_PATH) && ENGINE_PATH == root.to_s
+											if !defined?(ENGINE_PATH) || ENGINE_PATH != root.to_s
 												if ActiveRecord.const_defined?(:Tasks) # Rails 4.1
-													ActiveRecord::Tasks::DatabaseTasks.migrations_paths += config.paths["db/migrate"].to_a
+													ActiveRecord::Tasks::DatabaseTasks.migrations_paths += config.paths["db/migrate"].existent
 												else
-													ActiveRecord::Migrator.migrations_paths += config.paths["db/migrate"].to_a
+													Rails.application.paths['db/migrate'] += config.paths["db/migrate"].existent
 												end
 											end
 										end
