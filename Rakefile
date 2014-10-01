@@ -28,6 +28,8 @@ Hoe.spec 'service_base' do
 	dependency "pg-hstore", "~> 1.2.0", :development
 	dependency "eventmachine", "~> 1.0.0", :development
 	dependency "test-unit", ">= 2.1.2", :development
+
+	license 'PuzzleFlow'
 end
 
 # Before loading Gemfile we need to have up-to-date gemspec.
