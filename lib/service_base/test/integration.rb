@@ -1,3 +1,5 @@
+require 'eventmachine'
+
 module ServiceBase
 	module Test
 		# Rack app for asynchronous clients
