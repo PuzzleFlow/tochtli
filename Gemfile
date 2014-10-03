@@ -1,8 +1,4 @@
-# if RUBY_PLATFORM =~ /mswin/
-	source 'https://gems.puzzleflow.com'
-# else
-#	source 'https://rubygems.org'
-# end
+source 'https://gems.puzzleflow.com'
 
 gem 'pg-binaries', require: 'pg_binaries'  if RUBY_PLATFORM =~ /mswin/
 
