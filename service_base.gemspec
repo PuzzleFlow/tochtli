@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.4") if s.respond_to? :required_rubygems_version=
   s.authors = ["PuzzleFlow Team"]
-  s.date = "2014-10-01"
+  s.date = "2014-10-03"
   s.description = "The base components used by services' implementation."
   s.email = ["support@puzzleflow.com"]
   s.extra_rdoc_files = ["History.md", "Manifest.txt", "README.md"]
@@ -28,7 +28,6 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<bunny>, [">= 1.3.1"])
       s.add_runtime_dependency(%q<dalli>, ["~> 2.6.4"])
       s.add_development_dependency(%q<geminabox>, ["~> 0.12.4"])
-      s.add_development_dependency(%q<hoe-geminabox>, ["~> 0.3.1"])
       s.add_development_dependency(%q<hoe-git>, ["~> 1.6.0"])
       s.add_development_dependency(%q<rdoc>, [">= 3.4"])
       s.add_development_dependency(%q<hoe-puzzleflow>, ["~> 0.1.4"])
@@ -42,7 +41,6 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<bunny>, [">= 1.3.1"])
       s.add_dependency(%q<dalli>, ["~> 2.6.4"])
       s.add_dependency(%q<geminabox>, ["~> 0.12.4"])
-      s.add_dependency(%q<hoe-geminabox>, ["~> 0.3.1"])
       s.add_dependency(%q<hoe-git>, ["~> 1.6.0"])
       s.add_dependency(%q<rdoc>, [">= 3.4"])
       s.add_dependency(%q<hoe-puzzleflow>, ["~> 0.1.4"])
@@ -57,7 +55,6 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<bunny>, [">= 1.3.1"])
     s.add_dependency(%q<dalli>, ["~> 2.6.4"])
     s.add_dependency(%q<geminabox>, ["~> 0.12.4"])
-    s.add_dependency(%q<hoe-geminabox>, ["~> 0.3.1"])
     s.add_dependency(%q<hoe-git>, ["~> 1.6.0"])
     s.add_dependency(%q<rdoc>, [">= 3.4"])
     s.add_dependency(%q<hoe-puzzleflow>, ["~> 0.1.4"])

@@ -1,18 +1,12 @@
 #!/usr/bin/env rake
 
-ENV['RUBY_FLAGS'] = '-I.' # do not show warnings (default is '-w -I...')- bunny is full of unused variables
-
 begin
-	require 'hoe'
 	require 'hoe/puzzleflow'
 rescue LoadError
 	abort "This Rakefile requires hoe-puzzleflow (gem install hoe-puzzleflow --source https://gems.puzzleflow.com)"
 end
 
-# Set up Hoe plugins
-Hoe.plugin :geminabox
-Hoe.plugin :git
-Hoe.plugin :puzzleflow
+Hoe::PuzzleFlow.setup_plugins
 
 require './lib/service_base/version'
 
