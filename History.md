@@ -2,6 +2,7 @@
 
 * 4 minor enhancements:
 
+  * Update corrupted gemspec
   * Move add_engine_migrations method to hoe-puzzleflow
   * User always PuzzleFlow gem server
   * User always PuzzleFlow gem server

@@ -17,7 +17,7 @@ Hoe.spec 'service_base' do
 	dependency "rails", ">= 3.2.15"
 	dependency "bunny", ">= 1.3.1"
 	dependency "dalli", "~> 2.6.4"
-	dependency "hoe-puzzleflow", "~> 0.1.4", :development
+	dependency "hoe-puzzleflow", "~> 0.1.6", :development
 	dependency "pg", "0.17.0", :development
 	dependency "pg-hstore", "~> 1.2.0", :development
 	dependency "eventmachine", "~> 1.0.0", :development
