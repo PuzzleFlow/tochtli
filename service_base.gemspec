@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = "service_base"
-  s.version = "0.1.1"
+  s.version = "0.1.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.4") if s.respond_to? :required_rubygems_version=
   s.authors = ["PuzzleFlow Team"]
-  s.date = "2014-10-03"
+  s.date = "2014-10-10"
   s.description = "The base components used by services' implementation."
   s.email = ["support@puzzleflow.com"]
   s.extra_rdoc_files = ["History.md", "Manifest.txt", "README.md"]
@@ -15,7 +15,6 @@ Gem::Specification.new do |s|
   s.licenses = ["PuzzleFlow"]
   s.rdoc_options = ["--main", "README.md"]
   s.require_paths = ["lib"]
-  s.rubyforge_project = "puzzleflow"
   s.rubygems_version = "1.8.23"
   s.summary = "The base components used by services' implementation."
   s.test_files = ["test/test_helper.rb", "test/async_client_proxy_test.rb", "test/blocking_client_proxy_test.rb", "test/configuration_store_test.rb", "test/controller_test.rb", "test/rabbit_client_test.rb", "test/rabbit_connection_test.rb"]
@@ -35,7 +34,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<pg-hstore>, ["~> 1.2.0"])
       s.add_development_dependency(%q<eventmachine>, ["~> 1.0.0"])
       s.add_development_dependency(%q<test-unit>, [">= 2.1.2"])
-      s.add_development_dependency(%q<hoe>, ["~> 3.7"])
+      s.add_development_dependency(%q<hoe>, ["~> 3.13"])
     else
       s.add_dependency(%q<rails>, [">= 3.2.15"])
       s.add_dependency(%q<bunny>, [">= 1.3.1"])
@@ -48,7 +47,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<pg-hstore>, ["~> 1.2.0"])
       s.add_dependency(%q<eventmachine>, ["~> 1.0.0"])
       s.add_dependency(%q<test-unit>, [">= 2.1.2"])
-      s.add_dependency(%q<hoe>, ["~> 3.7"])
+      s.add_dependency(%q<hoe>, ["~> 3.13"])
     end
   else
     s.add_dependency(%q<rails>, [">= 3.2.15"])
@@ -62,6 +61,6 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<pg-hstore>, ["~> 1.2.0"])
     s.add_dependency(%q<eventmachine>, ["~> 1.0.0"])
     s.add_dependency(%q<test-unit>, [">= 2.1.2"])
-    s.add_dependency(%q<hoe>, ["~> 3.7"])
+    s.add_dependency(%q<hoe>, ["~> 3.13"])
   end
 end

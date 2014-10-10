@@ -1,3 +1,11 @@
+=== 0.1.2 / 2014-10-10
+
+* 4 minor enhancements:
+
+  * Move add_engine_migrations method to hoe-puzzleflow
+  * User always PuzzleFlow gem server
+  * User always PuzzleFlow gem server
+  * rakefile cleaning
 
 === 0.1.1 / 2014-09-30
 
