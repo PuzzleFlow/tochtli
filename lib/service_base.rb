@@ -30,8 +30,9 @@ module ServiceBase
 
 		def logger
 			unless @logger
-				@logger = Logger.new(File.join(Rails.root, 'log/services.log'))
-				@logger.level = ENV['RAILS_ENV']=='production' ? Logger::WARN : Logger::DEBUG
+				raise "ServiceBase.logger not set." unless defined?(Rails)
+				@logger = Logger.new(File.join(Rails.root, 'log/service.log'))
+				@logger.level = Rails.env.production? ? Logger::WARN : Logger::DEBUG
 				if defined?(CommonTools) # $%$%!$%!#!$%#$!%$%^
 					# TODO: move CommonTools::StandardFormatter to COMMON tools
 

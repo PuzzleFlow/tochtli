@@ -59,6 +59,10 @@ module ServiceBase
 			queue
 		end
 
+		def queue_exists?(name)
+			@connection.queue_exists?(name)
+		end
+
 		def ack(delivery_tag)
 			channel.ack(delivery_tag, false)
 		end

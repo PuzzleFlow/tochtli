@@ -1,3 +1,9 @@
+=== 0.1.3 / 2014-10-28
+
+* 1 minor enhancement:
+
+  * Remove Rails dependencies
+
 === 0.1.2 / 2014-10-10
 
 * 4 minor enhancements:
