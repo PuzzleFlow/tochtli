@@ -12,7 +12,7 @@ require './lib/service_base/version'
 
 Hoe.spec 'service_base' do
 	self.version = ServiceBase::VERSION
-	self.testlib = :testunit
+	self.testlib = :none
 
 	dependency "rails", ">= 3.2.15"
 	dependency "bunny", ">= 1.3.1"
@@ -21,7 +21,6 @@ Hoe.spec 'service_base' do
 	dependency "pg", "0.17.0", :development
 	dependency "pg-hstore", "~> 1.2.0", :development
 	dependency "eventmachine", "~> 1.0.0", :development
-	dependency "test-unit", ">= 2.1.2", :development
 
 	license 'PuzzleFlow'
 end
