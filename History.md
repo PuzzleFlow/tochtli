@@ -1,3 +1,13 @@
+=== 0.1.4 / 2014-11-17
+
+* 1 minor enhancement:
+
+  * Switched to minitest
+
+* 1 bug fix:
+
+  * Blocking client proxy should not block on immediate reply (refs #13829)
+
 === 0.1.3 / 2014-10-28
 
 * 1 minor enhancement:

@@ -16,7 +16,7 @@ module ServiceBase
 				final_command = block && options.fetch(:final, true)
 				@client.send(command, *args, reply_handler, options)
 				if final_command
-					sleep timeout
+					sleep timeout unless reply_handler.performed?
 					if reply_handler.exception
 						raise reply_handler.exception
 					elsif reply_handler.reply
@@ -34,6 +34,11 @@ module ServiceBase
 			def initialize(client_proxy, thread)
 				super client_proxy, nil
 				@thread = thread
+				@reply = nil
+			end
+
+			def performed?
+				!!@reply
 			end
 
 			def call(reply)

@@ -19,10 +19,14 @@ class BlockingClientProxyTest < ActionController::TestCase
 		def buggy_command(param, handler, options={})
 			handler.on_error 'StandardError', "Bug!"
 		end
+
+		def simple_command(param, handler, options={})
+			handler.call 'OK'
+		end
 	end
 
 	class ClientProxy < ServiceBase::ClientProxy::Blocking
-		delegate_command :sleepy_command, :buggy_command
+		delegate_command :sleepy_command, :buggy_command, :simple_command
 	end
 
 	class TestController < ActionController::Base
@@ -37,6 +41,12 @@ class BlockingClientProxyTest < ActionController::TestCase
 		def buggy
 			client_proxy.buggy_command(:param) do |response|
 				render :text => 'Should not reach this place'
+			end
+		end
+
+		def simple
+			client_proxy.simple_command(:param) do |response|
+				render :text => response
 			end
 		end
 
@@ -61,6 +71,7 @@ class BlockingClientProxyTest < ActionController::TestCase
 		Rails.application.routes.draw do
 			post '/sleepy' => 'blocking_client_proxy_test/test#sleepy'
 			post '/buggy' => 'blocking_client_proxy_test/test#buggy'
+			post '/simple' => 'blocking_client_proxy_test/test#simple'
 		end
 	end
 
@@ -76,5 +87,12 @@ class BlockingClientProxyTest < ActionController::TestCase
 	test 'buggy command' do
 		post :buggy
 		assert_response :error, "Handled Error: StandardError from Test Service: Bug!"
+	end
+
+	test 'simple command' do
+		t = Time.now
+		post :simple
+		assert_response :success, 'OK'
+		assert Time.now-t < 0.05, "Command should not block, but it took %.2fs" % (Time.now-t)
 	end
 end
