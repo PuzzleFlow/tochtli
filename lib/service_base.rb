@@ -1,6 +1,6 @@
 require 'service_base/version'
 require 'service_base/engine' if defined?(::Rails)
-require 'active_support/core_ext'
+require 'active_support/all'
 require 'bunny'
 
 module ServiceBase
