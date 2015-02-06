@@ -84,7 +84,7 @@ class ControllerTest < ServiceBase::Test::Integration
 
 		publish message, :reply_handler => handler, :timeout => 0.1.second
 
-		handler.wait(0.15.seconds)
+		handler.wait(0.5.seconds)
 
 		assert_equal 1, handler.errors
 	end
