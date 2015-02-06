@@ -82,9 +82,9 @@ class ControllerTest < ServiceBase::Test::Integration
 		message = ErrorMessage.new
 		handler = TestReplyHandler.new(1)
 
-		publish message, :reply_handler => handler, :timeout => 0.1.second
+		publish message, :reply_handler => handler, :timeout => 1.5.second
 
-		handler.wait(0.5.seconds)
+		handler.wait(2.seconds)
 
 		assert_equal 1, handler.errors
 	end
@@ -93,7 +93,7 @@ class ControllerTest < ServiceBase::Test::Integration
 		message = FailureMessage.new
 		handler = TestReplyHandler.new(1)
 
-		publish message, :reply_handler => handler, :timeout => 0.1.second
+		publish message, :reply_handler => handler, :timeout => 1.5.second
 
 		handler.wait(2.seconds)
 
