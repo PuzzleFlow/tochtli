@@ -53,7 +53,11 @@ module ServiceBase
 			end
 
 			teardown do
-				@controller_manager.stop
+        begin
+				  @controller_manager.stop
+        rescue Timeout::Error
+          warn "Unable to stop controller manager: #{$!} [#{$!.class}]"
+        end
 			end
 
 			private
