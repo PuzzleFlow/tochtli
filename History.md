@@ -1,3 +1,10 @@
+=== 0.1.5 / 2015-02-06
+
+* 2 minor enhancement:
+
+  * Test fix: timeout raised
+  * Rails 4.2 compatibility fix
+
 === 0.1.4 / 2014-11-17
 
 * 1 minor enhancement:
