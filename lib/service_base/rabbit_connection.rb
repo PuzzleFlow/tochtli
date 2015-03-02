@@ -145,7 +145,7 @@ module ServiceBase
 
 				defaults = DEFAULTS
 
-				if defined?(Rails)
+				if defined?(Rails) && Rails.root
 					config_path = Rails.root.join('config/rabbit.yml')
 					if config_path.exist?
 						rails_config = YAML.load_file(config_path)
