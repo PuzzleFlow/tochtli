@@ -1,3 +1,9 @@
+=== 0.1.6 / 2015-03-02
+
+* 1 bug fix:
+
+  * Protect RabbitConnection from crash when Rails.root is not set
+  
 === 0.1.5 / 2015-02-06
 
 * 2 minor enhancement:
