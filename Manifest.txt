@@ -6,6 +6,7 @@ README.md
 Rakefile
 db/migrate/20131017134818_create_configuration_store.rb
 lib/service_base.rb
+lib/service_base/base_client.rb
 lib/service_base/base_controller.rb
 lib/service_base/client_proxy.rb
 lib/service_base/client_proxy/async.rb
