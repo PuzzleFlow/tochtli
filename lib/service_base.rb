@@ -7,6 +7,7 @@ module ServiceBase
 	autoload :RabbitConnection, 'service_base/rabbit_connection'
 	autoload :Configuration, 'service_base/configuration'
 	autoload :BaseController, 'service_base/base_controller'
+	autoload :BaseClient, 'service_base/base_client'
 	autoload :ControllerManager, 'service_base/controller_manager'
 	autoload :Message, 'service_base/message'
 	autoload :MessageMap, 'service_base/message_map'

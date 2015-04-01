@@ -1,14 +1,14 @@
 # -*- encoding: utf-8 -*-
-# stub: service_base 0.1.6 ruby lib
+# stub: service_base 0.1.7 ruby lib
 
 Gem::Specification.new do |s|
   s.name = "service_base"
-  s.version = "0.1.6"
+  s.version = "0.1.7"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.4") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["PuzzleFlow Team"]
-  s.date = "2015-03-02"
+  s.date = "2015-04-01"
   s.description = "The base components used by services' implementation."
   s.email = ["support@puzzleflow.com"]
   s.extra_rdoc_files = ["History.md", "Manifest.txt", "README.md"]
@@ -16,8 +16,10 @@ Gem::Specification.new do |s|
   s.homepage = "https://git.puzzleflow.com/puzzleflow/service_base"
   s.licenses = ["PuzzleFlow"]
   s.rdoc_options = ["--main", "README.md"]
-  s.rubygems_version = "2.4.5"
+  s.rubyforge_project = "service_base"
+  s.rubygems_version = "2.4.3"
   s.summary = "The base components used by services' implementation."
+  s.test_files = ["test/test_helper.rb", "test/async_client_proxy_test.rb", "test/blocking_client_proxy_test.rb", "test/configuration_store_test.rb", "test/controller_test.rb", "test/rabbit_client_test.rb", "test/rabbit_connection_test.rb"]
 
   if s.respond_to? :specification_version then
     s.specification_version = 4

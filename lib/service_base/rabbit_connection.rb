@@ -13,10 +13,10 @@ module ServiceBase
 			@channel_pool   = channel_pool ? channel_pool : Hash.new
 		end
 
-		def connect
+		def connect(opts={})
 			return if open?
 
-			setup_bunny_connection
+			setup_bunny_connection(opts)
 
 			if block_given?
 				yield
@@ -36,11 +36,12 @@ module ServiceBase
 			@connection && @connection.open?
 		end
 
-		def setup_bunny_connection
-			@connection = Bunny.new(@config)
+		def setup_bunny_connection(opts={})
+			@connection = Bunny.new(@config, opts)
 			@connection.start
 		rescue Bunny::TCPConnectionFailed => ex
-			raise ConnectionFailed.new("Unable to connect to: '#{@config[:url]}': #{ex.message}")
+			connection_url = "amqp://#{@connection.user}@#{@connection.host}:#{@connection.port}/#{@connection.vhost}"
+			raise ConnectionFailed.new("Unable to connect to: '#{connection_url}' (#{ex.message})")
 		end
 
 		def exchange(thread=Thread.current)

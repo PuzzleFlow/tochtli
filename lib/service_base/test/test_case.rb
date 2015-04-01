@@ -13,7 +13,7 @@ module ServiceBase
 				properties = TestMessageProperties.new("test.reply", @message_index)
 				payload = message.to_json
 
-				@reply = nil
+				@message, @reply = nil
 				@controller.cleanup
 
 				unless @controller.process_message(delivery_info, properties, payload)
@@ -31,29 +31,44 @@ module ServiceBase
 				end
 			end
 
-			def assert_published(message_class, attributes)
-				publication = @connection.publications.shift
+			def assert_published(message_class, attributes, opts={})
+				timeout = attributes.delete(:timeout)
+				publication = @connection.get_publication(timeout)
 				assert_not_nil publication, "No message published"
-				message = publication[:message]
-				assert_kind_of message_class, message
+				@message = publication[:message]
+				assert_kind_of message_class, @message
 				attributes.each do |attr_name, value|
-					assert_equal value, message.send(attr_name), "Message attribute :#{attr_name} value does not match"
+					assert_equal value, @message.send(attr_name), "Message attribute :#{attr_name} value does not match"
 				end
+				@message
 			end
 
 		end
 
 		class TestRabbitConnection
+			include MonitorMixin
 			attr_reader :channel, :exchange, :publications
 
 			def initialize
+				super
 				@channel = TestRabbitChannel.new
 				@exchange = TestRabbitExchange.new
 				@publications = []
+				@cv = new_cond
 			end
 
 			def publish(routing_key, message, options={})
-				@publications << options.merge(routing_key: routing_key, message: message)
+				synchronize do
+					@publications << options.merge(routing_key: routing_key, message: message)
+					@cv.signal
+				end
+			end
+
+			def get_publication(timeout=nil)
+				synchronize do
+					@cv.wait(timeout) if timeout && @publications.empty?
+					@publications.shift
+				end
 			end
 
 			def logger
