@@ -1,9 +1,25 @@
 module ServiceBase
 	class BaseController
+		include ActiveSupport::Callbacks
+
+		CALLBACKS = [:start, :setup]
+		CALLBACK_FILTER_TYPES = [:before, :after, :around]
+
 		class_attribute :routing_keys,
 										:static_message_handlers
 
 		attr_reader :logger, :message
+
+		define_callbacks *CALLBACKS
+		CALLBACK_FILTER_TYPES.each do |filter_type|
+			CALLBACKS.each do |callback|
+				class_eval <<-RUBY
+					def self.#{filter_type}_#{callback}(*args, &block)
+						set_callback :#{callback}, :#{filter_type}, *args, &block
+					end
+				RUBY
+			end
+		end
 
 		def self.inherited(controller)
 			controller.routing_keys = Set.new
@@ -18,7 +34,11 @@ module ServiceBase
 		def self.on(routing_key, method_name, message_class=nil)
 			message_class ||= ServiceBase::MessageMap.instance.for(routing_key)
 			raise "Message class not found for the topic: #{routing_key}." unless message_class
-			self.static_message_handlers[routing_key] = MessageHandler.new(routing_key, message_class, method_name)
+			self.static_message_handlers[routing_key] = MessageHandler.new(message_class, method_name)
+		end
+
+		def self.unbind(routing_key)
+			self.static_message_handlers.delete(routing_key)
 		end
 
 		def initialize(rabbit_connection, cache, configuration_store, logger)
@@ -27,12 +47,20 @@ module ServiceBase
 			@configuration_store = configuration_store
 			@logger = logger
 
-			setup_routing
+			setup
 		end
 
 		def start
-			create_queue
-			subscribe_queue
+			run_callbacks :start do
+				create_queue
+				subscribe_queue
+			end
+		end
+
+		def setup
+			run_callbacks :setup do
+				setup_routing
+			end
 		end
 
 		def process_message(delivery_info, properties, payload)
@@ -58,6 +86,10 @@ module ServiceBase
 					false
 				end
 			else
+				logger.error "\n\nMessage DROPPED by #{self.class.name} at #{Time.now}"
+				logger.error "\tProperties: #{properties.inspect}."
+				logger.error "\tDelivery info: exchange: #{delivery_info[:exchange]}, routing_key: #{delivery_info[:routing_key]}."
+
 				false
 			end
 		rescue Exception => ex
@@ -104,7 +136,7 @@ module ServiceBase
 					routing_key = routing_key_prefix + method_name.to_s
 					message_class = ServiceBase::MessageMap.instance.for(routing_key)
 					raise "Topic '#{routing_key}' is not bound to any message. Unable to setup automatic routing for #{self.class}." unless message_class
-					@routing[routing_key] = MessageHandler.new(routing_key, message_class, method_name)
+					@routing[routing_key] = MessageHandler.new(message_class, method_name)
 				end
 			end
 		end
@@ -150,8 +182,7 @@ module ServiceBase
 		end
 
 		class MessageHandler
-			def initialize(topic, message_class, method_name)
-				@topic = topic
+			def initialize(message_class, method_name)
 				@message_class = message_class
 				@method_name = method_name
 			end
