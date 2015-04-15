@@ -1,6 +1,10 @@
-source 'https://gems.puzzleflow.com'
+if RUBY_PLATFORM =~ /mswin/
+	source 'https://gems.puzzleflow.com'
+else
+	source 'https://rubygems.org'
+end
 
-gem 'pg-binaries', require: 'pg_binaries'  if RUBY_PLATFORM =~ /mswin/
+gem 'pg-binaries', require: 'pg_binaries' if RUBY_PLATFORM =~ /mswin/
 
 gemspec
 

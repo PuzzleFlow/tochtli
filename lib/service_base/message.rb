@@ -32,6 +32,16 @@ module ServiceBase
 			validates_presence_of *attributes if validate
 		end
 
+		def self.required_attributes(*attributes)
+			options = attributes.extract_options!
+			self.attributes *attributes, options.merge(validate: true)
+		end
+
+		def self.optional_attributes(*attributes)
+			options = attributes.extract_options!
+			self.attributes *attributes, options.merge(validate: false)
+		end
+
 		def initialize(attributes={}, properties=nil)
 			self.attributes = attributes if attributes
 			@properties = properties

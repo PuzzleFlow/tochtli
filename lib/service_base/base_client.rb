@@ -55,39 +55,54 @@ module ServiceBase
 		end
 
 		class SyncMessageHandler
+			include MonitorMixin
 			attr_reader :reply, :error
 
 			def initialize
-				@main_thread = Thread.current
+				super # initialize monitor
+				@cv = new_cond
 			end
 
 			def wait(timeout)
-				Kernel.sleep timeout
-				on_timeout if !@reply && !@error
+				synchronize do
+					@cv.wait(timeout) unless handled?
+				end
+				on_timeout unless handled?
 			end
 
 			def wait!(timeout)
 				wait(timeout)
 				raise_error unless @reply
+				@reply
+			end
+
+			def handled?
+				@reply || @error
 			end
 
 			def on_timeout(original_message=nil)
-				@error = ClientError.new("Timeout", original_message ? "Unable to send message: #{original_message.inspect}" : "Service is not responding")
-				@main_thread.run
+				synchronize do
+					@error = ClientError.new("Timeout", original_message ? "Unable to send message: #{original_message.inspect}" : "Service is not responding")
+					@cv.signal
+				end
 			end
 
 			def on_error(error_message)
-				if error_message.is_a?(Exception)
-					@error = ClientError.new(error_message.class.name, error_message.message)
-				else
-					@error = ClientError.new(error_message.error, error_message.message)
+				synchronize do
+					if error_message.is_a?(Exception)
+						@error = ClientError.new(error_message.class.name, error_message.message)
+					else
+						@error = ClientError.new(error_message.error, error_message.message)
+					end
+					@cv.signal
 				end
-				@main_thread.run
 			end
 
 			def call(reply)
-				@reply = reply
-				@main_thread.run
+				synchronize do
+					@reply = reply
+					@cv.signal
+				end
 			end
 
 			def raise_error
