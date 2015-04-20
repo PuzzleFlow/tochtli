@@ -4,8 +4,9 @@ module ServiceBase
 	class ServiceCache
 		attr_reader :store
 
-		def self.create
-			new.store
+		def self.store
+			@cache ||= new
+			@cache.store
 		end
 
 		def initialize

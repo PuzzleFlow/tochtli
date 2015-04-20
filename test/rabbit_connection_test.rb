@@ -1,23 +1,24 @@
 require_relative 'test_helper'
 
 class RabbitConnectionTest < ActiveSupport::TestCase
+	teardown do
+		ServiceBase::RabbitConnection.close('test')
+	end
+
 	test "connection with default options" do
-		connection = ServiceBase::RabbitConnection.new
-		connection.connect do
+		ServiceBase::RabbitConnection.open('test') do |connection|
 			assert_equal "puzzleflow.services", connection.exchange.name
 		end
 	end
 
 	test "connection with custom options" do
-		connection = ServiceBase::RabbitConnection.new(:exchange_name => "puzzleflow.tests")
-		connection.connect do
+		ServiceBase::RabbitConnection.open('test', exchange_name: "puzzleflow.tests") do |connection|
 			assert_equal "puzzleflow.tests", connection.exchange.name
 		end
 	end
 
 	test "multiple channels and exchanges" do
-		connection = ServiceBase::RabbitConnection.new(:exchange_name => "puzzleflow.tests")
-		connection.connect do
+		ServiceBase::RabbitConnection.open('test', exchange_name: "puzzleflow.tests") do |connection|
 			another_thread = Thread.new {}
 
 			current_channel = connection.channel
@@ -39,13 +40,13 @@ class RabbitConnectionTest < ActiveSupport::TestCase
 
 	test "multithreaded consumer performance" do
 		work_pool_size = 10
-		connection = ServiceBase::RabbitConnection.new(:exchange_name => "puzzleflow.tests",
-																									 :work_pool_size => work_pool_size)
-		connection.connect do
+		ServiceBase::RabbitConnection.open('test',
+		                                   exchange_name:  "puzzleflow.tests",
+		                                   work_pool_size: work_pool_size) do |connection|
 			mutex = Mutex.new
 			cv = ConditionVariable.new
 			thread_count = 5
-			message_count = 1_000
+			message_count = 200
 			expected_message_count = message_count*thread_count
 
 			consumed = 0
@@ -85,7 +86,7 @@ class RabbitConnectionTest < ActiveSupport::TestCase
 
 			threads.each(&:join)
 
-			mutex.synchronize { cv.wait(mutex, 20.0) }
+			mutex.synchronize { cv.wait(mutex, 5.0) }
 
 			end_t = Time.now
 			time = end_t - start_t

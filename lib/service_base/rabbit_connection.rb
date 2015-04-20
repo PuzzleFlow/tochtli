@@ -6,11 +6,42 @@ module ServiceBase
 		attr_accessor :connection
 		delegate :logger, to: :@connection
 
+		cattr_accessor :connections
+		self.connections = {}
+
+		private_class_method :new
+
 		def initialize(config = nil, channel_pool=nil)
-			@config         = config.is_a?(RabbitConnection::Config) ? config : RabbitConnection::Config.load(config)
+			@config         = config.is_a?(RabbitConnection::Config) ? config : RabbitConnection::Config.load(nil, config)
 			@exchange_name  = @config.delete(:exchange_name)
 			@work_pool_size = @config.delete(:work_pool_size)
 			@channel_pool   = channel_pool ? channel_pool : Hash.new
+		end
+
+		def self.open(name=nil, config=nil)
+			name ||= defined?(Rails) ? Rails.env : nil
+			raise ArgumentError, "RabbitMQ configuration name not specified" unless name
+			connection = self.connections[name.to_sym]
+			if !connection || !connection.open?
+				config = config.is_a?(RabbitConnection::Config) ? config : RabbitConnection::Config.load(name, config)
+				connection = new(config)
+				connection.connect
+				self.connections[name.to_sym] = connection
+			end
+
+			if block_given?
+				yield connection
+				close name
+			else
+				connection
+			end
+		end
+
+		def self.close(name)
+			name ||= defined?(Rails) ? Rails.env : nil
+			raise ArgumentError, "RabbitMQ configuration name not specified" unless name
+			connection = self.connections.delete(name.to_sym)
+			connection.disconnect if connection && connection.open?
 		end
 
 		def connect(opts={})
@@ -132,7 +163,7 @@ module ServiceBase
 					:network_recovery_interval => 1
 			}
 
-			def self.load(config=nil)
+			def self.load(name, config=nil)
 				config = case config
 									 when String
 										 YAML.load_file(config).symbolize_keys
@@ -151,6 +182,13 @@ module ServiceBase
 					if config_path.exist?
 						rails_config = YAML.load_file(config_path)
 						raise "Unexpected rabbit.yml: #{rails_config.inspect}, Hash expected." unless rails_config.is_a?(Hash)
+						rails_config = rails_config.symbolize_keys
+						unless rails_config[:host] # backward compatibility
+							rails_config = rails_config[name.to_sym]
+							raise "RabbitMQ '#{name}' configuration not set in rabbit.yml" unless rails_config
+						else
+							warn "DEPRECATION WARNING: rabbit.yml should define different configurations for Rails environments (like database.yml). Please update your configuration file: #{config_path}."
+						end
 						defaults = defaults.merge(rails_config.symbolize_keys)
 					end
 				end

@@ -146,11 +146,11 @@ module ServiceBase
 		end
 
 		def queue_name
-			ControllerManager.controller_queue_name(self)
+			ControllerManager.controller_queue_name(self.class)
 		end
 
 		def create_queue
-			@queue = ControllerManager.create_controller_queue(self.class)
+			@queue = ControllerManager.create_controller_queue(self.class, queue_name)
 		end
 
 		def subscribe_queue

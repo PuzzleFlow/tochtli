@@ -10,8 +10,10 @@ module ServiceBase
 			if rabbit_connection
 				@rabbit_connection = rabbit_connection
 			else
-				@rabbit_connection = ServiceBase::RabbitConnection.new(self.class.rabbit_config)
-				@rabbit_connection.connect
+				config_name = self.class.rabbit_config
+				config_name = Rails.env if !config_name && defined?(Rails)
+				raise "ServiceBase::RabbitClient.rabbit_config is not set. Please setup configuration name." unless config_name
+				@rabbit_connection = ServiceBase::RabbitConnection.open(config_name)
 			end
 			@logger = logger || @rabbit_connection.logger
 			@reply_queue = ServiceBase::ReplyQueue.new(self.rabbit_connection, @logger)

@@ -104,7 +104,7 @@ class ControllerTest < ServiceBase::Test::Integration
 		begin
 			@logger.level = Logger::ERROR # mute logger to speed up test
 
-			count   = 2_000
+			count   = 500
 			handler = TestReplyHandler.new(count)
 
 			start_t = Time.now
@@ -114,7 +114,7 @@ class ControllerTest < ServiceBase::Test::Integration
 				publish message, :expect => TestEchoReply, :reply_handler => handler, :timeout => 6.seconds
 			end
 
-			handler.wait(6.seconds)
+			handler.wait(2.seconds)
 
 			end_t = Time.now
 			time  = end_t - start_t

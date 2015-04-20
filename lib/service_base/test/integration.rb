@@ -1,4 +1,4 @@
-require 'eventmachine'
+# require 'eventmachine'
 
 module ServiceBase
 	module Test
@@ -32,7 +32,6 @@ module ServiceBase
 		end
 
 		class Integration < ActionDispatch::IntegrationTest
-			RabbitClient.rabbit_config = {:exchange_name => "puzzleflow.tests", :log_level => Logger::WARN}
 			ControllerManager.queue_name_prefix = 'tests/'
 			ControllerManager.queue_durable = false
 			ControllerManager.queue_auto_delete = true
@@ -54,7 +53,7 @@ module ServiceBase
 
 			teardown do
         begin
-				  @controller_manager.stop
+				  @controller_manager.stop if @controller_manager
         rescue Timeout::Error
           warn "Unable to stop controller manager: #{$!} [#{$!.class}]"
         end

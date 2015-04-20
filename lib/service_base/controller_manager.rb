@@ -25,13 +25,15 @@ module ServiceBase
 
 		def start(rabbit_or_config=nil, logger=nil)
 			@logger = logger || ServiceBase.logger
-			@cache = ServiceBase::ServiceCache.create
+			@cache = ServiceBase::ServiceCache.store
 			@configuration_store = ServiceBase::Configuration::ActiveRecordStore.new
 
-			@logger.info @controller_classes.inspect
-
-			@rabbit_connection = rabbit_or_config.is_a?(RabbitConnection) ? rabbit_or_config : RabbitConnection.new(rabbit_or_config)
-			@rabbit_connection.connect
+			if rabbit_or_config.is_a?(RabbitConnection)
+				@rabbit_connection = rabbit_or_config
+			else
+				@rabbit_config_name = rabbit_or_config
+				@rabbit_connection = RabbitConnection.open(@rabbit_config_name)
+			end
 
 			@controller_classes.each do |controller_class|
 				@logger.info "Starting #{controller_class}..." if @logger
@@ -45,15 +47,19 @@ module ServiceBase
 			@controllers.each {|controller| controller.stop rescue nil }
 			@controllers.clear
 
-			@rabbit_connection.disconnect if @rabbit_connection.open?
+			RabbitConnection.close(@rabbit_config_name) if @rabbit_config_name
 		end
 
 		def running?
 			@rabbit_connection && @rabbit_connection.open?
 		end
 
-		def create_controller_queue(controller_class)
-			queue_name = self.class.queue_name_prefix + controller_class.name.underscore
+		def controller_queue_name(controller_class)
+			self.class.queue_name_prefix + controller_class.name.underscore
+		end
+
+		def create_controller_queue(controller_class, queue_name=nil)
+			queue_name ||= controller_queue_name(controller_class)
 			routing_keys = controller_class.routing_keys
 			@rabbit_connection.queue(queue_name, routing_keys,
 															 durable: self.class.queue_durable,
@@ -61,7 +67,8 @@ module ServiceBase
 		end
 
 		class << self
-			delegate :register, :start, :stop, :running?, :create_controller_queue, :logger, :to => :instance
+			delegate :register, :start, :stop, :running?, :logger,
+			         :create_controller_queue, :controller_queue_name, :to => :instance
 		end
 	end
 end
