@@ -45,7 +45,7 @@ module ServiceBase
 			def expect_published(message_class, attributes={})
 				@connection.callback do
 					assert_published message_class, attributes
-					yield
+					yield @message
 				end
 			end
 
