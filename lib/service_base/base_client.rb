@@ -6,17 +6,17 @@ module ServiceBase
 		self.singleton_instance = nil
 
 		# Singleton for controllers
-		def self.instance(rabbit_client = nil, logger = nil)
+		def self.instance(*args)
 			unless self.singleton_instance
-				self.singleton_instance = new(rabbit_client, logger)
+				self.singleton_instance = new(*args)
 			end
 			self.singleton_instance
 		end
 
 		# Reset singleton instance (useful for tests)
-		def self.force_instance(rabbit_client = nil, logger = nil)
+		def self.force_instance(*args)
 			self.singleton_instance = nil
-			instance(rabbit_client, logger)
+			instance(*args)
 		end
 
 		def initialize(rabbit_client_or_connection = nil, logger = nil)

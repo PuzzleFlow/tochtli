@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 1.4") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["PuzzleFlow Team"]
-  s.date = "2015-04-24"
+  s.date = "2015-05-06"
   s.description = "The base components used by services' implementation."
   s.email = ["support@puzzleflow.com"]
   s.extra_rdoc_files = ["History.md", "Manifest.txt", "README.md"]
@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.homepage = "https://git.puzzleflow.com/puzzleflow/service_base"
   s.licenses = ["PuzzleFlow"]
   s.rdoc_options = ["--main", "README.md"]
-  s.rubygems_version = "2.4.6"
+  s.rubygems_version = "2.4.3"
   s.summary = "The base components used by services' implementation."
 
   if s.respond_to? :specification_version then
