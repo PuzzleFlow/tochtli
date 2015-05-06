@@ -13,8 +13,6 @@ module ServiceBase
 	autoload :MessageMap, 'service_base/message_map'
 	autoload :ReplyQueue, 'service_base/reply_queue'
 	autoload :RabbitClient, 'service_base/rabbit_client'
-	autoload :ClientProxy, 'service_base/client_proxy'
-	autoload :AsyncClientProxy, 'service_base/async_client_proxy'
 	autoload :Test, 'service_base/test'
 	autoload :ServiceCache, 'service_base/service_cache'
 

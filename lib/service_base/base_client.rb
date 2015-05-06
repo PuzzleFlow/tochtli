@@ -33,10 +33,42 @@ module ServiceBase
 			@logger = logger
 		end
 
-		class ClientError < Struct.new(:type, :message)
+		class InternalServiceError < StandardError
+			attr_reader :service_error
+
+			def initialize(service_error, message)
+				@service_error = service_error
+				super message
+			end
 		end
 
-		class MessageHandler
+		class AbstractMessageHandler
+			def reconstruct_exception(error_message)
+				if error_message.is_a?(Exception)
+					error_message
+				else
+					if error_message.is_a?(ErrorMessage)
+						error = error_message.error
+						message = error_message.message
+						# Look for exception definition on client system
+						exception_class = error.constantize rescue nil
+						if exception_class < StandardError
+							# Use known exception if found
+							exception = exception_class.new(message)
+						else
+							# If the exception is not defined use generic InternalServiceError
+							exception = InternalServiceError.new(error, message)
+						end
+					else
+						exception = InternalServiceError.new(error_message.to_s)
+					end
+					exception.set_backtrace caller(0)
+					exception
+				end
+			end
+		end
+
+		class MessageHandler < AbstractMessageHandler
 			def initialize(external_handler)
 				@external_handler = external_handler
 			end
@@ -46,15 +78,12 @@ module ServiceBase
 			end
 
 			def on_error(error_message)
-				if error_message.is_a?(Exception)
-					@external_handler.on_error error_message.class.name, error_message.message
-				else
-					@external_handler.on_error error_message.error, error_message.message
-				end
+				error = reconstruct_exception(error_message)
+				@external_handler.on_error error
 			end
 		end
 
-		class SyncMessageHandler
+		class SyncMessageHandler < AbstractMessageHandler
 			include MonitorMixin
 			attr_reader :reply, :error
 
@@ -82,18 +111,14 @@ module ServiceBase
 
 			def on_timeout(original_message=nil)
 				synchronize do
-					@error = ClientError.new("Timeout", original_message ? "Unable to send message: #{original_message.inspect}" : "Service is not responding")
+					@error = Timeout::Error.new(original_message ? "Unable to send message: #{original_message.inspect}" : "Service is not responding")
 					@cv.signal
 				end
 			end
 
 			def on_error(error_message)
 				synchronize do
-					if error_message.is_a?(Exception)
-						@error = ClientError.new(error_message.class.name, error_message.message)
-					else
-						@error = ClientError.new(error_message.error, error_message.message)
-					end
+					@error = reconstruct_exception(error_message)
 					@cv.signal
 				end
 			end
@@ -106,8 +131,8 @@ module ServiceBase
 			end
 
 			def raise_error
-				error = self.error || ClientError.new("ClientError", "Unknown Error")
-				raise "[#{error.type}] #{error.message}"
+				error = self.error || InternalServiceError.new("Unknwon", "Unknown Error")
+				raise error
 			end
 		end
 
