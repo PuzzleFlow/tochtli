@@ -20,6 +20,7 @@ module ServiceBase
 		end
 
 		def initialize(rabbit_client_or_connection = nil, logger = nil)
+			logger ||= ServiceBase.logger
 			case rabbit_client_or_connection
 				when ServiceBase::RabbitClient
 					@rabbit_client = rabbit_client_or_connection

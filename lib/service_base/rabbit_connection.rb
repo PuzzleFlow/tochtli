@@ -20,7 +20,7 @@ module ServiceBase
 
 		def self.open(name=nil, config=nil)
 			name ||= defined?(Rails) ? Rails.env : nil
-			raise ArgumentError, "RabbitMQ configuration name not specified" unless name
+			raise ArgumentError, "RabbitMQ configuration name not specified" if !name && !ENV.has_key?('RABBITMQ_URL')
 			connection = self.connections[name.to_sym]
 			if !connection || !connection.open?
 				config = config.is_a?(RabbitConnection::Config) ? config : RabbitConnection::Config.load(name, config)
