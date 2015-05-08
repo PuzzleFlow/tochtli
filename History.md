@@ -1,16 +1,22 @@
-## 0.2.0 / 2015-04-20
+## 0.2.0 / 2015-05-08
 
 ### 1 major enhancement:
 
   * RabbitConnection connection cache. RabbitConnection.open(configuration_name) as a standard connection access method.
 
-### 5 minor enhancements:
+### 11 minor enhancements:
 
   * BaseController callbacks around :start and :setup
   * Public BaseController#setup method (for manual routing control in tests)
   * ServiceBase::BaseClient tests, expect_published helper method
   * ServiceBase::Message required_attributes and optional_attributes declarations
   * ServiceBase::ServiceCache caches the store object with method: ServiceBase::ServiceCache.store
+  * ServiceBase::BaseClient singleton methods accept any number of arguments (passed to constructor)
+  * Get rid of ClientProxy. Error handling unified in BaseClient.
+  * Default logger for BaseClient (ServiceBase.logger)
+  * ServiceBase::Message validation callbacks
+  * ServiceBase::Message#ignore_excess_attributes for open messages
+  * assert_published accepts block and yields message
   
 ## 0.1.7 / 2015-04-01
 
