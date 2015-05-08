@@ -4,14 +4,18 @@ module ServiceBase
 	class Message
 		include ActiveModel::Naming
 		include ActiveModel::Validations
+		include ActiveModel::Validations::Callbacks
 		include ActiveModel::Serializers::JSON
 
 		class_attribute :routing_key, :instance_writer => false
 		class_attribute :attribute_names, :instance_writer => false
+		class_attribute :excess_attributes_policy, :instance_writer => false
 
 		attr_reader :id, :properties
 
 		self.include_root_in_json = false
+
+		validate :validate_excess_attributes
 
 		def self.inherited(subclass)
 			subclass.attribute_names = Set.new
@@ -42,7 +46,12 @@ module ServiceBase
 			self.attributes *attributes, options.merge(validate: false)
 		end
 
+		def self.ignore_excess_attributes
+			self.excess_attributes_policy = :ignore
+		end
+
 		def initialize(attributes={}, properties=nil)
+			@excess_attributes = {}
 			self.attributes = attributes if attributes
 			@properties = properties
 			@id = if properties && properties.message_id
@@ -61,7 +70,20 @@ module ServiceBase
 
 		def attributes=(attributes)
 			attributes.each do |name, value|
-				send "#{name}=", value
+				setter = "#{name}="
+				if respond_to?(setter)
+					send setter, value
+				else
+					@excess_attributes[name] = value
+				end
+			end
+		end
+
+		def validate_excess_attributes
+			if !@excess_attributes.empty? && self.class.excess_attributes_policy != :ignore
+				@excess_attributes.each_key do |name|
+					self.errors.add :base, "Undefined attribute :#{name}"
+				end
 			end
 		end
 

@@ -1,6 +1,10 @@
 require_relative 'test_helper'
 
 class RabbitConnectionTest < ActiveSupport::TestCase
+	setup do
+		ServiceBase::RabbitConnection.close('test')
+	end
+
 	teardown do
 		ServiceBase::RabbitConnection.close('test')
 	end
