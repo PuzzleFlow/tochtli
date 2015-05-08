@@ -39,6 +39,7 @@ module ServiceBase
 				attributes.each do |attr_name, value|
 					assert_equal value, @message.send(attr_name), "Message attribute :#{attr_name} value does not match"
 				end
+				yield @message if block_given?
 				@message
 			end
 
