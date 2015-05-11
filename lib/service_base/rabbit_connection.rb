@@ -15,8 +15,8 @@ module ServiceBase
 			@config         = config.is_a?(RabbitConnection::Config) ? config : RabbitConnection::Config.load(nil, config)
 			@exchange_name  = @config.delete(:exchange_name)
 			@work_pool_size = @config.delete(:work_pool_size)
+			@logger         = @config.delete(:logger) || ServiceBase.logger
 			@channel_pool   = channel_pool ? channel_pool : Hash.new
-			@logger         = ServiceBase.logger
 		end
 
 		def self.open(name=nil, config=nil)

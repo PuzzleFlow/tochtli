@@ -15,7 +15,7 @@ module ServiceBase
 				config_name = self.class.rabbit_config
 				config_name = Rails.env if !config_name && defined?(Rails)
 				raise "ServiceBase::RabbitClient.rabbit_config is not set. Please setup configuration name." unless config_name
-				@rabbit_connection = ServiceBase::RabbitConnection.open(config_name)
+				@rabbit_connection = ServiceBase::RabbitConnection.open(config_name, logger: logger)
 			end
 			@logger = logger || @rabbit_connection.logger
 		end
