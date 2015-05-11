@@ -41,10 +41,9 @@ module ServiceBase
 			self.static_message_handlers.delete(routing_key)
 		end
 
-		def initialize(rabbit_connection, cache, configuration_store, logger)
+		def initialize(rabbit_connection, cache, logger)
 			@rabbit_connection = rabbit_connection
 			@cache = cache
-			@configuration_store = configuration_store
 			@logger = logger
 
 			setup

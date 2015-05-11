@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 1.4") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["PuzzleFlow Team", "Rafa\u{142} Bigaj"]
-  s.date = "2015-05-08"
+  s.date = "2015-05-11"
   s.description = "The base components used by services' implementation."
   s.email = ["support@puzzleflow.com", "rafal.bigaj@puzzleflow.com"]
   s.extra_rdoc_files = ["History.md", "README.md"]
@@ -27,12 +27,12 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<bunny>, [">= 1.3.1"])
       s.add_runtime_dependency(%q<dalli>, ["~> 2.6.4"])
       s.add_runtime_dependency(%q<hoe-puzzleflow>, ["~> 0.1.6"])
-      s.add_runtime_dependency(%q<pg-hstore>, ["~> 1.2.0"])
       s.add_development_dependency(%q<geminabox>, ["~> 0.12.4"])
       s.add_development_dependency(%q<hoe>, ["~> 3.7"])
       s.add_development_dependency(%q<hoe-git>, ["~> 1.6"])
       s.add_development_dependency(%q<rdoc>, [">= 3.4"])
       s.add_development_dependency(%q<pg>, [">= 0.17.0"])
+      s.add_development_dependency(%q<pg-hstore>, ["~> 1.2.0"])
       s.add_development_dependency(%q<eventmachine>, ["~> 1.0.0"])
       s.add_development_dependency(%q<minitest>, [">= 4.7.5"])
     else
@@ -40,12 +40,12 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<bunny>, [">= 1.3.1"])
       s.add_dependency(%q<dalli>, ["~> 2.6.4"])
       s.add_dependency(%q<hoe-puzzleflow>, ["~> 0.1.6"])
-      s.add_dependency(%q<pg-hstore>, ["~> 1.2.0"])
       s.add_dependency(%q<geminabox>, ["~> 0.12.4"])
       s.add_dependency(%q<hoe>, ["~> 3.7"])
       s.add_dependency(%q<hoe-git>, ["~> 1.6"])
       s.add_dependency(%q<rdoc>, [">= 3.4"])
       s.add_dependency(%q<pg>, [">= 0.17.0"])
+      s.add_dependency(%q<pg-hstore>, ["~> 1.2.0"])
       s.add_dependency(%q<eventmachine>, ["~> 1.0.0"])
       s.add_dependency(%q<minitest>, [">= 4.7.5"])
     end
@@ -54,12 +54,12 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<bunny>, [">= 1.3.1"])
     s.add_dependency(%q<dalli>, ["~> 2.6.4"])
     s.add_dependency(%q<hoe-puzzleflow>, ["~> 0.1.6"])
-    s.add_dependency(%q<pg-hstore>, ["~> 1.2.0"])
     s.add_dependency(%q<geminabox>, ["~> 0.12.4"])
     s.add_dependency(%q<hoe>, ["~> 3.7"])
     s.add_dependency(%q<hoe-git>, ["~> 1.6"])
     s.add_dependency(%q<rdoc>, [">= 3.4"])
     s.add_dependency(%q<pg>, [">= 0.17.0"])
+    s.add_dependency(%q<pg-hstore>, ["~> 1.2.0"])
     s.add_dependency(%q<eventmachine>, ["~> 1.0.0"])
     s.add_dependency(%q<minitest>, [">= 4.7.5"])
   end

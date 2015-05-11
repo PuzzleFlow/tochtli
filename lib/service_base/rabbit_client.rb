@@ -4,7 +4,7 @@ module ServiceBase
 		cattr_accessor :rabbit_config
 		self.rabbit_config = nil
 
-		attr_reader :rabbit_connection, :reply_queue, :configuration_store
+		attr_reader :rabbit_connection, :reply_queue
 
 		def initialize(rabbit_connection=nil, logger=nil)
 			if rabbit_connection
@@ -17,7 +17,6 @@ module ServiceBase
 			end
 			@logger = logger || @rabbit_connection.logger
 			@reply_queue = ServiceBase::ReplyQueue.new(self.rabbit_connection, @logger)
-			@configuration_store = ServiceBase::Configuration::ActiveRecordStore.new if defined?(ActiveRecord)
 		end
 
 		def publish(message, options={})

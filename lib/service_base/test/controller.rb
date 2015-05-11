@@ -9,13 +9,8 @@ module ServiceBase
 
 			setup do
 				@cache = ActiveSupport::Cache::MemoryStore.new
-				begin
-					@configuration_store = ServiceBase::Configuration::ActiveRecordStore.new
-				rescue LoadError
-					# ignore lack of pg_hstore
-				end
 				@logger = ServiceBase.logger
-				@controller = self.controller_class.new(@connection, @cache, @configuration_store, @logger)
+				@controller = self.controller_class.new(@connection, @cache, @logger)
 			end
 
 		end
