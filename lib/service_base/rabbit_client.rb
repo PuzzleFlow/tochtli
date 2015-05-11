@@ -4,7 +4,9 @@ module ServiceBase
 		cattr_accessor :rabbit_config
 		self.rabbit_config = nil
 
-		attr_reader :rabbit_connection, :reply_queue
+		attr_reader :rabbit_connection
+
+		delegate :reply_queue, to: :rabbit_connection
 
 		def initialize(rabbit_connection=nil, logger=nil)
 			if rabbit_connection
@@ -16,7 +18,6 @@ module ServiceBase
 				@rabbit_connection = ServiceBase::RabbitConnection.open(config_name)
 			end
 			@logger = logger || @rabbit_connection.logger
-			@reply_queue = ServiceBase::ReplyQueue.new(self.rabbit_connection, @logger)
 		end
 
 		def publish(message, options={})
@@ -24,9 +25,10 @@ module ServiceBase
 
 			@logger.debug "[#{Time.now} AMQP] Publishing message #{message.id} to #{message.routing_key}"
 
-			options[:reply_to] = @reply_queue.name
+			reply_queue = @rabbit_connection.reply_queue
+			options[:reply_to] = reply_queue.name
 			if (message_handler = options[:handler])
-				@reply_queue.register_message_handler message, message_handler, options[:timeout]
+				reply_queue.register_message_handler message, message_handler, options[:timeout]
 			end
 			@rabbit_connection.publish message.routing_key, message, options
 		end

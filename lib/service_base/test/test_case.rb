@@ -61,6 +61,10 @@ module ServiceBase
 				@publications = []
 			end
 
+			def reply_queue
+				@reply_queue ||= ServiceBase::ReplyQueue.new(self)
+			end
+
 			def publish(routing_key, message, options={})
 				@publications << options.merge(routing_key: routing_key, message: message)
 				run_callback

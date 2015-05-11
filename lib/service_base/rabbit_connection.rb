@@ -76,6 +76,14 @@ module ServiceBase
 			raise ConnectionFailed.new("Unable to connect to: '#{connection_url}' (#{ex.message})")
 		end
 
+		def create_reply_queue
+			ServiceBase::ReplyQueue.new(self, @logger)
+		end
+
+		def reply_queue
+			@reply_queue ||= create_reply_queue
+		end
+
 		def exchange(thread=Thread.current)
 			channel_wrap(thread).exchange
 		end
