@@ -4,7 +4,7 @@ require 'securerandom'
 module ServiceBase
 	class RabbitConnection
 		attr_accessor :connection
-		delegate :logger, to: :@connection
+		attr_reader :logger
 
 		cattr_accessor :connections
 		self.connections = {}
@@ -16,6 +16,7 @@ module ServiceBase
 			@exchange_name  = @config.delete(:exchange_name)
 			@work_pool_size = @config.delete(:work_pool_size)
 			@channel_pool   = channel_pool ? channel_pool : Hash.new
+			@logger         = ServiceBase.logger
 		end
 
 		def self.open(name=nil, config=nil)
@@ -103,6 +104,7 @@ module ServiceBase
 			begin
 				payload = message.to_json
 			rescue Exception
+				logger.error "Unable to serialize message: #{message.inspect}"
 				raise "Unable to serialize message to JSON: #{$!}"
 			end
 
