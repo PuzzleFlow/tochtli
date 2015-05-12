@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 1.4") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["PuzzleFlow Team", "Rafa\u{142} Bigaj"]
-  s.date = "2015-05-11"
+  s.date = "2015-05-12"
   s.description = "The base components used by services' implementation."
   s.email = ["support@puzzleflow.com", "rafal.bigaj@puzzleflow.com"]
   s.extra_rdoc_files = ["History.md", "README.md"]

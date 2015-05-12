@@ -6,6 +6,11 @@ class BaseClientTest < ServiceBase::Test::Client
 		@fake_client = FakeClient.new(@client)
 	end
 
+	test "instance" do
+		assert_respond_to @fake_client, :rabbit_client
+		assert_respond_to @fake_client, :rabbit_connection
+	end
+
 	test "synchronous method" do
 		expect_published FakeMessage do
 			handle_reply FakeReply, @message, result: 'OK'

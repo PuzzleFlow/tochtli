@@ -1,6 +1,6 @@
 module ServiceBase
 	class BaseClient
-		attr_reader :rabbit_client, :logger
+		attr_reader :rabbit_client, :rabbit_connection, :logger
 
 		class_attribute :singleton_instance
 		self.singleton_instance = nil
@@ -31,6 +31,7 @@ module ServiceBase
 				else
 					raise ArgumentError, "ServiceBase::RabbitClient or ServiceBase::RabbitConnection expected, got: #{rabbit_client_or_connection.class}"
 			end
+			@rabbit_connection = @rabbit_client.rabbit_connection
 			@logger = logger
 		end
 
