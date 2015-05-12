@@ -38,6 +38,15 @@ class RabbitConnectionTest < ActiveSupport::TestCase
 		end
 	end
 
+	test "queue creation and existance" do
+		ServiceBase::RabbitConnection.open('test') do |connection|
+			queue = connection.queue('test-queue', [], auto_delete: true)
+			assert_not_nil queue
+			assert_equal 'test-queue', queue.name
+			assert connection.queue_exists?('test-queue')
+		end
+	end
+
 	class TestMessage < ServiceBase::Message
 			attributes :text
 	end

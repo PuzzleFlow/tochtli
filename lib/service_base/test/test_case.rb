@@ -59,6 +59,7 @@ module ServiceBase
 				@channel = TestRabbitChannel.new
 				@exchange = TestRabbitExchange.new
 				@publications = []
+				@queues = {}
 			end
 
 			def reply_queue
@@ -87,6 +88,18 @@ module ServiceBase
 
 			def logger
 				Logger.new(STDOUT)
+			end
+
+			def queue(name=nil, routing_keys=[], options={})
+				queue = @queues[name]
+				unless queue
+					@queues[name] = queue = TestQueue.new(name, options)
+				end
+				queue
+			end
+
+			def queue_exists?(name)
+				@queues.has_key?(name)
 			end
 		end
 
