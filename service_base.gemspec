@@ -1,14 +1,14 @@
 # -*- encoding: utf-8 -*-
-# stub: service_base 0.2.0 ruby lib
+# stub: service_base 0.3.0 ruby lib
 
 Gem::Specification.new do |s|
   s.name = "service_base"
-  s.version = "0.2.0"
+  s.version = "0.3.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.4") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["PuzzleFlow Team", "Rafa\u{142} Bigaj"]
-  s.date = "2015-05-12"
+  s.date = "2015-05-19"
   s.description = "The base components used by services' implementation."
   s.email = ["support@puzzleflow.com", "rafal.bigaj@puzzleflow.com"]
   s.extra_rdoc_files = ["History.md", "README.md"]

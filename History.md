@@ -1,8 +1,26 @@
+## 0.3.0 / 2015-05-19
+
+### 2 major enhancements:
+
+  * Process each message in a separate controller instance (`BaseController::Dispatcher` introduced)
+  * Use separate channels and work pools per controller
+
+### 4 minor enhancements:
+
+  * `queue` & `queue_exists?` methods for TestRabbitConnection
+  * Single reply queue per rabbit connection
+  * configuration_store removed from `RabbitClient` (should be used separatelly)
+  * `RabbitConnection.logger` default set to `ServiceBase.logger`
+
+### 1 bug fix:
+
+  * `RabbitConnection` logger setup with configuration
+
 ## 0.2.0 / 2015-05-08
 
 ### 1 major enhancement:
 
-  * RabbitConnection connection cache. RabbitConnection.open(configuration_name) as a standard connection access method.
+  * `RabbitConnection` connection cache. `RabbitConnection.open(configuration_name)` as a standard connection access method.
 
 ### 11 minor enhancements:
 

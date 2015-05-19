@@ -18,12 +18,20 @@ class ControllerTest < ServiceBase::Test::Integration
 		bind_topic 'test.controller.failure'
 	end
 
+	class SleepyMessage < ServiceBase::Message
+		bind_topic 'test.controller.sleepy'
+
+		attributes :duration
+	end
+
 	class TestEchoReply < ServiceBase::Message
 		attributes :original_text
 	end
 
 	class TestController < ServiceBase::BaseController
 		subscribe 'test.controller.*'
+
+		self.work_pool_size = 5
 
 		def echo
 			reply TestEchoReply.new(:original_text => message.text)
@@ -37,36 +45,68 @@ class ControllerTest < ServiceBase::Test::Integration
 			@rabbit_connection.connection.close # simulate network failure
 			reply TestEchoReply.new(:original_text => 'should not get it')
 		end
+
+		def sleepy
+			sleep message.duration
+			reply TestEchoReply.new(:original_text => "Done after #{message.duration}s")
+		end
+	end
+
+	class CustomNameController < ServiceBase::BaseController
+		self.queue_name = 'test/custom/queue/name'
+	end
+
+	class CustomExchangeController < ServiceBase::BaseController
+		self.queue_name = ''
+		self.queue_durable = false
+		self.queue_exclusive = true
+		self.exchange_type = :fanout
+		self.exchange_name = 'test.notifications'
+		self.exchange_durable = false
+	end
+
+	class BeforeSetupBindingController < ServiceBase::BaseController
+		before_setup do
+			subscribe 'custom.topic'
+		end
 	end
 
 	class TestReplyHandler
 		attr_reader :pending_replies, :errors, :timeouts
 
 		def initialize(expected_replies)
-			@pending_replies = expected_replies
-			@errors          = 0
-			@timeouts        = 0
-			@mutex           = Mutex.new
-			@cv              = ConditionVariable.new
+			@pending_replies  = expected_replies
+			@errors           = 0
+			@timeouts         = 0
+			@mutex            = Mutex.new
+			@cv               = ConditionVariable.new
 		end
 
 		def call(reply)
 			@mutex.synchronize do
 				@pending_replies -= 1
-				@cv.signal if @pending_replies == 0
+				@cv.signal if done?
 			end
 		end
 
 		def on_error(reply)
 			@errors += 1
+			call(reply)
 		end
 
 		def on_timeout(original_message)
 			@timeouts += 1
+			call(nil)
 		end
 
 		def wait(timeout)
-			@mutex.synchronize { @cv.wait(@mutex, timeout) }
+			@mutex.synchronize { done? || @cv.wait(@mutex, timeout) }
+		end
+
+		protected
+
+		def done?
+			@pending_replies == 0
 		end
 	end
 
@@ -100,6 +140,24 @@ class ControllerTest < ServiceBase::Test::Integration
 		assert_equal 1, handler.timeouts
 	end
 
+	test 'sleepy' do
+		count   = 5
+		handler = TestReplyHandler.new(count)
+		start_t = Time.now
+		count.times do
+			message = SleepyMessage.new(:duration => 0.2)
+			publish message, :expect => TestEchoReply, :reply_handler => handler, :timeout => 0.5
+		end
+
+		handler.wait(2.seconds)
+
+		duration = Time.now - start_t
+
+		assert_equal 0, handler.errors
+		assert_equal 0, handler.timeouts
+		assert duration < 0.5, "The total processing time should be less then the processing time sum (multi customers expected), duration: #{duration}s"
+	end
+
 	test 'echo performance' do
 		begin
 			@logger.level = Logger::ERROR # mute logger to speed up test
@@ -127,5 +185,32 @@ class ControllerTest < ServiceBase::Test::Integration
 		ensure
 			@logger.level = Logger::DEBUG
 		end
+	end
+
+	test 'default queue name' do
+		assert_equal 'controller_test/test_controller', TestController.queue_name
+		assert @connection.queue_exists?('controller_test/test_controller')
+	end
+
+	test 'custom queue name' do
+		assert_equal 'test/custom/queue/name', CustomNameController.queue_name
+		assert @connection.queue_exists?('test/custom/queue/name')
+	end
+
+	test 'custom exchange' do
+		dispatcher = ServiceBase::ControllerManager.dispatcher_for(CustomExchangeController)
+		refute_nil dispatcher
+		assert_equal '', CustomExchangeController.queue_name
+		refute_nil dispatcher.queue
+		assert_match /^amq.gen/, dispatcher.queue.name
+		refute dispatcher.queue.durable?
+		assert dispatcher.queue.exclusive?
+		assert dispatcher.queue.server_named?
+		refute_nil dispatcher.queue.channel.exchanges['test.notifications']
+		refute dispatcher.queue.channel.exchanges['test.notifications'].durable?
+	end
+
+	test 'binding on setup' do
+		assert BeforeSetupBindingController.routing_keys.include?('custom.topic')
 	end
 end

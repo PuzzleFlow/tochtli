@@ -4,7 +4,7 @@ require 'securerandom'
 module ServiceBase
 	class RabbitConnection
 		attr_accessor :connection
-		attr_reader :logger
+		attr_reader :logger, :exchange_name
 
 		cattr_accessor :connections
 		self.connections = {}
@@ -120,7 +120,7 @@ module ServiceBase
 				logger.error "Message #{properties[:message_id]} dropped: #{return_info[:reply_text]} [#{return_info[:reply_code]}]"
 			end
 
-			exchange.publish(payload, {
+ 			exchange.publish(payload, {
 					routing_key:  routing_key,
 					persistent:   true,
 					mandatory:    true,
@@ -129,6 +129,10 @@ module ServiceBase
 					type:         message.class.name.underscore,
 					content_type: "application/json"
 			}.merge(options))
+		end
+
+		def create_channel(consumer_pool_size = 1)
+			@connection.create_channel(nil, consumer_pool_size)
 		end
 
 		private

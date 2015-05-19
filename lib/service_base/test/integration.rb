@@ -1,9 +1,8 @@
 module ServiceBase
 	module Test
 		class Integration < ActionDispatch::IntegrationTest
-			ControllerManager.queue_name_prefix = 'tests/'
-			ControllerManager.queue_durable = false
-			ControllerManager.queue_auto_delete = true
+			BaseController.queue_durable = false
+			BaseController.queue_auto_delete = true
 
 			setup do
 				@logger = Logger.new(File.join(Rails.root, 'log/test_service_integration.log'))

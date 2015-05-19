@@ -4,19 +4,9 @@ module ServiceBase
 
 		attr_reader :rabbit_connection, :cache, :logger
 
-		# Settings for tests
-		cattr_accessor :queue_name_prefix
-		self.queue_name_prefix = ''
-
-		cattr_accessor :queue_durable
-		self.queue_durable = true
-
-		cattr_accessor :queue_auto_delete
-		self.queue_auto_delete = false
-
 		def initialize
 			@controller_classes = []
-			@controllers = []
+			@dispatchers = []
 		end
 
 		def register(controller_class)
@@ -36,15 +26,20 @@ module ServiceBase
 
 			@controller_classes.each do |controller_class|
 				@logger.info "Starting #{controller_class}..." if @logger
-				controller = controller_class.new(@rabbit_connection, @cache, @logger)
-				controller.start
-				@controllers << controller
+				controller_class.setup
+				dispatcher = BaseController::Dispatcher.new(controller_class, @rabbit_connection, @cache, @logger)
+				dispatcher.start
+				@dispatchers << dispatcher
 			end
 		end
 
 		def stop
-			@controllers.each {|controller| controller.stop rescue nil }
-			@controllers.clear
+			@dispatchers.each {|dispatcher| dispatcher.stop rescue nil }
+			@dispatchers.clear
+
+			@controller_classes.each do |controller_class|
+				controller_class.stop rescue nil
+			end
 
 			RabbitConnection.close(@rabbit_config_name) if @rabbit_config_name
 		end
@@ -53,21 +48,12 @@ module ServiceBase
 			@rabbit_connection && @rabbit_connection.open?
 		end
 
-		def controller_queue_name(controller_class)
-			self.class.queue_name_prefix + controller_class.name.underscore
-		end
-
-		def create_controller_queue(controller_class, queue_name=nil)
-			queue_name ||= controller_queue_name(controller_class)
-			routing_keys = controller_class.routing_keys
-			@rabbit_connection.queue(queue_name, routing_keys,
-															 durable: self.class.queue_durable,
-															 auto_delete: self.class.queue_auto_delete)
+		def dispatcher_for(controller_class)
+			@dispatchers.find {|dispatcher| dispatcher.controller_class == controller_class }
 		end
 
 		class << self
-			delegate :register, :start, :stop, :running?, :logger,
-			         :create_controller_queue, :controller_queue_name, :to => :instance
+			delegate :register, :start, :stop, :running?, :logger, :rabbit_connection, :cache, :dispatcher_for, :to => :instance
 		end
 	end
 end
