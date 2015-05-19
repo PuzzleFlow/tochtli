@@ -31,7 +31,7 @@ class ControllerTest < ServiceBase::Test::Integration
 	class TestController < ServiceBase::BaseController
 		subscribe 'test.controller.*'
 
-		self.work_pool_size = 5
+		self.work_pool_size = 10
 
 		def echo
 			reply TestEchoReply.new(:original_text => message.text)
@@ -141,21 +141,21 @@ class ControllerTest < ServiceBase::Test::Integration
 	end
 
 	test 'sleepy' do
-		count   = 5
+		count   = 20
 		handler = TestReplyHandler.new(count)
 		start_t = Time.now
 		count.times do
-			message = SleepyMessage.new(:duration => 0.2)
-			publish message, :expect => TestEchoReply, :reply_handler => handler, :timeout => 0.5
+			message = SleepyMessage.new(:duration => 0.1)
+			publish message, :expect => TestEchoReply, :reply_handler => handler, :timeout => 2.0
 		end
 
-		handler.wait(2.seconds)
+		handler.wait(3.seconds)
 
 		duration = Time.now - start_t
 
 		assert_equal 0, handler.errors
 		assert_equal 0, handler.timeouts
-		assert duration < 0.5, "The total processing time should be less then the processing time sum (multi customers expected), duration: #{duration}s"
+		assert duration < 1.5, "The total processing time should be less then the processing time sum (multi customers expected), duration: #{duration}s"
 	end
 
 	test 'echo performance' do
