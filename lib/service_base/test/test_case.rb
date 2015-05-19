@@ -14,7 +14,7 @@ module ServiceBase
 				payload = message.to_json
 
 				@message, @reply = nil
-				@controller.cleanup
+				@controller.setup_message nil, nil
 
 				unless @controller.process_message(delivery_info, properties, payload)
 					if (reply = @connection.publications.first) && reply[:message].is_a?(ServiceBase::ErrorMessage)
