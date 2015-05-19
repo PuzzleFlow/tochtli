@@ -7,30 +7,6 @@ module ServiceBase
 				@message_index = 0
 			end
 
-			def publish(message)
-				@message_index += 1
-				delivery_info = TestDeliveryInfo.new(message.routing_key)
-				properties = TestMessageProperties.new("test.reply", @message_index)
-				payload = message.to_json
-
-				@message, @reply = nil
-				@controller.setup_message nil, nil
-
-				unless @controller.process_message(delivery_info, properties, payload)
-					if (reply = @connection.publications.first) && reply[:message].is_a?(ServiceBase::ErrorMessage)
-						raise "Process error: #{reply[:message].message}"
-					else
-						raise "Message #{message.class.name} not processed by #{@controller}."
-					end
-				end
-
-				reply = @connection.publications.first
-				if reply && reply[:routing_key] == "test.reply" && reply[:correlation_id] == @message_index
-					@connection.publications.shift
-					@reply = reply[:message]
-				end
-			end
-
 			def assert_published(message_class, attributes={})
 				publication = @connection.get_publication
 				assert_not_nil publication, "No message published"

@@ -96,6 +96,7 @@ module ServiceBase
 			end
 
 			def fetch_message_handler(routing_key)
+				raise "Routing not set up" unless @routing
 				@routing[routing_key]
 			end
 
