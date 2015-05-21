@@ -1,4 +1,4 @@
-## 0.3.0 / 2015-05-19
+## 0.3.0 / 2015-05-21
 
 ### 2 major enhancements:
 
@@ -11,6 +11,8 @@
   * Single reply queue per rabbit connection
   * configuration_store removed from `RabbitClient` (should be used separatelly)
   * `RabbitConnection.logger` default set to `ServiceBase.logger`
+  * ActiveRecordConnectionCleaner - a middleware for active connection cleanup
+  * ServiceBase.application with middlewares introduced
 
 ### 1 bug fix:
 

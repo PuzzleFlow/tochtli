@@ -6,6 +6,8 @@ require 'bunny'
 module ServiceBase
 	autoload :RabbitConnection, 'service_base/rabbit_connection'
 	autoload :Configuration, 'service_base/configuration'
+	autoload :Application, 'service_base/application'
+	autoload :Middleware, 'service_base/application'
 	autoload :BaseController, 'service_base/base_controller'
 	autoload :BaseClient, 'service_base/base_client'
 	autoload :ControllerManager, 'service_base/controller_manager'
@@ -15,6 +17,7 @@ module ServiceBase
 	autoload :RabbitClient, 'service_base/rabbit_client'
 	autoload :Test, 'service_base/test'
 	autoload :ServiceCache, 'service_base/service_cache'
+	autoload :ActiveRecordConnectionCleaner, 'service_base/active_record_connection_cleaner'
 
 	class InvalidMessageError < StandardError
 		def initialize(message, service_message)
@@ -24,7 +27,7 @@ module ServiceBase
 	end
 
 	class << self
-		# Global logger for services (default: RAILS_ROOT/log/services.log)
+		# Global logger for services (default: RAILS_ROOT/log/service.log)
 		attr_writer :logger
 
 		def logger
@@ -39,6 +42,14 @@ module ServiceBase
 				end
 			end
 			@logger
+		end
+
+		def application
+			unless @application
+				@application = ServiceBase::Application.new
+				@application.use_default_middlewares
+			end
+			@application
 		end
 
 		# Should be invoked only once
