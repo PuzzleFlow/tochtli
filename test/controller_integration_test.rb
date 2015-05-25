@@ -100,6 +100,7 @@ class ControllerIntegrationTest < ServiceBase::Test::Integration
 		end
 
 		def wait(timeout)
+			timeout = timeout.to_f unless timeout.nil? # ensure it is numerical, e.g. for Rubinius compatibility
 			@mutex.synchronize { done? || @cv.wait(@mutex, timeout) }
 		end
 
