@@ -1,6 +1,5 @@
-if RUBY_PLATFORM =~ /mswin/
-	source 'https://gems.puzzleflow.com'
-else
+source 'https://gems.puzzleflow.com'
+unless RUBY_PLATFORM =~ /mswin/
 	source 'https://rubygems.org'
 end
 
