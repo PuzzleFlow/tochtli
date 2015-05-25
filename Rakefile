@@ -27,6 +27,7 @@ Hoe::NoManifest.spec 'service_base' do
 	dependency "pg-hstore", "~> 1.2.0", :development
 	dependency "eventmachine", "~> 1.0.0", :development
 	dependency "minitest", ">= 4.7.5", :development
+	dependency 'test-unit', ">= 3.0.9", :development
 
 	developer 'Rafał Bigaj', 'rafal.bigaj@puzzleflow.com'
 	license 'PuzzleFlow'

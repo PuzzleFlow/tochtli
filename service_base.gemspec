@@ -7,8 +7,8 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.4") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
-  s.authors = ["PuzzleFlow Team", "Rafa\u{142} Bigaj"]
-  s.date = "2015-05-21"
+  s.authors = ["PuzzleFlow Team", "Rafa\xC5\x82 Bigaj"]
+  s.date = "2015-05-25"
   s.description = "The base components used by services' implementation."
   s.email = ["support@puzzleflow.com", "rafal.bigaj@puzzleflow.com"]
   s.extra_rdoc_files = ["History.md", "README.md"]
@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.homepage = "https://git.puzzleflow.com:puzzleflow/service_base"
   s.licenses = ["PuzzleFlow"]
   s.rdoc_options = ["--main", "README.md"]
-  s.rubygems_version = "2.4.5"
+  s.rubygems_version = "2.4.6"
   s.summary = "ServiceBase a core components for SOA"
 
   if s.respond_to? :specification_version then
@@ -35,6 +35,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<pg-hstore>, ["~> 1.2.0"])
       s.add_development_dependency(%q<eventmachine>, ["~> 1.0.0"])
       s.add_development_dependency(%q<minitest>, [">= 4.7.5"])
+      s.add_development_dependency(%q<test-unit>, [">= 3.0.9"])
     else
       s.add_dependency(%q<rails>, [">= 3.2.15"])
       s.add_dependency(%q<bunny>, [">= 1.3.1"])
@@ -48,6 +49,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<pg-hstore>, ["~> 1.2.0"])
       s.add_dependency(%q<eventmachine>, ["~> 1.0.0"])
       s.add_dependency(%q<minitest>, [">= 4.7.5"])
+      s.add_dependency(%q<test-unit>, [">= 3.0.9"])
     end
   else
     s.add_dependency(%q<rails>, [">= 3.2.15"])
@@ -62,5 +64,6 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<pg-hstore>, ["~> 1.2.0"])
     s.add_dependency(%q<eventmachine>, ["~> 1.0.0"])
     s.add_dependency(%q<minitest>, [">= 4.7.5"])
+    s.add_dependency(%q<test-unit>, [">= 3.0.9"])
   end
 end
