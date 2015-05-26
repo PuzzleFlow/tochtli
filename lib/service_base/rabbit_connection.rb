@@ -26,7 +26,7 @@ module ServiceBase
 			if !connection || !connection.open?
 				config = config.is_a?(RabbitConnection::Config) ? config : RabbitConnection::Config.load(name, config)
 				connection = new(config)
-				connection.connect(logger: config[:logger])
+				connection.connect
 				self.connections[name.to_sym] = connection
 			end
 
