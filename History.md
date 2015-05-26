@@ -1,19 +1,21 @@
 ## 0.3.0 / 2015-05-21
 
-### 2 major enhancements:
+### 3 major enhancements:
 
   * Process each message in a separate controller instance (`BaseController::Dispatcher` introduced)
   * Use separate channels and work pools per controller
-
-### 4 minor enhancements:
+  * ControllerManager#start selectively starts controllers
+  
+### 7 minor enhancements:
 
   * `queue` & `queue_exists?` methods for TestRabbitConnection
   * Single reply queue per rabbit connection
-  * configuration_store removed from `RabbitClient` (should be used separatelly)
+  * configuration_store removed from `RabbitClient` (should be used separately)
   * `RabbitConnection.logger` default set to `ServiceBase.logger`
   * ActiveRecordConnectionCleaner - a middleware for active connection cleanup
   * ServiceBase.application with middlewares introduced
-
+  * Network failure recovery rewritten (using automatic bunny recovery with additional reply queue binding recovery)
+  
 ### 1 bug fix:
 
   * `RabbitConnection` logger setup with configuration

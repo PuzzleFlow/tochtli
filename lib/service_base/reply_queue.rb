@@ -1,17 +1,42 @@
 module ServiceBase
 	class ReplyQueue
-		attr_reader :connection, :logger
+		attr_reader :connection, :logger, :queue
 		delegate :name, :to => :@queue
 
 		def initialize(rabbit_connection, logger=nil)
-			@connection = rabbit_connection
-			@logger = logger || rabbit_connection.logger
-			@queue = @connection.channel.queue('', exclusive: true, auto_delete: true)
-			@queue.bind @connection.exchange, routing_key: @queue.name
-
-			@consumer = @queue.subscribe(block: false, &method(:on_delivery))
-			@message_handlers = {}
+			@connection              = rabbit_connection
+			@logger                  = logger || rabbit_connection.logger
+			@message_handlers        = {}
 			@message_timeout_threads = {}
+
+			subscribe
+		end
+
+		def subscribe
+			channel = @connection.channel
+			exchange = @connection.exchange
+
+			@queue = channel.queue('', exclusive: true, auto_delete: true)
+			@original_queue_name = @queue.name
+			@queue.bind exchange, routing_key: @queue.name
+
+			@consumer = Consumer.new(self, channel, @queue)
+			@consumer.on_delivery(&method(:on_delivery))
+
+			@queue.subscribe_with(@consumer)
+		end
+
+		def reconnect(channel)
+			if @queue
+				channel.connection.logger.debug "Recovering reply queue binding (original: #{@original_queue_name}, current: #{@queue.name})"
+
+				# Re-bind queue after name change (auto-generated new on server has been re-generated)
+				exchange = @connection.create_exchange(channel)
+				@queue.unbind exchange, routing_key: @original_queue_name
+				@queue.bind exchange, routing_key: @queue.name
+			end
+
+			@original_queue_name = @queue.name
 		end
 
 		def register_message_handler(message, handler=nil, timeout=nil, &block)
@@ -78,6 +103,20 @@ module ServiceBase
 		end
 
 		class Consumer < ::Bunny::Consumer
+			def initialize(reply_queue, *args)
+				super(*args)
+				@reply_queue = reply_queue
+			end
+
+			def recover_from_network_failure
+				super
+				@reply_queue.reconnect(@channel)
+			rescue Exception
+				logger = channel.connection.logger
+				logger.error $!
+				logger.error $!.backtrace.join("\n")
+				raise
+			end
 		end
 	end
 end

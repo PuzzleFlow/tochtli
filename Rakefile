@@ -20,7 +20,7 @@ Hoe::NoManifest.spec 'service_base' do
 	self.description = "The base components used by services' implementation."
 
 	dependency "rails", ">= 3.2.15"
-	dependency "bunny", ">= 1.3.1"
+	dependency "bunny", ">= 1.7.0"
 	dependency "dalli", "~> 2.6.4"
 	dependency "hoe-puzzleflow", "~> 0.1.6"
 	dependency "pg", ">= 0.17.0", :development

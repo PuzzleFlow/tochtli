@@ -5,55 +5,65 @@ module ServiceBase
 		attr_reader :rabbit_connection, :cache, :logger
 
 		def initialize
-			@controller_classes = []
-			@dispatchers = []
+			@controller_classes = Set.new
 		end
 
 		def register(controller_class)
+			raise ArgumentError, "Controller expected, got: #{controller_class}" unless controller_class.is_a?(Class) && controller_class < ServiceBase::BaseController
 			@controller_classes << controller_class
 		end
 
-		def start(rabbit_or_config=nil, logger=nil)
-			@logger = logger || ServiceBase.logger
-			@cache = ServiceBase::ServiceCache.store
+		def setup(options)
+			@logger = options.fetch(:logger, ServiceBase.logger)
+			@cache = options.fetch(:cache, ServiceBase::ServiceCache.store)
+			@rabbit_connection = options[:connection]
 
-			if rabbit_or_config.is_a?(RabbitConnection)
-				@rabbit_connection = rabbit_or_config
-			else
-				@rabbit_config_name = rabbit_or_config
-				@rabbit_connection = RabbitConnection.open(@rabbit_config_name)
+			unless @rabbit_connection
+				@rabbit_connection = RabbitConnection.open(options[:config])
+			end
+		end
+
+		#def start(rabbit_or_config=nil, logger=nil)
+		def start(*controllers)
+			options = controllers.extract_options!
+			setup(options) unless @rabbit_connection
+
+			if controllers.empty? || controllers.include?(:all)
+				controllers = @controller_classes
 			end
 
-			@controller_classes.each do |controller_class|
-				@logger.info "Starting #{controller_class}..." if @logger
-				controller_class.setup
-				dispatcher = BaseController::Dispatcher.new(controller_class, @rabbit_connection, @cache, @logger)
-				dispatcher.start
-				@dispatchers << dispatcher
+			controllers.each do |controller_class|
+				raise ArgumentError, "Controller expected, got: #{controller_class}" unless controller_class.is_a?(Class) && controller_class < ServiceBase::BaseController
+				unless controller_class.started?
+					@logger.info "Starting #{controller_class}..." if @logger
+					controller_class.setup
+					controller_class.start(@rabbit_connection, @cache, @logger)
+				end
 			end
 		end
 
 		def stop
-			@dispatchers.each {|dispatcher| dispatcher.stop rescue nil }
-			@dispatchers.clear
-
 			@controller_classes.each do |controller_class|
-				controller_class.stop rescue nil
+				if controller_class.started?
+					@logger.info "Stopping #{controller_class}..." if @logger
+					controller_class.stop
+				end
 			end
+			@rabbit_connection = nil
+		end
 
-			RabbitConnection.close(@rabbit_config_name) if @rabbit_config_name
+		def restart(options={})
+			active_controllers = @controller_classes.select(&:started?)
+			stop
+			start *active_controllers, options
 		end
 
 		def running?
 			@rabbit_connection && @rabbit_connection.open?
 		end
 
-		def dispatcher_for(controller_class)
-			@dispatchers.find {|dispatcher| dispatcher.controller_class == controller_class }
-		end
-
 		class << self
-			delegate :register, :start, :stop, :running?, :logger, :rabbit_connection, :cache, :dispatcher_for, :to => :instance
+			delegate :register, :start, :stop, :restart, :running?, :logger, :rabbit_connection, :cache, :to => :instance
 		end
 	end
 end

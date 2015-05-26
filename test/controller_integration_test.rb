@@ -199,7 +199,7 @@ class ControllerIntegrationTest < ServiceBase::Test::Integration
 	end
 
 	test 'custom exchange' do
-		dispatcher = ServiceBase::ControllerManager.dispatcher_for(CustomExchangeController)
+		dispatcher = CustomExchangeController.dispatcher
 		refute_nil dispatcher
 		assert_equal '', CustomExchangeController.queue_name
 		refute_nil dispatcher.queue

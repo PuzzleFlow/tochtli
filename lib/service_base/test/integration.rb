@@ -10,7 +10,8 @@ module ServiceBase
 				@client = ServiceBase::RabbitClient.new(nil, @logger)
 				@connection = @client.rabbit_connection
 				@controller_manager = ServiceBase::ControllerManager.instance
-				@controller_manager.start(@connection, @logger)
+				@controller_manager.setup(connection: @connection, logger: @logger)
+				@controller_manager.start(:all)
 
 				# Reply support
 				@mutex = Mutex.new

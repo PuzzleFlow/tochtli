@@ -32,10 +32,14 @@ module ServiceBase
 			attr_reader :channel, :exchange, :publications
 
 			def initialize
-				@channel = TestRabbitChannel.new
+				@channel = TestRabbitChannel.new(self)
 				@exchange = TestRabbitExchange.new
 				@publications = []
 				@queues = {}
+			end
+
+			def exchange_name
+				@exchange.name
 			end
 
 			def reply_queue
@@ -69,7 +73,7 @@ module ServiceBase
 			def queue(name=nil, routing_keys=[], options={})
 				queue = @queues[name]
 				unless queue
-					@queues[name] = queue = TestQueue.new(name, options)
+					@queues[name] = queue = TestQueue.new(@channel, name, options)
 				end
 				queue
 			end
@@ -77,22 +81,46 @@ module ServiceBase
 			def queue_exists?(name)
 				@queues.has_key?(name)
 			end
+
+			def create_channel(consumer_pool_size = 1)
+				TestRabbitChannel.new(self)
+			end
 		end
 
 		class TestRabbitChannel
+			def initialize(connection)
+				@connection = connection
+			end
+
 			def queue(name, options={})
-				TestQueue.new(name, options)
+				@connection.queue(name, [], options)
+			end
+
+			[:topic, :fanout, :direct].each do |type|
+				define_method type do |name, options|
+					TestRabbitExchange.new(name, options)
+				end
+			end
+
+			def generate_consumer_tag
+				"test-consumer-tag-#{rand(1000)}"
 			end
 		end
 
 		class TestRabbitExchange
+			attr_reader :name
+
+			def initialize(name='test.exchange', options={})
+				@name = name
+			end
 		end
 
 		class TestQueue
-			attr_reader :name, :options, :routing_key
+			attr_reader :channel, :name, :options, :routing_key
 
-			def initialize(name, options)
+			def initialize(channel, name, options)
 				@name = name
+				@channel = channel
 				@options = options
 			end
 
@@ -101,6 +129,9 @@ module ServiceBase
 			end
 
 			def subscribe(*args)
+			end
+
+			def subscribe_with(*args)
 			end
 		end
 

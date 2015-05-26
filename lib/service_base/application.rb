@@ -8,7 +8,6 @@ module ServiceBase
 			@middleware_stack.use ErrorHandler
 			@middleware_stack.use MessageSetup
 			@middleware_stack.use MessageLogger
-			@middleware_stack.use ConnectionGuard
 		end
 
 		def to_app(app=nil)
@@ -118,20 +117,6 @@ module ServiceBase
 			logger.debug "Message #{properties[:message_id]} processed in %.1fms." % [(Time.now - start_time) * 1000]
 
 			result
-		end
-	end
-
-	class ConnectionGuard < Middleware
-		def call(env)
-			@app.call(env)
-		rescue Bunny::Exception
-			# Possible connection error - the controller manager would try to restart connection
-			logger = env[:logger]
-
-			logger.error "\nConnection lost: #{exception.class.name} (#{exception.message})"
-			logger.error exception.backtrace.join("\n")
-
-			ServiceBase::ControllerManager.stop
 		end
 	end
 

@@ -1,4 +1,5 @@
 require_relative 'test_helper'
+require 'service_base/test/test_case'
 
 class RabbitConnectionTest < ActiveSupport::TestCase
 	setup do
@@ -7,6 +8,10 @@ class RabbitConnectionTest < ActiveSupport::TestCase
 
 	teardown do
 		ServiceBase::RabbitConnection.close('test')
+	end
+
+	class TestMessage < ServiceBase::Message
+		attributes :text
 	end
 
 	test "connection with default options" do
@@ -47,8 +52,38 @@ class RabbitConnectionTest < ActiveSupport::TestCase
 		end
 	end
 
-	class TestMessage < ServiceBase::Message
-			attributes :text
+	test "reply queue recovery" do
+		ServiceBase::RabbitConnection.open('test',
+		                                   network_recovery_interval: 0.1,
+		                                   recover_from_connection_close: true) do |rabbit_connection|
+			reply_queue   = rabbit_connection.reply_queue
+			original_name = reply_queue.name
+
+			message = TestMessage.new(text: "Response")
+			reply = TestMessage.new(text: "Reply")
+			handler = ServiceBase::Test::TestMessageHandler.new
+			reply_queue.register_message_handler message, handler, 0.1
+
+			rabbit_connection.publish reply_queue.name, reply, correlation_id: message.id, timeout: 0.1
+			sleep 0.1
+
+			assert_not_nil handler.reply
+
+			# simulate network failure
+			rabbit_connection.connection.handle_network_failure(RuntimeError.new('fake connection error'))
+			sleep 0.1 until rabbit_connection.open? # wait for recovery
+			assert_not_equal original_name, reply_queue.name, "Recovered queue should have re-generated name"
+
+			message = TestMessage.new(text: "Response")
+			reply = TestMessage.new(text: "Reply")
+			handler = ServiceBase::Test::TestMessageHandler.new
+			reply_queue.register_message_handler message, handler, 0.1
+
+			rabbit_connection.publish reply_queue.name, reply, correlation_id: message.id, timeout: 0.1
+			sleep 0.1
+
+			assert_not_nil handler.reply
+		end
 	end
 
 	test "multithreaded consumer performance" do

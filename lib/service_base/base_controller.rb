@@ -29,6 +29,9 @@ module ServiceBase
 		class_attribute :exchange_durable
 		self.exchange_durable = true
 
+		# Message dispatcher created on start
+		class_attribute :dispatcher
+
 	protected
 
 		# @private before setup callback
@@ -65,7 +68,19 @@ module ServiceBase
 				setup_routing
 			end
 
+			def start(rabbit_connection, cache, logger)
+				raise 'Controller already started' if started?
+				self.dispatcher = Dispatcher.new(self, rabbit_connection, cache, logger)
+				self.dispatcher.start
+			end
+
+			def started?
+				!!self.dispatcher
+			end
+
 			def stop
+				self.dispatcher.stop if started?
+				self.dispatcher = nil
 				clear_routing
 			end
 
@@ -202,6 +217,8 @@ module ServiceBase
 
 			def stop
 				@consumer.cancel if @consumer
+			rescue Bunny::ConnectionClosedError
+				# ignore closed connection error
 			end
 		end
 	end

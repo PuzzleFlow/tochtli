@@ -26,7 +26,7 @@ module ServiceBase
 			if !connection || !connection.open?
 				config = config.is_a?(RabbitConnection::Config) ? config : RabbitConnection::Config.load(name, config)
 				connection = new(config)
-				connection.connect
+				connection.connect(logger: config[:logger])
 				self.connections[name.to_sym] = connection
 			end
 
@@ -38,7 +38,7 @@ module ServiceBase
 			end
 		end
 
-		def self.close(name)
+		def self.close(name=nil)
 			name ||= defined?(Rails) ? Rails.env : nil
 			raise ArgumentError, "RabbitMQ configuration name not specified" unless name
 			connection = self.connections.delete(name.to_sym)
@@ -61,7 +61,9 @@ module ServiceBase
 		rescue Bunny::ClientTimeout
 			false
 		ensure
+			@channel_pool.clear
 			@connection = nil
+			@reply_queue = nil
 		end
 
 		def open?
@@ -132,7 +134,13 @@ module ServiceBase
 		end
 
 		def create_channel(consumer_pool_size = 1)
-			@connection.create_channel(nil, consumer_pool_size)
+			@connection.create_channel(nil, consumer_pool_size).tap do |channel|
+				channel.confirm_select # use publisher confirmations
+			end
+		end
+
+		def create_exchange(channel)
+			channel.topic(@exchange_name, durable: true)
 		end
 
 		private
@@ -141,8 +149,8 @@ module ServiceBase
 			raise ConnectionFailed.new("Channel already created for thread #{thread.object_id}") if @channel_pool[thread.object_id]
 			raise ConnectionFailed.new("Unable to create channel. Connection lost.") unless @connection
 
-			channel  = @connection.create_channel(nil, @work_pool_size)
-			exchange = channel.topic(@exchange_name, durable: true)
+			channel  = create_channel(@work_pool_size)
+			exchange = create_exchange(channel)
 
 			channel_wrap                    = ChannelWrap.new(channel, exchange)
 			@channel_pool[thread.object_id] = channel_wrap
@@ -153,7 +161,13 @@ module ServiceBase
 		end
 
 		def channel_wrap(thread=Thread.current)
-			@channel_pool[thread.object_id] || create_channel_wrap(thread)
+			channel_wrap = @channel_pool[thread.object_id]
+			if channel_wrap && channel_wrap.channel.active
+				channel_wrap
+			else
+				@channel_pool.delete(thread.object_id) # ensure inactive channel s not cached
+				create_channel_wrap(thread)
+			end
 		end
 
 		def generate_id
