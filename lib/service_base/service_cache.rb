@@ -17,10 +17,7 @@ module ServiceBase
 					value_max_bytes: 4194304, # 4MB as max value, remember to configure memcache with -I
 					compress: true
 				}
-				host = config.fetch(:host, "localhost:11211")
-				opts = config.fetch(:opts, {}).merge(defaults)
-
-				@store = ActiveSupport::Cache::DalliStore.new(host, opts)
+				@store = ActiveSupport::Cache::DalliStore.new(nil, defaults)
 			end
 		end
 

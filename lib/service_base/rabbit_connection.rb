@@ -48,7 +48,13 @@ module ServiceBase
 		def connect(opts={})
 			return if open?
 
-			setup_bunny_connection(opts)
+			defaults = {}
+			unless opts[:logger]
+				defaults[:logger] = @logger.dup
+				defaults[:logger].level = ServiceBase.debug_bunny ? Logger::DEBUG : Logger::WARN
+			end
+
+			setup_bunny_connection(defaults.merge(opts))
 
 			if block_given?
 				yield

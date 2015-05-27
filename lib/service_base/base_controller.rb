@@ -6,7 +6,7 @@ module ServiceBase
 
 		self.work_pool_size = 1 # default work pool size per controller instance
 
-		attr_reader :logger, :message
+		attr_reader :logger, :message, :delivery_info
 
 		# Each controller can overwrite the queue name (default: controller.name.underscore)
 		class_attribute :queue_name
@@ -63,19 +63,22 @@ module ServiceBase
 				self.before_setup_block = block
 			end
 
-			def setup
+			def setup(rabbit_connection, cache=nil, logger=nil)
 				self.before_setup_block.call if self.before_setup_block
 				setup_routing
+				self.dispatcher = Dispatcher.new(self, rabbit_connection, cache, logger || ServiceBase.logger)
 			end
 
-			def start(rabbit_connection, cache, logger)
-				raise 'Controller already started' if started?
-				self.dispatcher = Dispatcher.new(self, rabbit_connection, cache, logger)
-				self.dispatcher.start
+			def start(queue_name=nil)
+				self.dispatcher.start(queue_name || self.queue_name)
+			end
+
+			def set_up?
+				!!self.dispatcher
 			end
 
 			def started?
-				!!self.dispatcher
+				self.dispatcher && !self.dispatcher.queues.empty?
 			end
 
 			def stop
@@ -173,7 +176,7 @@ module ServiceBase
 		end
 
 		class Dispatcher
-			attr_reader :controller_class, :rabbit_connection, :cache, :logger, :queue
+			attr_reader :controller_class, :rabbit_connection, :cache, :logger
 
 			def initialize(controller_class, rabbit_connection, cache, logger)
 				@controller_class  = controller_class
@@ -181,11 +184,11 @@ module ServiceBase
 				@cache             = cache
 				@logger            = logger
 				@application       = ServiceBase.application.to_app
+				@queues            = {}
 			end
 
-			def start
-				create_queue
-				subscribe_queue
+			def start(queue_name)
+				subscribe_queue(queue_name)
 			end
 
 			def process_message(delivery_info, properties, payload)
@@ -205,20 +208,27 @@ module ServiceBase
 				false
 			end
 
-			def create_queue
-				@queue = controller_class.create_queue(@rabbit_connection)
-			end
-
-			def subscribe_queue
-				@consumer = @queue.subscribe do |delivery_info, metadata, payload|
+			def subscribe_queue(queue_name)
+				queue = controller_class.create_queue(@rabbit_connection, queue_name)
+				consumer = queue.subscribe do |delivery_info, metadata, payload|
 					process_message delivery_info, metadata, payload
 				end
+
+				@queues[queue_name] = {
+						queue: queue,
+				    consumer: consumer
+				}
 			end
 
 			def stop
+				@queues.each_value {|qh| qh[:consumer].cancel }
 				@consumer.cancel if @consumer
 			rescue Bunny::ConnectionClosedError
 				# ignore closed connection error
+			end
+
+			def queues
+				@queues.map {|_,qh| qh[:queue] }
 			end
 		end
 	end

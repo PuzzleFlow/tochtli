@@ -10,8 +10,8 @@ module ServiceBase
 			setup do
 				@cache = ActiveSupport::Cache::MemoryStore.new
 				@logger = ServiceBase.logger
-				self.controller_class.setup
-				@dispatcher = ServiceBase::BaseController::Dispatcher.new(self.controller_class, @connection, @cache, @logger)
+				self.controller_class.setup(@connection, @cache, @logger)
+				@dispatcher = self.controller_class.dispatcher
 			end
 
 			teardown do

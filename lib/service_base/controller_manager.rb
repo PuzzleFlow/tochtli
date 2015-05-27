@@ -36,8 +36,8 @@ module ServiceBase
 				raise ArgumentError, "Controller expected, got: #{controller_class}" unless controller_class.is_a?(Class) && controller_class < ServiceBase::BaseController
 				unless controller_class.started?
 					@logger.info "Starting #{controller_class}..." if @logger
-					controller_class.setup
-					controller_class.start(@rabbit_connection, @cache, @logger)
+					controller_class.setup(@rabbit_connection, @cache, @logger)
+					controller_class.start
 				end
 			end
 		end

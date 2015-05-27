@@ -129,9 +129,17 @@ module ServiceBase
 			end
 
 			def subscribe(*args)
+				TestConsumer.new
 			end
 
 			def subscribe_with(*args)
+				TestConsumer.new
+			end
+		end
+
+		class TestConsumer
+			def cancel
+				TestConsumer.new
 			end
 		end
 

@@ -30,16 +30,14 @@ module ServiceBase
 		# Global logger for services (default: RAILS_ROOT/log/service.log)
 		attr_writer :logger
 
+		# If set to true bunny log level would be set to DEBUG (by default it is WARN)
+		attr_accessor :debug_bunny
+
 		def logger
 			unless @logger
 				raise "ServiceBase.logger not set." unless defined?(Rails)
 				@logger = Logger.new(File.join(Rails.root, 'log/service.log'))
 				@logger.level = Rails.env.production? ? Logger::WARN : Logger::DEBUG
-				if defined?(CommonTools) # $%$%!$%!#!$%#$!%$%^
-					# TODO: move CommonTools::StandardFormatter to COMMON tools
-
-					@logger.formatter = CommonTools::StandardFormatter.new
-				end
 			end
 			@logger
 		end

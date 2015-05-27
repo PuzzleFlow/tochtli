@@ -200,15 +200,16 @@ class ControllerIntegrationTest < ServiceBase::Test::Integration
 
 	test 'custom exchange' do
 		dispatcher = CustomExchangeController.dispatcher
+		queue = dispatcher.queues.first
 		refute_nil dispatcher
+		refute_nil queue
 		assert_equal '', CustomExchangeController.queue_name
-		refute_nil dispatcher.queue
-		assert_match /^amq.gen/, dispatcher.queue.name
-		refute dispatcher.queue.durable?
-		assert dispatcher.queue.exclusive?
-		assert dispatcher.queue.server_named?
-		refute_nil dispatcher.queue.channel.exchanges['test.notifications']
-		refute dispatcher.queue.channel.exchanges['test.notifications'].durable?
+		assert_match /^amq.gen/, queue.name
+		refute queue.durable?
+		assert queue.exclusive?
+		assert queue.server_named?
+		refute_nil queue.channel.exchanges['test.notifications']
+		refute queue.channel.exchanges['test.notifications'].durable?
 	end
 
 	test 'binding on setup' do
