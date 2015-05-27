@@ -54,18 +54,19 @@ class RabbitConnectionTest < ActiveSupport::TestCase
 
 	test "reply queue recovery" do
 		ServiceBase::RabbitConnection.open('test',
-		                                   network_recovery_interval: 0.1,
+		                                   network_recovery_interval:     0.1,
 		                                   recover_from_connection_close: true) do |rabbit_connection|
 			reply_queue   = rabbit_connection.reply_queue
 			original_name = reply_queue.name
+			timeout       = 0.3
 
 			message = TestMessage.new(text: "Response")
-			reply = TestMessage.new(text: "Reply")
+			reply   = TestMessage.new(text: "Reply")
 			handler = ServiceBase::Test::TestMessageHandler.new
-			reply_queue.register_message_handler message, handler, 0.1
+			reply_queue.register_message_handler message, handler, timeout
 
-			rabbit_connection.publish reply_queue.name, reply, correlation_id: message.id, timeout: 0.1
-			sleep 0.1
+			rabbit_connection.publish reply_queue.name, reply, correlation_id: message.id, timeout: timeout
+			sleep timeout
 
 			assert_not_nil handler.reply
 
@@ -75,12 +76,12 @@ class RabbitConnectionTest < ActiveSupport::TestCase
 			assert_not_equal original_name, reply_queue.name, "Recovered queue should have re-generated name"
 
 			message = TestMessage.new(text: "Response")
-			reply = TestMessage.new(text: "Reply")
+			reply   = TestMessage.new(text: "Reply")
 			handler = ServiceBase::Test::TestMessageHandler.new
-			reply_queue.register_message_handler message, handler, 0.3
+			reply_queue.register_message_handler message, handler, timeout
 
-			rabbit_connection.publish reply_queue.name, reply, correlation_id: message.id, timeout: 0.3
-			sleep 0.3
+			rabbit_connection.publish reply_queue.name, reply, correlation_id: message.id, timeout: timeout
+			sleep timeout
 
 			assert_not_nil handler.reply
 		end
@@ -91,15 +92,15 @@ class RabbitConnectionTest < ActiveSupport::TestCase
 		ServiceBase::RabbitConnection.open('test',
 		                                   exchange_name:  "puzzleflow.tests",
 		                                   work_pool_size: work_pool_size) do |connection|
-			mutex = Mutex.new
-			cv = ConditionVariable.new
-			thread_count = 5
-			message_count = 200
+			mutex                  = Mutex.new
+			cv                     = ConditionVariable.new
+			thread_count           = 5
+			message_count          = 200
 			expected_message_count = message_count*thread_count
 
-			consumed = 0
+			consumed         = 0
 			consumer_threads = Set.new
-			consumer = Proc.new do |delivery_info, metadata, payload|
+			consumer         = Proc.new do |delivery_info, metadata, payload|
 				consumed += 1
 				consumer_threads << Thread.current
 				connection.publish metadata.reply_to, TestMessage.new(text: "Response to #{payload}")
@@ -109,7 +110,7 @@ class RabbitConnectionTest < ActiveSupport::TestCase
 			queue.bind(connection.exchange, routing_key: queue.name)
 			queue.subscribe(block: false, &consumer)
 
-			replies = 0
+			replies        = 0
 			reply_consumer = Proc.new do |delivery_info, metadata, payload|
 				replies += 1
 				mutex.synchronize { cv.signal } if replies == expected_message_count
@@ -122,10 +123,10 @@ class RabbitConnectionTest < ActiveSupport::TestCase
 			start_t = Time.now
 
 			threads = (1..thread_count).collect do
-				t = Thread.new do
+				t                    = Thread.new do
 					message_count.times do |i|
 						connection.publish queue.name, TestMessage.new(text: "Message #{i}"),
-															 reply_to: reply_queue.name
+						                   reply_to: reply_queue.name
 					end
 				end
 				t.abort_on_exception = true
@@ -137,7 +138,7 @@ class RabbitConnectionTest < ActiveSupport::TestCase
 			mutex.synchronize { cv.wait(mutex, 5.0) }
 
 			end_t = Time.now
-			time = end_t - start_t
+			time  = end_t - start_t
 
 			assert_equal expected_message_count, consumed
 			assert_equal expected_message_count, replies
