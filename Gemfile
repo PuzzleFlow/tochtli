@@ -1,9 +1,14 @@
-source 'https://gems.puzzleflow.com'
 unless RUBY_PLATFORM =~ /mswin/
 	source 'https://rubygems.org'
 end
 
-gem 'pg-binaries', require: 'pg_binaries' if RUBY_PLATFORM =~ /mswin/
+source 'https://gems.puzzleflow.com' do
+	gem 'hoe-puzzleflow'
+	if RUBY_PLATFORM =~ /mswin/
+		gem 'pg-binaries', require: 'pg_binaries'
+		gem 'nokogiri'
+	end
+end
 
 gemspec
 

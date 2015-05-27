@@ -51,13 +51,15 @@ module ServiceBase
 			end
 
 			def synchronous_reply_handler(reply)
-				@reply = reply
-				assert_kind_of @reply_message_class, @reply, "Unexpected reply"
-				@mutex.synchronize { @cv.signal }
+				assert_kind_of @reply_message_class, reply, "Unexpected reply"
+				@mutex.synchronize do
+					@reply = reply
+					@cv.signal
+				end
 			end
 
 			def synchronous_timeout_handler(message, timeout)
-				@mutex.synchronize { @cv.wait(@mutex, timeout) }
+				@mutex.synchronize { @cv.wait(@mutex, timeout) unless @reply }
 
 				raise "Reply on #{message.class.name} timeout" unless @reply
 				raise @reply.message if @reply.is_a?(ServiceBase::ErrorMessage)

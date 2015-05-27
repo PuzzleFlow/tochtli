@@ -43,7 +43,6 @@ class ControllerIntegrationTest < ServiceBase::Test::Integration
 
 		def failure
 			@rabbit_connection.connection.close # simulate network failure
-			reply TestEchoReply.new(:original_text => 'should not get it')
 		end
 
 		def sleepy
@@ -134,9 +133,9 @@ class ControllerIntegrationTest < ServiceBase::Test::Integration
 		message = FailureMessage.new
 		handler = TestReplyHandler.new(1)
 
-		publish message, :reply_handler => handler, :timeout => 1.5.second
+		publish message, :reply_handler => handler, :timeout => 2.5.second
 
-		handler.wait(2.seconds)
+		handler.wait(3.seconds)
 
 		assert_equal 1, handler.timeouts
 	end
@@ -146,8 +145,8 @@ class ControllerIntegrationTest < ServiceBase::Test::Integration
 		handler = TestReplyHandler.new(count)
 		start_t = Time.now
 		count.times do
-			message = SleepyMessage.new(:duration => 0.1)
-			publish message, :expect => TestEchoReply, :reply_handler => handler, :timeout => 2.0
+			message = SleepyMessage.new(:duration => 0.2)
+			publish message, :expect => TestEchoReply, :reply_handler => handler, :timeout => 3.0
 		end
 
 		handler.wait(3.seconds)
@@ -156,7 +155,7 @@ class ControllerIntegrationTest < ServiceBase::Test::Integration
 
 		assert_equal 0, handler.errors
 		assert_equal 0, handler.timeouts
-		assert duration < 1.5, "The total processing time should be less then the processing time sum (multi customers expected), duration: #{duration}s"
+		assert duration < 3.0, "The total processing time should be less then the processing time sum (multi customers expected), duration: #{duration}s"
 	end
 
 	test 'echo performance' do
