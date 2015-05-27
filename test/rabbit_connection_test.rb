@@ -77,10 +77,10 @@ class RabbitConnectionTest < ActiveSupport::TestCase
 			message = TestMessage.new(text: "Response")
 			reply = TestMessage.new(text: "Reply")
 			handler = ServiceBase::Test::TestMessageHandler.new
-			reply_queue.register_message_handler message, handler, 0.1
+			reply_queue.register_message_handler message, handler, 0.3
 
-			rabbit_connection.publish reply_queue.name, reply, correlation_id: message.id, timeout: 0.1
-			sleep 0.1
+			rabbit_connection.publish reply_queue.name, reply, correlation_id: message.id, timeout: 0.3
+			sleep 0.3
 
 			assert_not_nil handler.reply
 		end
