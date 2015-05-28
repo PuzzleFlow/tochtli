@@ -7,7 +7,6 @@ test/dummy/db/*.sql
 test/dummy/log/*.log
 test/dummy/tmp/
 test/dummy/.sass-cache
-test/dummy/config/*.yml
 Gemfile.lock
 doc
 .yardoc

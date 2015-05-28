@@ -12,11 +12,11 @@
   * `queue` & `queue_exists?` methods for TestRabbitConnection
   * Single reply queue per rabbit connection
   * configuration_store removed from `RabbitClient` (should be used separately)
-  * `RabbitConnection.logger` default set to `ServiceBase.logger`
+  * `RabbitConnection.logger` default set to `Tochtli.logger`
   * ActiveRecordConnectionCleaner - a middleware for active connection cleanup
-  * ServiceBase.application with middlewares introduced
+  * Tochtli.application with middlewares introduced
   * Network failure recovery rewritten (using automatic bunny recovery with additional reply queue binding recovery)
-  * Bunny logger redirected to RabbitConnection logger with level dependent on ServiceBase.debug_bunny (by default WARN)
+  * Bunny logger redirected to RabbitConnection logger with level dependent on Tochtli.debug_bunny (by default WARN)
   
 ### 1 bug fix:
 
@@ -32,21 +32,21 @@
 
   * BaseController callbacks around :start and :setup
   * Public BaseController#setup method (for manual routing control in tests)
-  * ServiceBase::BaseClient tests, expect_published helper method
-  * ServiceBase::Message required_attributes and optional_attributes declarations
-  * ServiceBase::ServiceCache caches the store object with method: ServiceBase::ServiceCache.store
-  * ServiceBase::BaseClient singleton methods accept any number of arguments (passed to constructor)
+  * Tochtli::BaseClient tests, expect_published helper method
+  * Tochtli::Message required_attributes and optional_attributes declarations
+  * Tochtli::ServiceCache caches the store object with method: Tochtli::ServiceCache.store
+  * Tochtli::BaseClient singleton methods accept any number of arguments (passed to constructor)
   * Get rid of ClientProxy. Error handling unified in BaseClient.
-  * Default logger for BaseClient (ServiceBase.logger)
-  * ServiceBase::Message validation callbacks
-  * ServiceBase::Message#ignore_excess_attributes for open messages
+  * Default logger for BaseClient (Tochtli.logger)
+  * Tochtli::Message validation callbacks
+  * Tochtli::Message#ignore_excess_attributes for open messages
   * assert_published accepts block and yields message
   
 ## 0.1.7 / 2015-04-01
 
 ### 1 minor enhancement:
 
-  * ServiceBase::BaseClient introduced (with MessageHandler and SyncMessageHandler)
+  * Tochtli::BaseClient introduced (with MessageHandler and SyncMessageHandler)
   
 ## 0.1.6 / 2015-03-02
 
