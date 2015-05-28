@@ -149,7 +149,7 @@ class ControllerIntegrationTest < ServiceBase::Test::Integration
 			publish message, :expect => TestEchoReply, :reply_handler => handler, :timeout => 3.0
 		end
 
-		handler.wait(3.seconds)
+		handler.wait(4.seconds)
 
 		duration = Time.now - start_t
 
@@ -162,7 +162,7 @@ class ControllerIntegrationTest < ServiceBase::Test::Integration
 		begin
 			@logger.level = Logger::ERROR # mute logger to speed up test
 
-			count   = 500
+			count   = 200
 			handler = TestReplyHandler.new(count)
 
 			start_t = Time.now

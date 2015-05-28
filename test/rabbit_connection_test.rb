@@ -95,7 +95,7 @@ class RabbitConnectionTest < ActiveSupport::TestCase
 			mutex                  = Mutex.new
 			cv                     = ConditionVariable.new
 			thread_count           = 5
-			message_count          = 200
+			message_count          = 100
 			expected_message_count = message_count*thread_count
 
 			consumed         = 0
