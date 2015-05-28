@@ -35,7 +35,7 @@ module ServiceBase
 			end
 
 			controllers.each do |controller_class|
-				raise ArgumentError, "Controller expected, got: #{controller_class}" unless controller_class.is_a?(Class) && controller_class < ServiceBase::BaseController
+				raise ArgumentError, "Controller expected, got: #{controller_class.inspect}" unless controller_class.is_a?(Class) && controller_class < ServiceBase::BaseController
 				unless controller_class.started?
 					@logger.info "Starting #{controller_class}..." if @logger
 					controller_class.setup(@rabbit_connection, @cache, @logger)
@@ -65,7 +65,7 @@ module ServiceBase
 		end
 
 		class << self
-			delegate :register, :start, :stop, :restart, :running?, :logger, :rabbit_connection, :cache, :to => :instance
+			delegate :register, :setup, :start, :stop, :restart, :running?, :logger, :rabbit_connection, :cache, :to => :instance
 		end
 	end
 end

@@ -57,7 +57,8 @@ module ServiceBase
 		end
 
 		def start_services(rabbit_config=nil, logger=nil)
-			ControllerManager.start(rabbit_config, logger)
+			ControllerManager.setup(config: rabbit_config, logger: logger)
+			ControllerManager.start
 			true
 		rescue
 			if logger
