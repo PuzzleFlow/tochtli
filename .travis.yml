@@ -7,5 +7,3 @@ env:
   - RAILS_VER=4.2.1
 services:
   - rabbitmq
-before_script:
-  - cp test/internal/config/database.yml.travis test/internal/config/database.yml
