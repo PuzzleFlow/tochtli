@@ -99,9 +99,10 @@ class RabbitConnectionTest < ActiveSupport::TestCase
 			expected_message_count = message_count*thread_count
 
 			consumed         = 0
+			consumed_mutex = Mutex.new
 			consumer_threads = Set.new
 			consumer         = Proc.new do |delivery_info, metadata, payload|
-				consumed += 1
+				consumed_mutex.synchronize { consumed += 1 }
 				consumer_threads << Thread.current
 				connection.publish metadata.reply_to, TestMessage.new(text: "Response to #{payload}")
 			end
