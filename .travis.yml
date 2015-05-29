@@ -2,8 +2,12 @@ language: ruby
 rvm:
   - 2.1.5
   - 2.2.1
+  - rbx-2
 env:
   - RAILS_VER=3.2.19
   - RAILS_VER=4.2.1
 services:
   - rabbitmq
+matrix:
+  allow_failures:
+    - rvm: rbx-2
