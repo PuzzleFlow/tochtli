@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Flex - {{ page.title }}</title>
+      <meta name="viewport" content="width=device-width">
+
+      <!-- syntax highlighting CSS -->
+      <link rel="stylesheet" href="/css/syntax.css">
+
+      <!-- Custom CSS -->
+      <link rel="stylesheet" href="/css/main.css">
+
+      <!-- Responsive CSS -->
+      <link rel="stylesheet" href="/css/responsive.css">
+
+      <!-- Google Fonts -->
+      <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700' rel='stylesheet' type='text/css'>
+      <link href='http://fonts.googleapis.com/css?family=Raleway:300,400,700' rel='stylesheet' type='text/css'>
+  </head>
+  <body>
+    <div class="site">
+      <div class="sidebar" id="sidebar">
+        <div class="header">
+          <h1 class="title"><a href="/"><img id="logo" src="/images/tochtli.jpg"></a></h1>
+          <span class="tagline">Tochtli</span>
+        </div>
+        <div class="posts">
+          <ul class="posts-list">
+            <li class="post-link"><a class="post-title" href="/tutorials/getting-started.html">Getting started</a></li>
+            
+          </ul>
+        </div>
+        <div class="footer">
+          <span id="footer-links">
+            <a href="http://puzzleflow.com" class="footer-link">PuzzleFlow</a> <span class="separator">&bull;</span>
+            <a href="https://github.com/PuzzleFlow/tochtli" class="footer-link">GitHub</a>
+          </span>
+          <p>Image by <a href="https://www.flickr.com/photos/gwendalcentrifugue/8082137667">Gwendal Uguen</a></p>
+        </div>
+      </div>
+      <div class="content" id="home">
+        <div id="sidebar-button">
+          <img src="/images/sidebar-button.png">
+        </div>
+
+        <div class="post">
+          {{ content }}
+        </div>
+      </div>
+
+    </div>
+    <script src="/scripts/responsive.js" type="text/javascript"></script>
+  </body>
+</html>
