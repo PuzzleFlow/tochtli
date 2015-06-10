@@ -15,11 +15,11 @@ Since we are based on **Rabbit**MQ and **Bunny** gem, it seemed natural to go wi
 
 ## Why RabbitMQ?
 
-It proved to be reliable and durable enough to rely on it. However, we are open to built an abstraction which would allow to plug ØMQ or Redis PubSub instead.
+It proved to be reliable and durable enough to rely on it. However, we are open to building an abstraction which would allow to plug ØMQ or Redis PubSub instead.
 
 ## How is it better than Resque or Sidekiq?
 
-It's not better, it's different. With traditional background processing (at least that available in Ruby world) you fire a job and forget it. It may fail terribly and the system will be notified about that but there is no way to react to it at application level. You also would have to implement some hacks to get notified that the job was succesful. We wanted something different, which would give us duplex communication between clients and server.
+It's not better, it's different. With traditional background processing (at least that available in Ruby world) you launch a job and forget it. It may fail terribly and the system will be notified about that but there is no way to react to it at application level. You also would have to implement some hacks to get notified that the job was succesful. We wanted something different, which would give us full and reliable communication between clients and server (with acknowledgements, when necessary).
 
 ![]({{ site.baseurl}}/images/easter_centzon_totochtin_by_anadiasarts-d79dl4l.jpg)
 Centzon Totochlin visualized by [AnaDiasArts](http://www.deviantart.com/art/Easter-Centzon-Totochtin-439013685).
