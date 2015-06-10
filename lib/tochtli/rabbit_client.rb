@@ -3,6 +3,7 @@ module Tochtli
 
     cattr_accessor :rabbit_config
     self.rabbit_config = nil
+    DEFAULT_CONNECTION_NAME = 'default'
 
     attr_reader :rabbit_connection
 
@@ -14,6 +15,7 @@ module Tochtli
       else
         config_name = self.class.rabbit_config
         config_name = Rails.env if !config_name && defined?(Rails)
+        config_name ||= DEFAULT_CONNECTION_NAME
         raise "Tochtli::RabbitClient.rabbit_config is not set. Please setup configuration name." unless config_name
         @rabbit_connection = Tochtli::RabbitConnection.open(config_name, logger: logger)
       end
