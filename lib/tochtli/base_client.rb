@@ -1,6 +1,7 @@
 module Tochtli
   class BaseClient
     attr_reader :rabbit_client, :rabbit_connection, :logger
+    delegate :publish, to: :rabbit_client
 
     class_attribute :singleton_instance
     self.singleton_instance = nil
