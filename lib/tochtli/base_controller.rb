@@ -81,10 +81,20 @@ module Tochtli
         self.dispatcher && !self.dispatcher.queues.empty?
       end
 
-      def stop
-        self.dispatcher.stop if started?
+      def stop(options={})
+        self.dispatcher.shutdown(options) if started?
         self.dispatcher = nil
         clear_routing
+      end
+
+      def restart(options={})
+        connection = self.dispatcher.rabbit_connection
+        logger = self.dispatcher.logger
+        cache = self.dispatcher.cache
+
+        stop(timeout: options.fetch(:timeout, 15))
+        setup(connection, cache, logger)
+        start
       end
 
       def setup_routing
@@ -185,6 +195,8 @@ module Tochtli
         @logger            = logger
         @application       = Tochtli.application.to_app
         @queues            = {}
+        @mutex             = Mutex.new
+        @current_processes = 0
       end
 
       def start(queue_name)
@@ -192,6 +204,7 @@ module Tochtli
       end
 
       def process_message(delivery_info, properties, payload)
+        @mutex.synchronize { @current_processes += 1}
         env = {
             delivery_info:     delivery_info,
             properties:        properties,
@@ -206,6 +219,8 @@ module Tochtli
         logger.error "\nUNEXPECTED EXCEPTION: #{ex.class.name} (#{ex.message})"
         logger.error ex.backtrace.join("\n")
         false
+      ensure
+        @mutex.synchronize { @current_processes -= 1}
       end
 
       def subscribe_queue(queue_name)
@@ -218,6 +233,20 @@ module Tochtli
             queue:    queue,
             consumer: consumer
         }
+      end
+
+      # Performs a graceful shutdown of dispatcher i.e. waits for all processes to end.
+      # If timeout is reached, forces the shutdown. Useful with dynamic reconfiguration of work pool size. 
+      def shutdown(options={})
+        timeout = options[:timeout] || 15
+        interval = options[:interval] || 0.5
+
+        (timeout/interval).to_i.times do
+          break if @current_processes == 0
+          sleep(interval)
+        end
+
+        stop
       end
 
       def stop

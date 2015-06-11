@@ -158,6 +158,41 @@ class ControllerIntegrationTest < Tochtli::Test::Integration
     assert duration < 3.0, "The total processing time should be less then the processing time sum (multi customers expected), duration: #{duration}s"
   end
 
+  def restart_test(timeout)
+    count = 30
+    handler = TestReplyHandler.new(count)
+    count.times do
+      message = SleepyMessage.new(:duration => 0.5)
+      publish message, :expect => TestEchoReply, :reply_handler => handler, :timeout => 3.0
+    end
+    sleep(0.3)
+    assert_not_equal 0, handler.pending_replies
+
+    # right now there should be some messages not processed
+    # restart should wait until they are done
+
+    TestController.restart(timeout: timeout)
+    handler.wait(4)
+
+    handler
+  end
+
+  test 'graceful restart' do
+    handler = restart_test(15)
+
+    assert_equal 0, handler.pending_replies
+    assert_equal 0, handler.errors
+    assert_equal 0, handler.timeouts
+  end
+
+  test 'forced restart' do
+    handler = restart_test(0)
+
+    assert_equal 0, handler.pending_replies
+    assert_not_equal 0, handler.errors + handler.timeouts
+  end
+
+
   test 'echo performance' do
     begin
       @logger.level = Logger::ERROR # mute logger to speed up test
