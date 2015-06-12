@@ -5,7 +5,7 @@ title: Scaling
 
 # Scaling
 
-In [previous tutorial]({{ site.baseurl }}/tutorials/getting-started.html") we learned how to create basic service for making screenshots of web pages with Tochtli. However, how will it behave when many clients want to work with it at the same time? Let's modify our client code to find out.
+In [previous tutorial]({{ site.baseurl }}/tutorials/getting-started.html) we learned how to create basic service for making screenshots of web pages with Tochtli. However, how will it behave when many clients want to work with it at the same time? Let's modify our client code to find out.
 
 {% highlight ruby %}
 threads = []
