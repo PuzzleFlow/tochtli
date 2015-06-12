@@ -14,7 +14,7 @@ threads = []
 		ScreenerClient.new.create_screen(ARGV[0], ARGV[1].gsub('N', i.to_s))
 	end
 end
-threads.each {|t| t.join}
+threads.each(&:join)
 {% endhighlight %}
 
 There is a small change here, allowing to get appropiriate number of output file – one per each client. I also modified server to print into STDOUT when processing of a request starts and ends, to see what happens. Now when we run ` bundle exec ruby client.rb http://google.com googleN.png`. Whoops, no concurrency here! The server processes one message at the time and after finishing it, moves to another. Completing 20 requests in our example takes quite some time and it is possible that some requests will fail due to timeouts. Not to scalable, but we can do two things to improve it.
