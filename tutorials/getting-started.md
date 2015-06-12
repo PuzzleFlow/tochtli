@@ -161,4 +161,4 @@ end
 
 You probably already see what I did there. We create a new `SyncMessageHandler` and upon sending the message bind it to it. Then with `handler.wait!(timeout)` we block the thread until message arrival. If it does not happen withing specified number of seconds, an exception is raised. After receiving the response, we may access it via `handler.reply` and write our elapsed time to the console.
 
-Et voilà! We have completed our RPC webpage capturing system.
+Et voilà! We have completed our RPC webpage capturing system. Now let's learn [how to scale it]({{ site.baseurl }}/tutorials/scaling.html).

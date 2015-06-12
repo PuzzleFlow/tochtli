@@ -248,10 +248,16 @@ a:hover {
   margin-bottom: 0.75em;
 }
 
-.post-title {
+.section-title {
   font-weight: 600;
   font-size: 1.25em;
   text-transform: uppercase;
+}
+
+.posts-list li.menu-item {
+  text-align: left;
+  font-size: 1.2em;
+  padding-left: 2em;
 }
 
 .post-date {
