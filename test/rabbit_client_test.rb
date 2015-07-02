@@ -1,20 +1,20 @@
 require_relative 'test_helper'
 
 class RabbitClientTest < Tochtli::Test::Client
-  test "reply queue" do
+  def test_reply_queue
     reply_queue = @client.reply_queue
     assert_kind_of Tochtli::ReplyQueue, reply_queue
     assert_equal @client.rabbit_connection, reply_queue.connection
-    assert_not_nil reply_queue.name
+    refute_nil reply_queue.name
   end
 
-  test "publishing" do
+  def test_publishing
     @client.publish FakeMessage.new(test_attr: 'test')
 
     assert_published FakeMessage, test_attr: 'test'
   end
 
-  test "reply" do
+  def test_reply
     handler = Tochtli::Test::TestMessageHandler.new
 
     message = FakeMessage.new(test_attr: 'test')
@@ -25,7 +25,7 @@ class RabbitClientTest < Tochtli::Test::Client
     assert_equal expected_reply, handler.reply
   end
 
-  test "reply timeout" do
+  def test_reply_timeout
     handler = Tochtli::Test::TestMessageHandler.new
     message = FakeMessage.new(test_attr: 'test')
     @client.publish message, handler: handler, timeout: 0.05
@@ -33,7 +33,7 @@ class RabbitClientTest < Tochtli::Test::Client
     assert_equal message, handler.timeout_message
   end
 
-  test "reply no timeout" do
+  def test_reply_no_timeout
     handler = Tochtli::Test::TestMessageHandler.new
     message = FakeMessage.new(test_attr: 'test')
     @client.publish message, handler: handler, timeout: 0.1

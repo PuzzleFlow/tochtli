@@ -11,6 +11,8 @@ module Tochtli
 
     private_class_method :new
 
+    DEFAULT_CONNECTION_NAME = 'default'
+
     def initialize(config = nil, channel_pool=nil)
       @config         = config.is_a?(RabbitConnection::Config) ? config : RabbitConnection::Config.load(nil, config)
       @exchange_name  = @config.delete(:exchange_name)
@@ -20,7 +22,7 @@ module Tochtli
     end
 
     def self.open(name=nil, config=nil)
-      name ||= defined?(Rails) ? Rails.env : nil
+      name ||= defined?(Rails) ? Rails.env : DEFAULT_CONNECTION_NAME
       raise ArgumentError, "RabbitMQ configuration name not specified" if !name && !ENV.has_key?('RABBITMQ_URL')
       connection = self.connections[name.to_sym]
       if !connection || !connection.open?
@@ -121,6 +123,7 @@ module Tochtli
         payload = message.to_json
       rescue Exception
         logger.error "Unable to serialize message: #{message.inspect}"
+        logger.error $!
         raise "Unable to serialize message to JSON: #{$!}"
       end
 

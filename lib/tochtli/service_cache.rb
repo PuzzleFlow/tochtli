@@ -1,4 +1,8 @@
-require 'active_support/cache/dalli_store'
+if defined?(Rails)
+  require 'active_support/cache/dalli_store'
+else
+  require 'dalli'
+end
 
 module Tochtli
   class ServiceCache
@@ -17,7 +21,7 @@ module Tochtli
             value_max_bytes: 4194304, # 4MB as max value, remember to configure memcache with -I
             compress:        true
         }
-        @store   = ActiveSupport::Cache::DalliStore.new(nil, defaults)
+        @store   = Dalli::Client.new(nil, defaults)
       end
     end
 

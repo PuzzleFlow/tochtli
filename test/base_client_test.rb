@@ -2,16 +2,17 @@ require_relative 'test_helper'
 
 class BaseClientTest < Tochtli::Test::Client
 
-  setup do
+  def setup
+    super
     @fake_client = FakeClient.new(@client)
   end
 
-  test "instance" do
+  def test_instance
     assert_respond_to @fake_client, :rabbit_client
     assert_respond_to @fake_client, :rabbit_connection
   end
 
-  test "synchronous method" do
+  def test_synchronous_method
     expect_published FakeMessage do
       handle_reply FakeReply, @message, result: 'OK'
     end
@@ -21,7 +22,7 @@ class BaseClientTest < Tochtli::Test::Client
     assert_equal 'OK', result
   end
 
-  test "asynchronous method" do
+  def test_asynchronous_method
     result = nil
     @fake_client.do_async('attr') { |r| result = r }
 

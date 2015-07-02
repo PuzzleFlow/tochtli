@@ -1,21 +1,24 @@
 module Tochtli
   module Test
     class Controller < Tochtli::Test::TestCase
-      class_attribute :controller_class
+      extend Uber::InheritableAttr
+      inheritable_attr :controller_class
 
       def self.tests(controller_class)
         self.controller_class = controller_class
       end
 
-      setup do
+      def setup
+        super
         @cache  = ActiveSupport::Cache::MemoryStore.new
         @logger = Tochtli.logger
-        self.controller_class.setup(@connection, @cache, @logger)
-        @dispatcher = self.controller_class.dispatcher
+        self.class.controller_class.setup(@connection, @cache, @logger)
+        @dispatcher = self.class.controller_class.dispatcher
       end
 
-      teardown do
-        self.controller_class.stop
+      def teardown
+        super
+        self.class.controller_class.stop
       end
 
       def publish(message)

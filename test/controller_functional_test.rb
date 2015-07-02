@@ -22,7 +22,7 @@ class ControllerFunctionalTest < Tochtli::Test::Controller
 
   tests TestController
 
-  test 'echo command' do
+  def test_echo_command
     message = TestMessage.new(:text => 'Hello world!')
 
     publish message

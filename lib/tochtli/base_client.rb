@@ -1,9 +1,10 @@
 module Tochtli
   class BaseClient
-    attr_reader :rabbit_client, :rabbit_connection, :logger
-    delegate :publish, to: :rabbit_client
+    extend Uber::InheritableAttr
 
-    class_attribute :singleton_instance
+    attr_reader :rabbit_client, :rabbit_connection, :logger
+
+    inheritable_attr :singleton_instance
     self.singleton_instance = nil
 
     # Singleton for controllers
@@ -34,6 +35,10 @@ module Tochtli
       end
       @rabbit_connection = @rabbit_client.rabbit_connection
       @logger            = logger
+    end
+
+    def publish(*args)
+      rabbit_client.publish(args)
     end
 
     class InternalServiceError < StandardError

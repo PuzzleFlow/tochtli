@@ -12,37 +12,39 @@ class ControllerManagerTest < Tochtli::Test::TestCase
   class ThirdController < Tochtli::BaseController
   end
 
-  setup do
+  def setup
+    super
     @logger       = Logger.new(STDERR)
     @logger.level = Logger::WARN
   end
 
-  teardown do
+  def teardown
+    super
     Tochtli::ControllerManager.stop
   end
 
-  test 'start single controller' do
+  def test_start_single_controller
     Tochtli::ControllerManager.start(FirstController, connection: @connection, logger: @logger)
     assert FirstController.started?
     refute SecondController.started?
     refute ThirdController.started?
   end
 
-  test 'start selected controllers' do
+  def test_start_selected_controllers
     Tochtli::ControllerManager.start(FirstController, ThirdController, connection: @connection, logger: @logger)
     assert FirstController.started?
     refute SecondController.started?
     assert ThirdController.started?
   end
 
-  test 'start all controllers' do
+  def test_start_all_controllers
     Tochtli::ControllerManager.start(:all, connection: @connection, logger: @logger)
     assert FirstController.started?
     assert SecondController.started?
     assert ThirdController.started?
   end
 
-  test 'restart only active controllers' do
+  def test_restart_only_active_controllers
     Tochtli::ControllerManager.start(FirstController, SecondController, connection: @connection, logger: @logger)
     Tochtli::ControllerManager.restart(connection: @connection, logger: @logger)
     assert FirstController.started?
@@ -50,7 +52,7 @@ class ControllerManagerTest < Tochtli::Test::TestCase
     refute ThirdController.started?
   end
 
-  test 'state monitor' do
+  def test_state_monitor
     Tochtli::ControllerManager.start(FirstController, connection: @connection, logger: @logger)
 
   end

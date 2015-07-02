@@ -1,11 +1,11 @@
 module Tochtli
   module Test
-    class Integration < ActionDispatch::IntegrationTest
+    class Integration < Minitest::Test
       BaseController.queue_durable     = false
       BaseController.queue_auto_delete = true
 
-      setup do
-        @logger             = Logger.new(File.join(Rails.root, 'log/test_service_integration.log'))
+      def setup
+        @logger             = Logger.new(File.join(Object.const_defined?(:Rails) ? Rails.root : './test', 'log/test_service_integration.log'))
         @logger.level       = Logger::DEBUG
         @client             = Tochtli::RabbitClient.new(nil, @logger)
         @connection         = @client.rabbit_connection
@@ -18,7 +18,7 @@ module Tochtli
         @cv    = ConditionVariable.new
       end
 
-      teardown do
+      def teardown
         begin
           @controller_manager.stop if @controller_manager
         rescue Timeout::Error

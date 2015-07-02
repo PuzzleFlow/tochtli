@@ -1,7 +1,6 @@
 module Tochtli
   class ReplyQueue
     attr_reader :connection, :logger, :queue
-    delegate :name, :to => :@queue
 
     def initialize(rabbit_connection, logger=nil)
       @connection              = rabbit_connection
@@ -10,6 +9,10 @@ module Tochtli
       @message_timeout_threads = {}
 
       subscribe
+    end
+
+    def name
+      @queue.name
     end
 
     def subscribe
@@ -52,9 +55,11 @@ module Tochtli
     end
 
     def on_delivery(delivery_info, metadata, payload)
-      reply_class = metadata.type.camelize.constantize
+      class_name  = metadata.type.camelize.gsub(/[^a-zA-Z0-9\:]/, '_') # basic sanity
+      reply_class = eval(class_name)
       reply       = reply_class.new({}, metadata)
-      reply.from_json payload, false
+      attributes  = JSON.parse(payload)
+      reply.attributes = attributes
 
       logger.debug "[#{Time.now} AMQP] Replay for #{reply.properties.correlation_id}: #{reply.inspect}"
 

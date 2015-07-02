@@ -1,21 +1,14 @@
-require 'active_model'
-
 module Tochtli
   class Message
-    include ActiveModel::Naming
-    include ActiveModel::Validations
-    include ActiveModel::Validations::Callbacks
-    include ActiveModel::Serializers::JSON
+    extend Uber::InheritableAttr
+    include Virtus.model
 
-    class_attribute :routing_key, :instance_writer => false
-    class_attribute :attribute_names, :instance_writer => false
-    class_attribute :excess_attributes_policy, :instance_writer => false
+    inheritable_attr :routing_key #, :instance_writer => false
+    inheritable_attr :attribute_names #, :instance_writer => false
+    inheritable_attr :excess_attributes_policy #, :instance_writer => false
+    inheritable_attr :should_validate
 
     attr_reader :id, :properties
-
-    self.include_root_in_json = false
-
-    validate :validate_excess_attributes
 
     def self.inherited(subclass)
       subclass.attribute_names = Set.new
@@ -28,12 +21,12 @@ module Tochtli
 
     def self.attributes(*attributes)
       options  = attributes.extract_options!
-      validate = options.fetch(:validate, true)
+      self.should_validate = options.fetch(:validate, true)
 
       attribute_names.merge(attributes)
 
       attr_accessor *attributes
-      validates_presence_of *attributes if validate
+      #validates_presence_of *attributes if validate
     end
 
     def self.required_attributes(*attributes)
@@ -81,14 +74,37 @@ module Tochtli
 
     def validate_excess_attributes
       if !@excess_attributes.empty? && self.class.excess_attributes_policy != :ignore
+        return false
         @excess_attributes.each_key do |name|
           self.errors.add :base, "Undefined attribute :#{name}"
         end
       end
+      true
+    end
+
+    def valid?
+      return false unless validate_excess_attributes
+      if self.class.should_validate
+        attributes.all?{|a| !a.nil? }
+      else
+        true
+      end
+    end
+
+    def invalid?
+      !valid?
     end
 
     def self.generate_id
       SecureRandom.uuid
+    end
+
+    def routing_key
+      self.class.routing_key
+    end
+
+    def to_json
+      JSON.dump(attributes)
     end
   end
 
