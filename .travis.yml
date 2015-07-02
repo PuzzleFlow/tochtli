@@ -6,6 +6,7 @@ rvm:
 env:
   - RAILS_VER=3.2.19
   - RAILS_VER=4.2.1
+  - NO_RAILS=1
 services:
   - rabbitmq
 matrix:
