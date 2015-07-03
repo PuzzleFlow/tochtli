@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Rafal Bigaj"]
-  s.date = "2015-07-02"
+  s.date = "2015-07-03"
   s.description = "Lightweight framework for service oriented applications based on bunny (RabbitMQ)"
   s.email = "rafal.bigaj@puzzleflow.com"
   s.extra_rdoc_files = [
@@ -41,6 +41,7 @@ Gem::Specification.new do |s|
     "lib/tochtli/test/client.rb",
     "lib/tochtli/test/controller.rb",
     "lib/tochtli/test/integration.rb",
+    "lib/tochtli/test/memory_cache.rb",
     "lib/tochtli/test/test_case.rb",
     "lib/tochtli/version.rb",
     "test/base_client_test.rb",
@@ -55,6 +56,7 @@ Gem::Specification.new do |s|
     "test/dummy/config/rabbit.yml",
     "test/dummy/db/.gitkeep",
     "test/dummy/log/.gitkeep",
+    "test/log/.gitkeep",
     "test/message_test.rb",
     "test/rabbit_client_test.rb",
     "test/rabbit_connection_test.rb",
@@ -77,6 +79,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<dalli>, ["~> 2.6.4"])
       s.add_development_dependency(%q<jeweler>, ["~> 2.0.1"])
       s.add_development_dependency(%q<sqlite3>, [">= 0"])
+      s.add_development_dependency(%q<mini_cache>, [">= 0"])
       s.add_development_dependency(%q<minitest>, [">= 4.7.5"])
       s.add_development_dependency(%q<minitest-reporters>, [">= 0.5.0"])
     else
@@ -87,6 +90,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<dalli>, ["~> 2.6.4"])
       s.add_dependency(%q<jeweler>, ["~> 2.0.1"])
       s.add_dependency(%q<sqlite3>, [">= 0"])
+      s.add_dependency(%q<mini_cache>, [">= 0"])
       s.add_dependency(%q<minitest>, [">= 4.7.5"])
       s.add_dependency(%q<minitest-reporters>, [">= 0.5.0"])
     end
@@ -98,6 +102,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<dalli>, ["~> 2.6.4"])
     s.add_dependency(%q<jeweler>, ["~> 2.0.1"])
     s.add_dependency(%q<sqlite3>, [">= 0"])
+    s.add_dependency(%q<mini_cache>, [">= 0"])
     s.add_dependency(%q<minitest>, [">= 4.7.5"])
     s.add_dependency(%q<minitest-reporters>, [">= 0.5.0"])
   end

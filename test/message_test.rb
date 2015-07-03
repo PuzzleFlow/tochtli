@@ -9,10 +9,9 @@ class MessageTest < Tochtli::Test::TestCase
 
     def valid?
       @timestamp ||= Time.now
+      return false unless optional.nil? || optional =~ /\A[a-z!]+\z/i
       super
     end
-
-    #validates :optional, format: /\A[a-z!]+\z/i, allow_nil: true
 
     def setup_timestamp
       @timestamp ||= Time.now

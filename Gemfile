@@ -10,6 +10,7 @@ group :development do
   gem 'jeweler', '~> 2.0.1'
 
   gem 'sqlite3'
+  gem 'mini_cache'
 
   if ENV['RAILS_VER']
     rails_ver = ENV['RAILS_VER'] # Setup rails version for tests

@@ -10,7 +10,7 @@ module Tochtli
 
       def setup
         super
-        @cache  = ActiveSupport::Cache::MemoryStore.new
+        @cache  = Object.const_defined?(:ActiveSupport) ? ActiveSupport::Cache::MemoryStore.new : Tochtli::Test::MemoryCache.new
         @logger = Tochtli.logger
         self.class.controller_class.setup(@connection, @cache, @logger)
         @dispatcher = self.class.controller_class.dispatcher
