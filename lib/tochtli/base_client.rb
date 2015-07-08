@@ -1,25 +1,6 @@
 module Tochtli
   class BaseClient
-    extend Uber::InheritableAttr
-
     attr_reader :rabbit_client, :rabbit_connection, :logger
-
-    inheritable_attr :singleton_instance
-    self.singleton_instance = nil
-
-    # Singleton for controllers
-    def self.instance(*args)
-      unless self.singleton_instance
-        self.singleton_instance = new(*args)
-      end
-      self.singleton_instance
-    end
-
-    # Reset singleton instance (useful for tests)
-    def self.force_instance(*args)
-      self.singleton_instance = nil
-      instance(*args)
-    end
 
     def initialize(rabbit_client_or_connection = nil, logger = nil)
       logger ||= Tochtli.logger
