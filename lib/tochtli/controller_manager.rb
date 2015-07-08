@@ -65,7 +65,13 @@ module Tochtli
     end
 
     class << self
-      delegate :register, :setup, :start, :stop, :restart, :running?, :logger, :rabbit_connection, :cache, :to => :instance
+      def method_missing(method, *args)
+        if [:register, :setup, :start, :stop, :restart, :running?, :logger, :rabbit_connection, :cache].include?(method)
+          instance.send(method, *args)
+        else
+          super
+        end
+      end
     end
   end
 end

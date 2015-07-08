@@ -1,15 +1,15 @@
 module Tochtli
   module Test
-    class TestCase < ActiveSupport::TestCase
+    class TestCase < Minitest::Test
 
-      setup do
+      def setup
         @connection    = TestRabbitConnection.new
         @message_index = 0
       end
 
       def assert_published(message_class, attributes={})
         publication = @connection.get_publication
-        assert_not_nil publication, "No message published"
+        refute_nil publication, "No message published"
         @message = publication[:message]
         assert_kind_of message_class, @message
         attributes.each do |attr_name, value|

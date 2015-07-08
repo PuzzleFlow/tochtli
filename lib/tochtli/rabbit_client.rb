@@ -7,8 +7,6 @@ module Tochtli
 
     attr_reader :rabbit_connection
 
-    delegate :reply_queue, to: :rabbit_connection
-
     def initialize(rabbit_connection=nil, logger=nil)
       if rabbit_connection
         @rabbit_connection = rabbit_connection
@@ -47,6 +45,10 @@ module Tochtli
       end
 
       mutex.synchronize { cv.wait(mutex, timeout.to_f) }
+    end
+
+    def reply_queue(*args)
+      rabbit_connection.reply_queue(*args)
     end
   end
 end

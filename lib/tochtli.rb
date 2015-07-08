@@ -1,7 +1,23 @@
 require 'tochtli/version'
 require 'tochtli/engine' if defined?(::Rails)
-require 'active_support/all'
+
 require 'bunny'
+require 'json'
+
+require 'uber/inheritable_attr'
+require 'virtus'
+require 'facets/module/cattr'
+require 'facets/array/extract_options'
+require 'facets/hash/symbolize_keys'
+require 'facets/string/underscore'
+require 'facets/array/extract_options'
+require 'facets/string/camelcase'
+
+class String # ActiveSupport compatibility
+  def camelize
+    split('::').map{|s| s.camelcase(true) }.join('::')
+  end
+end
 
 module Tochtli
   autoload :RabbitConnection, 'tochtli/rabbit_connection'
@@ -120,5 +136,16 @@ module Tochtli
         railtie.paths["service/#{type}"].try(:existent)
       end.compact.flatten
     end
+  end
+end
+
+
+####
+# TEMPORARY see: https://github.com/apotonick/uber/pull/10
+####
+
+class Uber::InheritableAttr::Clone
+  def self.uncloneable
+    [Symbol, TrueClass, FalseClass, NilClass, Numeric]
   end
 end

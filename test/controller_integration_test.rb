@@ -110,7 +110,7 @@ class ControllerIntegrationTest < Tochtli::Test::Integration
     end
   end
 
-  test 'echo command' do
+  def test_echo_command
     message = TestMessage.new(:text => 'Hello world!')
 
     publish message, :expect => TestEchoReply
@@ -118,29 +118,29 @@ class ControllerIntegrationTest < Tochtli::Test::Integration
     assert_equal message.text, @reply.original_text
   end
 
-  test 'error' do
+  def test_error
     message = ErrorMessage.new
     handler = TestReplyHandler.new(1)
 
-    publish message, :reply_handler => handler, :timeout => 1.5.second
+    publish message, :reply_handler => handler, :timeout => 1.5
 
-    handler.wait(2.seconds)
+    handler.wait(2)
 
     assert_equal 1, handler.errors
   end
 
-  test 'network failure' do
+  def test_network_failure
     message = FailureMessage.new
     handler = TestReplyHandler.new(1)
 
-    publish message, :reply_handler => handler, :timeout => 2.5.second
+    publish message, :reply_handler => handler, :timeout => 2.5
 
-    handler.wait(3.seconds)
+    handler.wait(3)
 
     assert_equal 1, handler.timeouts
   end
 
-  test 'sleepy' do
+  def test_sleepy
     count   = 20
     handler = TestReplyHandler.new(count)
     start_t = Time.now
@@ -149,7 +149,7 @@ class ControllerIntegrationTest < Tochtli::Test::Integration
       publish message, :expect => TestEchoReply, :reply_handler => handler, :timeout => 3.0
     end
 
-    handler.wait(4.seconds)
+    handler.wait(4)
 
     duration = Time.now - start_t
 
@@ -166,7 +166,7 @@ class ControllerIntegrationTest < Tochtli::Test::Integration
       publish message, :expect => TestEchoReply, :reply_handler => handler, :timeout => 3.0
     end
     sleep(0.3)
-    assert_not_equal 0, handler.pending_replies
+    refute_equal 0, handler.pending_replies
 
     # right now there should be some messages not processed
     # restart should wait until they are done
@@ -177,7 +177,7 @@ class ControllerIntegrationTest < Tochtli::Test::Integration
     handler
   end
 
-  test 'graceful restart' do
+  def test_graceful_restart
     handler = restart_test(15)
 
     assert_equal 0, handler.pending_replies
@@ -185,15 +185,15 @@ class ControllerIntegrationTest < Tochtli::Test::Integration
     assert_equal 0, handler.timeouts
   end
 
-  test 'forced restart' do
+  def test_forced_restart
     handler = restart_test(0)
 
     assert_equal 0, handler.pending_replies
-    assert_not_equal 0, handler.errors + handler.timeouts
+    refute_equal 0, handler.errors + handler.timeouts
   end
 
 
-  test 'echo performance' do
+  def test_echo_performance
     begin
       @logger.level = Logger::ERROR # mute logger to speed up test
 
@@ -204,10 +204,10 @@ class ControllerIntegrationTest < Tochtli::Test::Integration
 
       count.times do |i|
         message = TestMessage.new(:text => "#{i}: Hello world!")
-        publish message, :expect => TestEchoReply, :reply_handler => handler, :timeout => 6.seconds
+        publish message, :expect => TestEchoReply, :reply_handler => handler, :timeout => 6
       end
 
-      handler.wait(2.seconds)
+      handler.wait(2)
 
       end_t = Time.now
       time  = end_t - start_t
@@ -222,17 +222,17 @@ class ControllerIntegrationTest < Tochtli::Test::Integration
     end
   end
 
-  test 'default queue name' do
+  def test_default_queue_name
     assert_equal 'controller_integration_test/test_controller', TestController.queue_name
     assert @connection.queue_exists?('controller_integration_test/test_controller')
   end
 
-  test 'custom queue name' do
+  def test_custom_queue_name
     assert_equal 'test/custom/queue/name', CustomNameController.queue_name
     assert @connection.queue_exists?('test/custom/queue/name')
   end
 
-  test 'custom exchange' do
+  def test_custom_exchange
     dispatcher = CustomExchangeController.dispatcher
     queue      = dispatcher.queues.first
     refute_nil dispatcher
@@ -246,7 +246,7 @@ class ControllerIntegrationTest < Tochtli::Test::Integration
     refute queue.channel.exchanges['test.notifications'].durable?
   end
 
-  test 'binding on setup' do
+  def test_binding_on_setup
     assert BeforeSetupBindingController.routing_keys.include?('custom.topic')
   end
 end

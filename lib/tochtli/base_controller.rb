@@ -1,47 +1,49 @@
 module Tochtli
   class BaseController
-    class_attribute :routing_keys,
-                    :static_message_handlers,
-                    :work_pool_size
+    extend Uber::InheritableAttribute
+
+    inheritable_attr :routing_keys
+    inheritable_attr :static_message_handlers
+    inheritable_attr :work_pool_size
 
     self.work_pool_size = 1 # default work pool size per controller instance
 
     attr_reader :logger, :message, :delivery_info
 
     # Each controller can overwrite the queue name (default: controller.name.underscore)
-    class_attribute :queue_name
+    inheritable_attr :queue_name
 
     # Custom options for controller queue and exchange
-    class_attribute :queue_durable
+    inheritable_attr :queue_durable
     self.queue_durable = true
 
-    class_attribute :queue_auto_delete
+    inheritable_attr :queue_auto_delete
     self.queue_auto_delete = false
 
-    class_attribute :queue_exclusive
+    inheritable_attr :queue_exclusive
     self.queue_exclusive = false
 
-    class_attribute :exchange_type
+    inheritable_attr :exchange_type
     self.exchange_type = :topic
 
-    class_attribute :exchange_name # read from configuration by default
+    inheritable_attr :exchange_name # read from configuration by default
 
-    class_attribute :exchange_durable
+    inheritable_attr :exchange_durable
     self.exchange_durable = true
 
     # Message dispatcher created on start
-    class_attribute :dispatcher
+    inheritable_attr :dispatcher
 
     protected
 
     # @private before setup callback
-    class_attribute :before_setup_block
+    inheritable_attr :before_setup_block
 
     class << self
       def inherited(controller)
         controller.routing_keys            = Set.new
         controller.static_message_handlers = Hash.new
-        controller.queue_name              = controller.name.underscore
+        controller.queue_name              = controller.name.underscore.gsub('::', '/')
         ControllerManager.register(controller)
       end
 

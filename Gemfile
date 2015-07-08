@@ -1,12 +1,16 @@
 source 'https://rubygems.org'
 
 gem 'bunny', '>= 1.7.0'
+gem 'uber'
+gem 'virtus'
+gem 'facets', require: false
 
 group :development do
   gem 'dalli', '~> 2.6.4'
   gem 'jeweler', '~> 2.0.1'
 
   gem 'sqlite3'
+  gem 'mini_cache'
 
   if ENV['RAILS_VER']
     rails_ver = ENV['RAILS_VER'] # Setup rails version for tests
@@ -18,7 +22,7 @@ group :development do
     gem 'minitest', rails_ver < '4.0' ? '~> 4.7.5' : '~> 5.4.2'
     gem 'minitest-rails', rails_ver < '4.0' ? '~> 1.0.1' : '~> 2.1.1'
   else
-    gem 'rails', '>= 3.2.15'
+    #gem 'rails', '>= 3.2.15'
     gem 'minitest', '>= 4.7.5'
     gem 'minitest-reporters', '>= 0.5.0'
   end
