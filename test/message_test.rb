@@ -2,13 +2,14 @@ require_relative 'test_helper'
 
 class MessageTest < Tochtli::Test::TestCase
   class SimpleMessage < Tochtli::Message
-    bind_topic 'test.controller.simple'
+    route_to 'test.controller.simple'
 
-    required_attributes :text, :timestamp
-    optional_attributes :optional
+    attribute :text, String
+    attribute :timestamp, Time
+    attribute :optional, String, required: false
 
     def valid?
-      @timestamp ||= Time.now
+      setup_timestamp
       return false unless optional.nil? || optional =~ /\A[a-z!]+\z/i
       super
     end
@@ -19,14 +20,13 @@ class MessageTest < Tochtli::Test::TestCase
   end
 
   class OpenMessage < Tochtli::Message
-    ignore_excess_attributes
+    ignore_extra_attributes
 
-    required_attributes :text
+    attribute :text, String
   end
 
-  def test_topic_binding
-    message_class = Tochtli::MessageMap.instance.for('test.controller.simple')
-    assert_equal SimpleMessage, message_class
+  def test_routing_key
+    assert_equal 'test.controller.simple', SimpleMessage.routing_key
   end
 
   def test_simple_message_without_optional
@@ -63,8 +63,7 @@ class MessageTest < Tochtli::Test::TestCase
 
   def test_undefined_attribute_error
     message = SimpleMessage.new(text: 'Hello', extra: 'from Paris')
-    assert message.invalid?
-    #assert_equal 'Undefined attribute :extra', message.errors.full_messages.first
+    assert message.invalid? # Undefined attribute :extra
   end
 
   def test_ignore_excess_attribute

@@ -54,6 +54,5 @@ class ControllerManagerTest < Tochtli::Test::TestCase
 
   def test_state_monitor
     Tochtli::ControllerManager.start(FirstController, connection: @connection, logger: @logger)
-
   end
 end

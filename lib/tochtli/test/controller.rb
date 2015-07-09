@@ -33,7 +33,7 @@ module Tochtli
           if (reply = @connection.publications.first) && reply[:message].is_a?(Tochtli::ErrorMessage)
             raise "Process error: #{reply[:message].message}"
           else
-            raise "Message #{message.class.name} not processed by #{self.controller_class}."
+            raise "Message #{message.class.name} not processed by #{self.class.controller_class} - #{message.inspect}."
           end
         end
 

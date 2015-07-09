@@ -5,33 +5,38 @@ Thread.abort_on_exception = true
 
 class ControllerIntegrationTest < Tochtli::Test::Integration
   class TestMessage < Tochtli::Message
-    bind_topic 'test.controller.echo'
+    route_to 'test.controller.echo'
 
-    attributes :text
+    attribute :text, String
   end
 
   class ErrorMessage < Tochtli::Message
-    bind_topic 'test.controller.error'
+    route_to 'test.controller.error'
   end
 
   class FailureMessage < Tochtli::Message
-    bind_topic 'test.controller.failure'
+    route_to 'test.controller.failure'
   end
 
   class SleepyMessage < Tochtli::Message
-    bind_topic 'test.controller.sleepy'
+    route_to 'test.controller.sleepy'
 
-    attributes :duration
+    attribute :duration, Float
   end
 
   class TestEchoReply < Tochtli::Message
-    attributes :original_text
+    attribute :original_text, String
   end
 
   class TestController < Tochtli::BaseController
-    subscribe 'test.controller.*'
+    bind 'test.controller.*'
 
     self.work_pool_size = 10
+
+    on TestMessage, :echo
+    on ErrorMessage, :error
+    on FailureMessage, :failure
+    on SleepyMessage, :sleepy
 
     def echo
       reply TestEchoReply.new(:original_text => message.text)
@@ -66,7 +71,7 @@ class ControllerIntegrationTest < Tochtli::Test::Integration
 
   class BeforeSetupBindingController < Tochtli::BaseController
     before_setup do
-      subscribe 'custom.topic'
+      bind 'custom.topic'
     end
   end
 
@@ -159,7 +164,7 @@ class ControllerIntegrationTest < Tochtli::Test::Integration
   end
 
   def restart_test(timeout)
-    count = 30
+    count   = 20
     handler = TestReplyHandler.new(count)
     count.times do
       message = SleepyMessage.new(:duration => 0.5)

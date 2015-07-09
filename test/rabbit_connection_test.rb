@@ -56,8 +56,8 @@ class RabbitConnectionTest < Minitest::Test
 
   def test_reply_queue_recovery
     Tochtli::RabbitConnection.open('test',
-                                       network_recovery_interval:     0.1,
-                                       recover_from_connection_close: true) do |rabbit_connection|
+                                   network_recovery_interval:     0.1,
+                                   recover_from_connection_close: true) do |rabbit_connection|
       reply_queue   = rabbit_connection.reply_queue
       original_name = reply_queue.name
       timeout       = 0.3
@@ -92,8 +92,8 @@ class RabbitConnectionTest < Minitest::Test
   def test_multithreaded_consumer_performance
     work_pool_size = 10
     Tochtli::RabbitConnection.open('test',
-                                       exchange_name:  "puzzleflow.tests",
-                                       work_pool_size: work_pool_size) do |connection|
+                                   exchange_name:  "puzzleflow.tests",
+                                   work_pool_size: work_pool_size) do |connection|
       mutex                  = Mutex.new
       cv                     = ConditionVariable.new
       thread_count           = 5

@@ -89,7 +89,7 @@ module Tochtli
     end
 
     def create_message(message_class, properties, payload)
-      message = message_class.new(nil, properties)
+      message            = message_class.new(nil, properties)
       message.attributes = JSON.parse(payload)
       raise InvalidMessageError.new(message.errors.full_messages.join(", "), message) if message.invalid?
       message
@@ -106,8 +106,10 @@ module Tochtli
       action           = env[:action]
       logger           = env[:logger]
 
+      action_info = action.is_a?(Proc) ? "block at #{action.source_location.join(':')}" : action
+
       logger.debug "\n\nAMQP Message #{message.class.name} at #{start_time}"
-      logger.debug "Processing by #{controller_class.name}##{action} [Thread: #{Thread.current.object_id}]"
+      logger.debug "Processing by #{controller_class.name}##{action_info} [Thread: #{Thread.current.object_id}]"
       logger.debug "\tMessage: #{message.attributes.inspect}."
       logger.debug "\tProperties: #{properties.inspect}."
       logger.debug "\tDelivery info: exchange: #{delivery_info[:exchange]}, routing_key: #{delivery_info[:routing_key]}."

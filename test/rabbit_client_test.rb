@@ -48,7 +48,7 @@ class RabbitClientTest < Tochtli::Test::Client
   end
 
   class FakeMessage < Tochtli::Message
-    bind_topic 'test.fake.topic'
+    route_to 'test.fake.topic'
 
     attributes :test_attr
   end

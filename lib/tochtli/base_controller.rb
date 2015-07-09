@@ -3,7 +3,7 @@ module Tochtli
     extend Uber::InheritableAttribute
 
     inheritable_attr :routing_keys
-    inheritable_attr :static_message_handlers
+    inheritable_attr :message_handlers
     inheritable_attr :work_pool_size
 
     self.work_pool_size = 1 # default work pool size per controller instance
@@ -41,25 +41,36 @@ module Tochtli
 
     class << self
       def inherited(controller)
-        controller.routing_keys            = Set.new
-        controller.static_message_handlers = Hash.new
-        controller.queue_name              = controller.name.underscore.gsub('::', '/')
+        controller.routing_keys     = Set.new
+        controller.message_handlers = Hash.new
+        controller.queue_name       = controller.name.underscore.gsub('::', '/')
         ControllerManager.register(controller)
       end
 
-      def subscribe(*routing_keys)
+      def bind(*routing_keys)
         self.routing_keys.merge(routing_keys)
       end
 
-      def on(routing_key, method_name, message_class=nil)
-        message_class ||= Tochtli::MessageMap.instance.for(routing_key)
-        raise "Message class not found for the topic: #{routing_key}." unless message_class
-        self.static_message_handlers[routing_key] = MessageRoute.new(message_class, method_name)
+      def on(message_class, method_name=nil, opts={}, &block)
+        if method_name.is_a?(Hash)
+          opts        = method_name
+          method_name = nil
+        end
+        method = method_name ? method_name : block
+        raise ArgumentError, "Method name or block must be given" unless method
+
+        raise ArgumentError, "Message class expected, got: #{message_class}" unless message_class < Tochtli::Message
+
+        routing_key = opts[:routing_key] || message_class.routing_key
+        raise "Topic not set for message: #{message_class}" unless routing_key
+
+        self.message_handlers[routing_key] = MessageRoute.new(message_class, method)
       end
 
-      def unbind(routing_key)
-        self.static_message_handlers.delete(routing_key)
-      end
+      # TODO: rename - conflicts with bind method
+      #def unbind(routing_key)
+      #  self.message_handlers.delete(routing_key)
+      #end
 
       def before_setup(&block)
         self.before_setup_block = block
@@ -67,7 +78,6 @@ module Tochtli
 
       def setup(rabbit_connection, cache=nil, logger=nil)
         self.before_setup_block.call if self.before_setup_block
-        setup_routing
         self.dispatcher = Dispatcher.new(self, rabbit_connection, cache, logger || Tochtli.logger)
       end
 
@@ -86,48 +96,21 @@ module Tochtli
       def stop(options={})
         self.dispatcher.shutdown(options) if started?
         self.dispatcher = nil
-        clear_routing
       end
 
       def restart(options={})
         connection = self.dispatcher.rabbit_connection
-        logger = self.dispatcher.logger
-        cache = self.dispatcher.cache
+        logger     = self.dispatcher.logger
+        cache      = self.dispatcher.cache
 
         stop(timeout: options.fetch(:timeout, 15))
         setup(connection, cache, logger)
         start
       end
 
-      def setup_routing
-        clear_routing
-        setup_static_routing
-        setup_automatic_routing
-      end
-
-      def clear_routing
-        @routing = {}
-      end
-
-      def setup_static_routing
-        @routing.merge!(self.static_message_handlers)
-      end
-
-      def setup_automatic_routing
-        if self.routing_keys.size == 1 && self.routing_keys.first =~ /^([a-z\.]+\.)\*$/
-          routing_key_prefix = $1
-          self.public_instance_methods(false).each do |method_name|
-            routing_key   = routing_key_prefix + method_name.to_s
-            message_class = Tochtli::MessageMap.instance.for(routing_key)
-            raise "Topic '#{routing_key}' is not bound to any message. Unable to setup automatic routing for #{self.class}." unless message_class
-            @routing[routing_key] = MessageRoute.new(message_class, method_name)
-          end
-        end
-      end
-
       def find_message_route(routing_key)
-        raise "Routing not set up" unless @routing
-        @routing[routing_key]
+        raise "Routing not set up" if self.message_handlers.empty?
+        self.message_handlers[routing_key]
       end
 
       def create_queue(rabbit_connection, queue_name=nil)
@@ -163,7 +146,11 @@ module Tochtli
       @message       = env[:message]
       @delivery_info = env[:delivery_info]
 
-      send @action
+      if @action.is_a?(Proc)
+        instance_eval(&@action)
+      else
+        send @action
+      end
 
     ensure
       @env, @message, @delivery_info = nil
@@ -197,8 +184,7 @@ module Tochtli
         @logger            = logger
         @application       = Tochtli.application.to_app
         @queues            = {}
-        @mutex             = Mutex.new
-        @current_processes = 0
+        @process_counter   = ProcessCounter.new
       end
 
       def start(queue_name)
@@ -206,7 +192,8 @@ module Tochtli
       end
 
       def process_message(delivery_info, properties, payload)
-        @mutex.synchronize { @current_processes += 1}
+        register_process_start
+
         env = {
             delivery_info:     delivery_info,
             properties:        properties,
@@ -216,13 +203,15 @@ module Tochtli
             cache:             cache,
             logger:            logger
         }
+
         @application.call(env)
+
       rescue Exception => ex
         logger.error "\nUNEXPECTED EXCEPTION: #{ex.class.name} (#{ex.message})"
         logger.error ex.backtrace.join("\n")
         false
       ensure
-        @mutex.synchronize { @current_processes -= 1}
+        register_process_end
       end
 
       def subscribe_queue(queue_name)
@@ -241,12 +230,8 @@ module Tochtli
       # If timeout is reached, forces the shutdown. Useful with dynamic reconfiguration of work pool size. 
       def shutdown(options={})
         timeout = options[:timeout] || 15
-        interval = options[:interval] || 0.5
 
-        (timeout/interval).to_i.times do
-          break if @current_processes == 0
-          sleep(interval)
-        end
+        wait_for_processes timeout
 
         stop
       end
@@ -260,6 +245,49 @@ module Tochtli
 
       def queues
         @queues.map { |_, qh| qh[:queue] }
+      end
+
+      protected
+
+      def register_process_start
+        @process_counter.increment
+      end
+
+      def register_process_end
+        @process_counter.decrement
+      end
+
+      def wait_for_processes(timeout)
+        @process_counter.wait(timeout)
+      end
+
+      class ProcessCounter
+        include MonitorMixin
+
+        def initialize
+          super
+          @count = 0
+          @cv    = new_cond
+        end
+
+        def increment
+          synchronize do
+            @count += 1
+          end
+        end
+
+        def decrement
+          synchronize do
+            @count -= 1 if @count > 0
+            @cv.signal if @count == 0
+          end
+        end
+
+        def wait(timeout)
+          synchronize do
+            @cv.wait(timeout) unless @count == 0
+          end
+        end
       end
     end
   end

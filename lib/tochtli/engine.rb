@@ -1,4 +1,3 @@
-
 module Tochtli
   class Engine < ::Rails::Engine
 

@@ -2,7 +2,7 @@ module Tochtli
   class RabbitClient
 
     cattr_accessor :rabbit_config
-    self.rabbit_config = nil
+    self.rabbit_config      = nil
     DEFAULT_CONNECTION_NAME = 'default'
 
     attr_reader :rabbit_connection

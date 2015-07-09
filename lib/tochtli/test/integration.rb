@@ -5,7 +5,7 @@ module Tochtli
       BaseController.queue_auto_delete = true
 
       def setup
-        @logger             = Logger.new(File.join(Object.const_defined?(:Rails) ? Rails.root : './test', 'log/test_service_integration.log'))
+        @logger             = Tochtli.logger
         @logger.level       = Logger::DEBUG
         @client             = Tochtli::RabbitClient.new(nil, @logger)
         @connection         = @client.rabbit_connection

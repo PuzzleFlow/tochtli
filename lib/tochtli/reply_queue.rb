@@ -55,10 +55,10 @@ module Tochtli
     end
 
     def on_delivery(delivery_info, metadata, payload)
-      class_name  = metadata.type.camelize.gsub(/[^a-zA-Z0-9\:]/, '_') # basic sanity
-      reply_class = eval(class_name)
-      reply       = reply_class.new({}, metadata)
-      attributes  = JSON.parse(payload)
+      class_name       = metadata.type.camelize.gsub(/[^a-zA-Z0-9\:]/, '_') # basic sanity
+      reply_class      = eval(class_name)
+      reply            = reply_class.new({}, metadata)
+      attributes       = JSON.parse(payload)
       reply.attributes = attributes
 
       logger.debug "[#{Time.now} AMQP] Replay for #{reply.properties.correlation_id}: #{reply.inspect}"

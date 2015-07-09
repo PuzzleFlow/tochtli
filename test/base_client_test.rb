@@ -48,11 +48,11 @@ class BaseClientTest < Tochtli::Test::Client
   end
 
   class FakeMessage < Tochtli::Message
-    optional_attributes :test_attr
+    attribute :test_attr, String, required: false
   end
 
   class FakeReply < Tochtli::Message
-    required_attributes :result
+    attribute :result, String
   end
 
 end

@@ -15,7 +15,7 @@ require 'facets/string/camelcase'
 
 class String # ActiveSupport compatibility
   def camelize
-    split('::').map{|s| s.camelcase(true) }.join('::')
+    split('::').map { |s| s.camelcase(true) }.join('::')
   end
 end
 
@@ -27,7 +27,6 @@ module Tochtli
   autoload :BaseClient, 'tochtli/base_client'
   autoload :ControllerManager, 'tochtli/controller_manager'
   autoload :Message, 'tochtli/message'
-  autoload :MessageMap, 'tochtli/message_map'
   autoload :ReplyQueue, 'tochtli/reply_queue'
   autoload :RabbitClient, 'tochtli/rabbit_client'
   autoload :Test, 'tochtli/test'
