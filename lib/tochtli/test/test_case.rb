@@ -171,7 +171,7 @@ module Tochtli
     end
 
     class TestMessageHandler
-      attr_reader :reply, :timeout_message
+      attr_reader :reply, :timeout_message, :error
 
       def call(reply)
         @reply = reply
@@ -179,6 +179,10 @@ module Tochtli
 
       def on_timeout(original_message=nil)
         @timeout_message = original_message
+      end
+
+      def on_error(error)
+        @error = error
       end
     end
   end

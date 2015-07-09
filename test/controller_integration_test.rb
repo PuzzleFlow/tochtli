@@ -24,6 +24,10 @@ class ControllerIntegrationTest < Tochtli::Test::Integration
     attribute :duration, Float
   end
 
+  class DroppedMessage < Tochtli::Message
+    route_to 'test.invalid.route'
+  end
+
   class TestEchoReply < Tochtli::Message
     attribute :original_text, String
   end
@@ -161,6 +165,17 @@ class ControllerIntegrationTest < Tochtli::Test::Integration
     assert_equal 0, handler.errors
     assert_equal 0, handler.timeouts
     assert duration < 3.0, "The total processing time should be less then the processing time sum (multi customers expected), duration: #{duration}s"
+  end
+
+  def test_dropped
+    message = DroppedMessage.new
+    handler = TestReplyHandler.new(1)
+
+    publish message, :reply_handler => handler, :timeout => 0.5
+
+    handler.wait(1)
+
+    assert_equal 1, handler.errors
   end
 
   def restart_test(timeout)

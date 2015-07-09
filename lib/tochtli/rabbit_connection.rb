@@ -13,6 +13,16 @@ module Tochtli
 
     DEFAULT_CONNECTION_NAME = 'default'
 
+    class MessageDropped < StandardError
+      attr_reader :original_message
+
+      def initialize(error_message, original_message=nil)
+        super error_message
+        @original_message = original_message
+      end
+    end
+
+
     def initialize(config = nil, channel_pool=nil)
       @config         = config.is_a?(RabbitConnection::Config) ? config : RabbitConnection::Config.load(nil, config)
       @exchange_name  = @config.delete(:exchange_name)
@@ -127,8 +137,9 @@ module Tochtli
         raise "Unable to serialize message to JSON: #{$!}"
       end
 
-      exchange.on_return do |return_info, properties, content|
-        logger.error "Message #{properties[:message_id]} dropped: #{return_info[:reply_text]} [#{return_info[:reply_code]}]"
+      exchange.on_return do |return_info, properties, _|
+        error_message = "Message #{properties[:message_id]} dropped: #{return_info[:reply_text]} [#{return_info[:reply_code]}]"
+        reply_queue.handle_reply MessageDropped.new(error_message, message), properties[:message_id]
       end
 
       exchange.publish(payload, {

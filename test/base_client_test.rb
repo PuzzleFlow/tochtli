@@ -31,6 +31,16 @@ class BaseClientTest < Tochtli::Test::Client
     assert_equal 'OK', result
   end
 
+  def test_dropped_message
+    expect_published FakeMessage do
+      @reply_queue.handle_reply Tochtli::RabbitConnection::MessageDropped.new("Message dropped", @message), @message.id
+    end
+
+    assert_raises Tochtli::RabbitConnection::MessageDropped do
+      @fake_client.do_sync
+    end
+  end
+
   class FakeClient < Tochtli::BaseClient
     def do_sync(attr=nil)
       handler = SyncMessageHandler.new

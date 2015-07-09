@@ -70,14 +70,15 @@ module Tochtli
       logger.error $!.backtrace.join("\n")
     end
 
-    def handle_reply(reply)
-      if (handler = @message_handlers.delete(reply.properties.correlation_id))
-        if (timeout_thread = @message_timeout_threads.delete(reply.properties.correlation_id))
+    def handle_reply(reply, correlation_id=nil)
+      correlation_id ||= reply.properties.correlation_id
+      if (handler = @message_handlers.delete(correlation_id))
+        if (timeout_thread = @message_timeout_threads.delete(correlation_id))
           timeout_thread.kill
           timeout_thread.join # make sure timeout thread is dead
         end
 
-        unless reply.is_a?(Tochtli::ErrorMessage)
+        if !reply.is_a?(Tochtli::ErrorMessage) && !reply.is_a?(Exception)
 
           begin
 
@@ -94,7 +95,7 @@ module Tochtli
         end
 
       else
-        logger.error "[Tochtli::ReplyQueue] Unexpected message delivery '#{reply.properties.correlation_id}':\n\t#{reply.inspect})"
+        logger.error "[Tochtli::ReplyQueue] Unexpected message delivery '#{correlation_id}':\n\t#{reply.inspect})"
       end
     end
 

@@ -47,6 +47,15 @@ class RabbitClientTest < Tochtli::Test::Client
     assert_nil handler.timeout_message
   end
 
+  def test_message_drop
+    handler = Tochtli::Test::TestMessageHandler.new
+    message = FakeMessage.new(test_attr: 'test')
+    @client.publish message, handler: handler, timeout: 0.1
+    @client.reply_queue.handle_reply Tochtli::RabbitConnection::MessageDropped.new("Message dropped", message), message.id
+
+    assert_kind_of Tochtli::RabbitConnection::MessageDropped, handler.error
+  end
+
   class FakeMessage < Tochtli::Message
     route_to 'test.fake.topic'
 
