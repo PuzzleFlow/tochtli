@@ -127,11 +127,6 @@ module Tochtli
         raise "Unable to serialize message to JSON: #{$!}"
       end
 
-      exchange.on_return do |return_info, properties, _|
-        error_message = "Message #{properties[:message_id]} dropped: #{return_info[:reply_text]} [#{return_info[:reply_code]}]"
-        reply_queue.handle_reply MessageDropped.new(error_message, message), properties[:message_id]
-      end
-
       exchange.publish(payload, {
           routing_key:  routing_key,
           persistent:   true,
@@ -155,12 +150,18 @@ module Tochtli
 
     private
 
+    def on_return(return_info, properties, payload)
+      error_message = "Message #{properties[:message_id]} dropped: #{return_info[:reply_text]} [#{return_info[:reply_code]}]"
+      reply_queue.handle_reply MessageDropped.new(error_message, payload), properties[:message_id]
+    end
+
     def create_channel_wrap(thread=Thread.current)
       raise ConnectionFailed.new("Channel already created for thread #{thread.object_id}") if @channel_pool[thread.object_id]
       raise ConnectionFailed.new("Unable to create channel. Connection lost.") unless @connection
 
       channel  = create_channel(@work_pool_size)
       exchange = create_exchange(channel)
+      exchange.on_return &method(:on_return)
 
       channel_wrap                    = ChannelWrap.new(channel, exchange)
       @channel_pool[thread.object_id] = channel_wrap
