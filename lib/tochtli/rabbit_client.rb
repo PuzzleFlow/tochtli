@@ -1,27 +1,19 @@
 module Tochtli
   class RabbitClient
 
-    cattr_accessor :rabbit_config
-    self.rabbit_config      = nil
-    DEFAULT_CONNECTION_NAME = 'default'
-
     attr_reader :rabbit_connection
 
     def initialize(rabbit_connection=nil, logger=nil)
       if rabbit_connection
         @rabbit_connection = rabbit_connection
       else
-        config_name = self.class.rabbit_config
-        config_name = Rails.env if !config_name && defined?(Rails)
-        config_name ||= DEFAULT_CONNECTION_NAME
-        raise "Tochtli::RabbitClient.rabbit_config is not set. Please setup configuration name." unless config_name
-        @rabbit_connection = Tochtli::RabbitConnection.open(config_name, logger: logger)
+        @rabbit_connection = Tochtli::RabbitConnection.open(nil, logger: logger)
       end
       @logger = logger || @rabbit_connection.logger
     end
 
     def publish(message, options={})
-      raise InvalidMessageError.new(message.errors.full_messages.join(", "), message) if message.invalid?
+      raise InvalidMessageError.new(message.errors.join(", "), message) if message.invalid?
 
       @logger.debug "[#{Time.now} AMQP] Publishing message #{message.id} to #{message.routing_key}"
 

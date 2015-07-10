@@ -8,9 +8,11 @@ class MessageTest < Tochtli::Test::TestCase
     attribute :timestamp, Time
     attribute :optional, String, required: false
 
-    def valid?
+    def validate
       setup_timestamp
-      return false unless optional.nil? || optional =~ /\A[a-z!]+\z/i
+      unless optional.nil? || optional =~ /\A[a-z!]+\z/i
+        add_error "Invalid optional attribute: #{optional}"
+      end
       super
     end
 
@@ -46,6 +48,7 @@ class MessageTest < Tochtli::Test::TestCase
   def test_invalid_attribute
     message = SimpleMessage.new(text: 'Hello', optional: 'world 123')
     assert message.invalid?, "Message passed validation when it should not"
+    assert_equal "Invalid optional attribute: world 123", message.errors[0]
   end
 
   def test_validation_callback_without_value
@@ -64,6 +67,7 @@ class MessageTest < Tochtli::Test::TestCase
   def test_undefined_attribute_error
     message = SimpleMessage.new(text: 'Hello', extra: 'from Paris')
     assert message.invalid? # Undefined attribute :extra
+    assert_equal "Unexpected attributes: extra", message.errors[0]
   end
 
   def test_ignore_excess_attribute

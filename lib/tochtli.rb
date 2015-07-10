@@ -26,6 +26,7 @@ module Tochtli
   autoload :BaseController, 'tochtli/base_controller'
   autoload :BaseClient, 'tochtli/base_client'
   autoload :ControllerManager, 'tochtli/controller_manager'
+  autoload :SimpleValidation, 'tochtli/simple_validation'
   autoload :Message, 'tochtli/message'
   autoload :ReplyQueue, 'tochtli/reply_queue'
   autoload :RabbitClient, 'tochtli/rabbit_client'
@@ -33,11 +34,19 @@ module Tochtli
   autoload :ServiceCache, 'tochtli/service_cache'
   autoload :ActiveRecordConnectionCleaner, 'tochtli/active_record_connection_cleaner'
 
-  class InvalidMessageError < StandardError
-    def initialize(message, service_message)
-      super(message)
-      @service_message = service_message
+  class MessageError < StandardError
+    attr_reader :tochtli_message
+
+    def initialize(error_message, tochtli_message)
+      super error_message
+      @tochtli_message = tochtli_message
     end
+  end
+
+  class InvalidMessageError < MessageError
+  end
+
+  class MessageDropped < MessageError
   end
 
   class << self

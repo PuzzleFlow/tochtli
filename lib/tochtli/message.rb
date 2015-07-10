@@ -2,6 +2,7 @@ module Tochtli
   class Message
     extend Uber::InheritableAttr
     include Virtus.model
+    include Tochtli::SimpleValidation
 
     inheritable_attr :routing_key
     inheritable_attr :extra_attributes_policy
@@ -63,19 +64,21 @@ module Tochtli
     end
 
     def validate_extra_attributes
-      self.class.extra_attributes_policy == :ignore || @extra_attributes.empty?
+      if self.class.extra_attributes_policy != :ignore && !@extra_attributes.empty?
+        add_error "Unexpected attributes: #{@extra_attributes.keys.map(&:to_s).join(', ')}"
+      end
     end
 
     def validate_attributes_presence
-      !attribute_set.any? { |a| a.required? && self[a.name].nil? }
+      nil_attributes = attribute_set.select { |a| a.required? && self[a.name].nil? }.map(&:name)
+      unless nil_attributes.empty?
+        add_error "Required attributes: #{nil_attributes.map(&:to_s).join(', ')} not specified"
+      end
     end
 
-    def valid?
-      validate_extra_attributes && validate_attributes_presence
-    end
-
-    def invalid?
-      !valid?
+    def validate
+      validate_extra_attributes
+      validate_attributes_presence
     end
 
     def self.generate_id

@@ -12,7 +12,10 @@ rescue Bundler::BundlerError => e
 end
 require 'rake'
 
+require 'rake/testtask'
 require 'jeweler'
+require 'yard'
+
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://guides.rubygems.org/specification-reference/ for more options
   gem.name = "tochtli"
@@ -26,7 +29,6 @@ Jeweler::Tasks.new do |gem|
 end
 Jeweler::RubygemsDotOrgTasks.new
 
-require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
   test.libs << 'lib' << 'test'
   test.pattern = 'test/**/*_test.rb'
@@ -41,12 +43,8 @@ end
 
 task :default => :test
 
-require 'rdoc/task'
-Rake::RDocTask.new do |rdoc|
-  version = File.exist?('VERSION') ? File.read('VERSION') : ""
-
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "activerecord-postgres-custom-types #{version}"
-  rdoc.rdoc_files.include('README*')
-  rdoc.rdoc_files.include('lib/**/*.rb')
+YARD::Rake::YardocTask.new do |t|
+  t.files   = ['lib/**/*.rb', 'README*']   # optional
+  t.options = ['--any', '--extra', '--opts'] # optional
+  t.stats_options = ['--list-undoc']         # optional
 end

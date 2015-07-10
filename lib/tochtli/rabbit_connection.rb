@@ -13,16 +13,6 @@ module Tochtli
 
     DEFAULT_CONNECTION_NAME = 'default'
 
-    class MessageDropped < StandardError
-      attr_reader :original_message
-
-      def initialize(error_message, original_message=nil)
-        super error_message
-        @original_message = original_message
-      end
-    end
-
-
     def initialize(config = nil, channel_pool=nil)
       @config         = config.is_a?(RabbitConnection::Config) ? config : RabbitConnection::Config.load(nil, config)
       @exchange_name  = @config.delete(:exchange_name)

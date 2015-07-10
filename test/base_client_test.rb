@@ -33,10 +33,10 @@ class BaseClientTest < Tochtli::Test::Client
 
   def test_dropped_message
     expect_published FakeMessage do
-      @reply_queue.handle_reply Tochtli::RabbitConnection::MessageDropped.new("Message dropped", @message), @message.id
+      @reply_queue.handle_reply Tochtli::MessageDropped.new("Message dropped", @message), @message.id
     end
 
-    assert_raises Tochtli::RabbitConnection::MessageDropped do
+    assert_raises Tochtli::MessageDropped do
       @fake_client.do_sync
     end
   end

@@ -71,7 +71,8 @@ module Tochtli
     end
 
     def handle_reply(reply, correlation_id=nil)
-      correlation_id ||= reply.properties.correlation_id
+      correlation_id ||= reply.properties.correlation_id if reply.is_a?(Tochtli::Message)
+      raise ArgumentError, "Correlated message ID expected" unless correlation_id
       if (handler = @message_handlers.delete(correlation_id))
         if (timeout_thread = @message_timeout_threads.delete(correlation_id))
           timeout_thread.kill

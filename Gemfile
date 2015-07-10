@@ -9,10 +9,11 @@ group :development do
   gem 'dalli', '~> 2.6.4'
   gem 'jeweler', '~> 2.0.1'
 
-  gem 'sqlite3'
   gem 'mini_cache'
+  gem 'yard', '~> 0.8'
 
   if ENV['RAILS_VER']
+    gem 'sqlite3'
     rails_ver = ENV['RAILS_VER'] # Setup rails version for tests
     gem 'rails', rails_ver
     if rails_ver.to_i < 4
