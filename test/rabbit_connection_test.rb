@@ -3,12 +3,10 @@ require 'tochtli/test/test_case'
 
 class RabbitConnectionTest < Minitest::Test
   def setup
-    super
     Tochtli::RabbitConnection.close('test')
   end
 
   def teardown
-    super
     Tochtli::RabbitConnection.close('test')
   end
 

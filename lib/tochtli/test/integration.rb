@@ -4,7 +4,8 @@ module Tochtli
       BaseController.queue_durable     = false
       BaseController.queue_auto_delete = true
 
-      def setup
+      def before_setup
+        super
         @logger             = Tochtli.logger
         @logger.level       = Logger::DEBUG
         @client             = Tochtli::RabbitClient.new(nil, @logger)
@@ -18,12 +19,13 @@ module Tochtli
         @cv    = ConditionVariable.new
       end
 
-      def teardown
+      def after_teardown
         begin
           @controller_manager.stop if @controller_manager
         rescue Timeout::Error
           warn "Unable to stop controller manager: #{$!} [#{$!.class}]"
         end
+        super
       end
 
       private

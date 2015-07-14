@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Rafal Bigaj"]
-  s.date = "2015-07-03"
+  s.date = "2015-07-14"
   s.description = "Lightweight framework for service oriented applications based on bunny (RabbitMQ)"
   s.email = "rafal.bigaj@puzzleflow.com"
   s.extra_rdoc_files = [
@@ -32,11 +32,11 @@ Gem::Specification.new do |s|
     "lib/tochtli/controller_manager.rb",
     "lib/tochtli/engine.rb",
     "lib/tochtli/message.rb",
-    "lib/tochtli/message_map.rb",
     "lib/tochtli/rabbit_client.rb",
     "lib/tochtli/rabbit_connection.rb",
     "lib/tochtli/reply_queue.rb",
     "lib/tochtli/service_cache.rb",
+    "lib/tochtli/simple_validation.rb",
     "lib/tochtli/test.rb",
     "lib/tochtli/test/client.rb",
     "lib/tochtli/test/controller.rb",
@@ -65,7 +65,7 @@ Gem::Specification.new do |s|
   ]
   s.homepage = "http://github.com/puzzleflow/tochtli"
   s.licenses = ["MIT"]
-  s.rubygems_version = "2.4.6"
+  s.rubygems_version = "2.4.8"
   s.summary = "Tochtli a core components for SOA"
 
   if s.respond_to? :specification_version then
@@ -78,8 +78,8 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<facets>, [">= 0"])
       s.add_development_dependency(%q<dalli>, ["~> 2.6.4"])
       s.add_development_dependency(%q<jeweler>, ["~> 2.0.1"])
-      s.add_development_dependency(%q<sqlite3>, [">= 0"])
       s.add_development_dependency(%q<mini_cache>, [">= 0"])
+      s.add_development_dependency(%q<yard>, ["~> 0.8"])
       s.add_development_dependency(%q<minitest>, [">= 4.7.5"])
       s.add_development_dependency(%q<minitest-reporters>, [">= 0.5.0"])
     else
@@ -89,8 +89,8 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<facets>, [">= 0"])
       s.add_dependency(%q<dalli>, ["~> 2.6.4"])
       s.add_dependency(%q<jeweler>, ["~> 2.0.1"])
-      s.add_dependency(%q<sqlite3>, [">= 0"])
       s.add_dependency(%q<mini_cache>, [">= 0"])
+      s.add_dependency(%q<yard>, ["~> 0.8"])
       s.add_dependency(%q<minitest>, [">= 4.7.5"])
       s.add_dependency(%q<minitest-reporters>, [">= 0.5.0"])
     end
@@ -101,8 +101,8 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<facets>, [">= 0"])
     s.add_dependency(%q<dalli>, ["~> 2.6.4"])
     s.add_dependency(%q<jeweler>, ["~> 2.0.1"])
-    s.add_dependency(%q<sqlite3>, [">= 0"])
     s.add_dependency(%q<mini_cache>, [">= 0"])
+    s.add_dependency(%q<yard>, ["~> 0.8"])
     s.add_dependency(%q<minitest>, [">= 4.7.5"])
     s.add_dependency(%q<minitest-reporters>, [">= 0.5.0"])
   end

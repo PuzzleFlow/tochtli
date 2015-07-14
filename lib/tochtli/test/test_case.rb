@@ -2,7 +2,8 @@ module Tochtli
   module Test
     class TestCase < Minitest::Test
 
-      def setup
+      def before_setup
+        super
         @connection    = TestRabbitConnection.new
         @message_index = 0
       end

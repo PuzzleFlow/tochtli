@@ -2,7 +2,7 @@ module Tochtli
   module Test
     class Client < Tochtli::Test::TestCase
 
-      def setup
+      def before_setup
         super
         @logger      = Tochtli.logger
         @client      = Tochtli::RabbitClient.new(@connection, @logger)

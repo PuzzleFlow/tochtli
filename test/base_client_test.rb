@@ -3,7 +3,6 @@ require_relative 'test_helper'
 class BaseClientTest < Tochtli::Test::Client
 
   def setup
-    super
     @fake_client = FakeClient.new(@client)
   end
 

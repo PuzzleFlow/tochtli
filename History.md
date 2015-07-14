@@ -1,3 +1,19 @@
+## 0.4.0 / 2015-07-10
+
+  * Remove ActiveSupport dependencies
+  * Replace ActiveSupport::Cache with MiniCache and fix validation tests
+  * Use RabbitConnection#on_return method with all exchanges
+  * YARD introduced
+  * Tochtli::SimpleValidation for validation error messages
+  * RabbitClient#rabbit_config removed
+  * Removed RabbitClient#publish_and_wait (use SyncMessageHandler
+  * Fix #2: Client error on dropped message
+  * No more automatic routing. All routes have to be defined in the controller. (got rid of the MessageMap)
+  * Message attributes rewritten with Virtus.
+  * Message#bind_topic renamed to route_to
+  * BaseController#subscribe renamed to bind
+  * BaseClient#instance (singleton support) removed
+
 ## 0.3.0 / 2015-05-21
 
 ### 4 major enhancements:

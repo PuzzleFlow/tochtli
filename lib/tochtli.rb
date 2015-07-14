@@ -6,18 +6,22 @@ require 'json'
 
 require 'uber/inheritable_attr'
 require 'virtus'
-require 'facets/module/cattr'
-require 'facets/array/extract_options'
-require 'facets/hash/symbolize_keys'
-require 'facets/string/underscore'
-require 'facets/array/extract_options'
-require 'facets/string/camelcase'
 
-class String # ActiveSupport compatibility
-  def camelize
-    split('::').map { |s| s.camelcase(true) }.join('::')
+unless defined?(Rails)
+  require 'facets/module/cattr'
+  require 'facets/array/extract_options'
+  require 'facets/hash/symbolize_keys'
+  require 'facets/string/underscore'
+  require 'facets/array/extract_options'
+  require 'facets/string/camelcase'
+
+  class String # ActiveSupport compatibility
+    def camelize
+      split('::').map { |s| s.camelcase(true) }.join('::')
+    end
   end
 end
+
 
 module Tochtli
   autoload :RabbitConnection, 'tochtli/rabbit_connection'

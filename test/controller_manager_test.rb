@@ -13,13 +13,11 @@ class ControllerManagerTest < Tochtli::Test::TestCase
   end
 
   def setup
-    super
     @logger       = Logger.new(STDERR)
     @logger.level = Logger::WARN
   end
 
   def teardown
-    super
     Tochtli::ControllerManager.stop
   end
 

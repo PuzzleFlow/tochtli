@@ -8,7 +8,7 @@ module Tochtli
         self.controller_class = controller_class
       end
 
-      def setup
+      def before_setup
         super
         @cache  = Object.const_defined?(:ActiveSupport) ? ActiveSupport::Cache::MemoryStore.new : Tochtli::Test::MemoryCache.new
         @logger = Tochtli.logger
@@ -16,9 +16,9 @@ module Tochtli
         @dispatcher = self.class.controller_class.dispatcher
       end
 
-      def teardown
-        super
+      def after_teardown
         self.class.controller_class.stop
+        super
       end
 
       def publish(message)
