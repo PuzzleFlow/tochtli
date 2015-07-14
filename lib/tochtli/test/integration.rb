@@ -1,9 +1,10 @@
 module Tochtli
-  module Test
-    class Integration < Minitest::Test
-      BaseController.queue_durable     = false
-      BaseController.queue_auto_delete = true
+  # Ensure all queues are temporary
+  BaseController.queue_durable     = false
+  BaseController.queue_auto_delete = true
 
+  module Test
+    module IntegrationHelpers
       def before_setup
         super
         @logger             = Tochtli.logger
@@ -68,6 +69,10 @@ module Tochtli
 
         @reply
       end
+    end
+
+    class Integration < Minitest::Test
+      include IntegrationHelpers
     end
   end
 end

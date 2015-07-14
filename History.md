@@ -1,6 +1,6 @@
 ## 0.4.0 / 2015-07-10
 
-  * Remove ActiveSupport dependencies
+  * Remove ActiveSupport dependencies (use Facets if Rails not loaded)
   * Replace ActiveSupport::Cache with MiniCache and fix validation tests
   * Use RabbitConnection#on_return method with all exchanges
   * YARD introduced
@@ -13,7 +13,9 @@
   * Message#bind_topic renamed to route_to
   * BaseController#subscribe renamed to bind
   * BaseClient#instance (singleton support) removed
-
+  * Tochtli::Test::IntegrationHelpers module with methods extracted from Tochtli::Test::Integration
+  * setup and teardown -> before_setup and after_teardown (no need for def setup; super; ... in tests)
+  
 ## 0.3.0 / 2015-05-21
 
 ### 4 major enhancements:

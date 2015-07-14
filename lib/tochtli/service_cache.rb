@@ -1,8 +1,4 @@
-if defined?(Rails)
-  require 'active_support/cache/dalli_store'
-else
-  require 'dalli'
-end
+require 'dalli' unless defined?(Rails)
 
 module Tochtli
   class ServiceCache
