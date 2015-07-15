@@ -1,7 +1,8 @@
 module Tochtli
   module Test
-    class Client < Tochtli::Test::TestCase
-
+    module ClientHelpers
+      include Tochtli::Test::Helpers
+      
       def before_setup
         super
         @logger      = Tochtli.logger
@@ -19,7 +20,10 @@ module Tochtli
         @reply_queue.handle_reply reply
         reply
       end
+    end
 
+    class Client < Tochtli::Test::TestCase
+      include ClientHelpers
     end
   end
 end
