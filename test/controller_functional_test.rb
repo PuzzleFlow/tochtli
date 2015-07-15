@@ -35,6 +35,11 @@ class ControllerFunctionalTest < Tochtli::Test::Controller
       reply TestCustomReply.new(:message => "#{message.resource} accepted")
     end
 
+    on CustomTopicMessage, routing_key: 'fn.test.off.accept' do
+      raise "Should not reach this code"
+    end
+    off 'fn.test.off.accept'
+
     def echo
       reply TestEchoReply.new(:original_text => message.text)
     end
@@ -58,5 +63,13 @@ class ControllerFunctionalTest < Tochtli::Test::Controller
 
     assert_kind_of TestCustomReply, @reply
     assert_equal "Red car accepted", @reply.message
+  end
+
+  def test_off_key
+    message = CustomTopicMessage.new(key: 'off', resource: 'Red car')
+
+    assert_raises RoutingNotFound do
+      publish message
+    end
   end
 end

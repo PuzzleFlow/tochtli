@@ -67,10 +67,9 @@ module Tochtli
         self.message_handlers[routing_key] = MessageRoute.new(message_class, method)
       end
 
-      # TODO: rename - conflicts with bind method
-      #def unbind(routing_key)
-      #  self.message_handlers.delete(routing_key)
-      #end
+      def off(routing_key)
+        self.message_handlers.delete(routing_key)
+      end
 
       def before_setup(&block)
         self.before_setup_block = block

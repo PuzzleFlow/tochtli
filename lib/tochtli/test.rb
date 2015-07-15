@@ -3,6 +3,7 @@ module Tochtli
     autoload :TestCase, 'tochtli/test/test_case'
     autoload :Helpers, 'tochtli/test/test_case'
     autoload :Client, 'tochtli/test/client'
+    autoload :ClientHelpers, 'tochtli/test/client'
     autoload :Controller, 'tochtli/test/controller'
     autoload :ControllerHelpers, 'tochtli/test/controller'
     autoload :Integration, 'tochtli/test/integration'

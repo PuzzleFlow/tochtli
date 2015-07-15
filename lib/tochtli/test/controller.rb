@@ -3,6 +3,9 @@ module Tochtli
     module ControllerHelpers
       include Tochtli::Test::Helpers
 
+      class RoutingNotFound < StandardError
+      end
+
       def self.included(base)
         base.class_eval do
           extend Uber::InheritableAttr
@@ -40,7 +43,7 @@ module Tochtli
           if (reply = @connection.publications.first) && reply[:message].is_a?(Tochtli::ErrorMessage)
             raise "Process error: #{reply[:message].message}"
           else
-            raise "Message #{message.class.name} not processed by #{self.class.controller_class} - #{message.inspect}."
+            raise RoutingNotFound, "Message #{message.class.name} not processed by #{self.class.controller_class} - #{message.inspect}."
           end
         end
 
@@ -52,7 +55,7 @@ module Tochtli
       end
     end
 
-     class Controller < Tochtli::Test::TestCase
+    class Controller < Tochtli::Test::TestCase
       include ControllerHelpers
     end
   end

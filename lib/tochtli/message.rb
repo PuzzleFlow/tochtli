@@ -89,8 +89,16 @@ module Tochtli
       self.class.routing_key
     end
 
+    def to_hash
+      attributes.inject({}) do |hash, (name, value)|
+          value = value.map(&:to_hash) if value.is_a?(Array)
+          hash[name] = value
+          hash
+      end
+    end
+
     def to_json
-      JSON.dump(attributes)
+      JSON.dump(to_hash)
     end
   end
 
