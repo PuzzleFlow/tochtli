@@ -7,7 +7,7 @@ require 'json'
 require 'uber/inheritable_attr'
 require 'virtus'
 
-unless defined?(Rails)
+unless defined?(ActiveSupport)
   require 'facets/module/cattr'
   require 'facets/array/extract_options'
   require 'facets/hash/symbolize_keys'

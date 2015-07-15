@@ -1,11 +1,17 @@
 module Tochtli
   module Test
-    class Controller < Tochtli::Test::TestCase
-      extend Uber::InheritableAttr
-      inheritable_attr :controller_class
+    module ControllerHelpers
+      include Tochtli::Test::Helpers
 
-      def self.tests(controller_class)
-        self.controller_class = controller_class
+      def self.included(base)
+        base.class_eval do
+          extend Uber::InheritableAttr
+          inheritable_attr :controller_class
+
+          def self.tests(controller_class)
+            self.controller_class = controller_class
+          end
+        end
       end
 
       def before_setup
@@ -14,6 +20,7 @@ module Tochtli
         @logger = Tochtli.logger
         self.class.controller_class.setup(@connection, @cache, @logger)
         @dispatcher = self.class.controller_class.dispatcher
+        @message_index = 0
       end
 
       def after_teardown
@@ -43,7 +50,10 @@ module Tochtli
           @reply = reply[:message]
         end
       end
+    end
 
+     class Controller < Tochtli::Test::TestCase
+      include ControllerHelpers
     end
   end
 end

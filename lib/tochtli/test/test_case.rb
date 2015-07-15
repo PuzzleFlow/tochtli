@@ -1,11 +1,9 @@
 module Tochtli
   module Test
-    class TestCase < Minitest::Test
-
+    module Helpers
       def before_setup
         super
         @connection    = TestRabbitConnection.new
-        @message_index = 0
       end
 
       def assert_published(message_class, attributes={})
@@ -26,7 +24,10 @@ module Tochtli
           yield @message
         end
       end
+    end
 
+    class TestCase < Minitest::Test
+      include Helpers
     end
 
     class TestRabbitConnection

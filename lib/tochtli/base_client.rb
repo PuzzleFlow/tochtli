@@ -3,6 +3,7 @@ module Tochtli
     attr_reader :rabbit_client, :rabbit_connection, :logger
 
     def initialize(rabbit_client_or_connection = nil, logger = nil)
+      
       logger ||= Tochtli.logger
       case rabbit_client_or_connection
         when Tochtli::RabbitClient
