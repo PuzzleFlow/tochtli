@@ -17,7 +17,7 @@ module Tochtli
 
     def setup(options)
       @logger            = options.fetch(:logger, Tochtli.logger)
-      @cache             = options.fetch(:cache, Tochtli::ServiceCache.store)
+      @cache             = options.fetch(:cache, Tochtli.cache)
       @rabbit_connection = options[:connection]
 
       unless @rabbit_connection

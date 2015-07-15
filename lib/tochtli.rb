@@ -35,7 +35,6 @@ module Tochtli
   autoload :ReplyQueue, 'tochtli/reply_queue'
   autoload :RabbitClient, 'tochtli/rabbit_client'
   autoload :Test, 'tochtli/test'
-  autoload :ServiceCache, 'tochtli/service_cache'
   autoload :ActiveRecordConnectionCleaner, 'tochtli/active_record_connection_cleaner'
 
   class MessageError < StandardError
@@ -57,6 +56,9 @@ module Tochtli
     # Global logger for services (default: RAILS_ROOT/log/service.log)
     attr_writer :logger
 
+    # Global cache store for services (default: Rails.cache)
+    attr_writer :cache
+
     # If set to true bunny log level would be set to DEBUG (by default it is WARN)
     attr_accessor :debug_bunny
 
@@ -67,6 +69,14 @@ module Tochtli
         @logger.level = Rails.env.production? ? Logger::WARN : Logger::DEBUG
       end
       @logger
+    end
+
+    def cache
+      unless @cache
+        raise "Tochtli.cache not set." unless defined?(Rails)
+        @cache = Rails.cache
+      end
+      @cache
     end
 
     def application

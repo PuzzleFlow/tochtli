@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'bundler'
-Bundler.setup(:default, :development, :test)
+Bundler.require(:default, :development, :test)
 
 $: << File.expand_path('../../lib', __FILE__)
 
@@ -8,6 +8,7 @@ require 'tochtli'
 require 'minitest/autorun'
 
 Tochtli.logger = Logger.new(File.join(File.dirname(__FILE__), 'test.log'))
+Tochtli.cache = MiniCache::Store.new
 
 if ENV['RAILS_VER']
   # Configure Rails Environment
