@@ -3,7 +3,9 @@ require 'benchmark'
 
 Thread.abort_on_exception = true
 
-class ControllerIntegrationTest < Tochtli::Test::Integration
+class ControllerIntegrationTest < Minitest::Test
+  include Tochtli::Test::Integration
+  
   class TestMessage < Tochtli::Message
     route_to 'test.controller.echo'
 

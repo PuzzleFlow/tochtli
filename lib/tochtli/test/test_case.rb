@@ -30,10 +30,6 @@ module Tochtli
       end
     end
 
-    class TestCase < Minitest::Test
-      include Helpers
-    end
-
     class TestRabbitConnection
       attr_reader :channel, :exchange, :publications
 

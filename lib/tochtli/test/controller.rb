@@ -2,7 +2,7 @@ require_relative 'test_case'
 
 module Tochtli
   module Test
-    module ControllerHelpers
+    module Controller
       module ControllerClassSupport
         def included(base)
           super
@@ -61,10 +61,6 @@ module Tochtli
           @reply = reply[:message]
         end
       end
-    end
-
-    class Controller < Tochtli::Test::TestCase
-      include ControllerHelpers
     end
   end
 end

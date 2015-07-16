@@ -2,7 +2,7 @@ require_relative 'test_case'
 
 module Tochtli
   module Test
-    module ClientHelpers
+    module Client
       extend UnitTestSupport if defined?(::Test::Unit)
       include Tochtli::Test::Helpers
       
@@ -23,10 +23,6 @@ module Tochtli
         @reply_queue.handle_reply reply
         reply
       end
-    end
-
-    class Client < Tochtli::Test::TestCase
-      include ClientHelpers
     end
   end
 end

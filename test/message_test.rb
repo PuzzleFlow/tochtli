@@ -1,6 +1,8 @@
 require_relative 'test_helper'
 
-class MessageTest < Tochtli::Test::TestCase
+class MessageTest < Minitest::Test
+  include Tochtli::Test::Helpers
+  
   class SimpleMessage < Tochtli::Message
     route_to 'test.controller.simple'
 

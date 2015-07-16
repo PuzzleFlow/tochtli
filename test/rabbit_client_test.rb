@@ -1,6 +1,8 @@
 require_relative 'test_helper'
 
-class RabbitClientTest < Tochtli::Test::Client
+class RabbitClientTest < Minitest::Test
+  include Tochtli::Test::Client
+  
   def test_reply_queue
     reply_queue = @client.reply_queue
     assert_kind_of Tochtli::ReplyQueue, reply_queue

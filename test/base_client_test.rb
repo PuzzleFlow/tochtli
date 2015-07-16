@@ -1,6 +1,7 @@
 require_relative 'test_helper'
 
-class BaseClientTest < Tochtli::Test::Client
+class BaseClientTest < Minitest::Test
+  include Tochtli::Test::Client
 
   def setup
     @fake_client = FakeClient.new(@client)

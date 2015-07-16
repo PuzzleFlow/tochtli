@@ -6,7 +6,7 @@ module Tochtli
   BaseController.queue_auto_delete = true
 
   module Test
-    module IntegrationHelpers
+    module Integration
       extend UnitTestSupport if defined?(::Test::Unit)
 
       def before_setup
@@ -73,10 +73,6 @@ module Tochtli
 
         @reply
       end
-    end
-
-    class Integration < Minitest::Test
-      include IntegrationHelpers
     end
   end
 end

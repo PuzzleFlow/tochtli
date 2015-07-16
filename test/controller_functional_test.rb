@@ -1,7 +1,9 @@
 require_relative 'test_helper'
 require 'benchmark'
 
-class ControllerFunctionalTest < Tochtli::Test::Controller
+class ControllerFunctionalTest < Minitest::Test
+  include Tochtli::Test::Controller
+  
   class TestMessage < Tochtli::Message
     route_to 'fn.test.echo'
 

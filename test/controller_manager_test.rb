@@ -2,7 +2,9 @@ require_relative 'test_helper'
 
 Thread.abort_on_exception = true
 
-class ControllerManagerTest < Tochtli::Test::TestCase
+class ControllerManagerTest < Minitest::Test
+  include Tochtli::Test::Helpers
+  
   class FirstController < Tochtli::BaseController
   end
 
