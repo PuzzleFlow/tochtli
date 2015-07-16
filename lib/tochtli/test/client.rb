@@ -1,6 +1,9 @@
+require_relative 'test_case'
+
 module Tochtli
   module Test
     module ClientHelpers
+      extend UnitTestSupport if defined?(::Test::Unit)
       include Tochtli::Test::Helpers
       
       def before_setup

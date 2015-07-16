@@ -1,6 +1,10 @@
+require_relative 'test_unit' if defined?(::Test::Unit)
+
 module Tochtli
   module Test
     module Helpers
+      extend UnitTestSupport if defined?(::Test::Unit)
+
       def before_setup
         super
         @connection    = TestRabbitConnection.new
@@ -8,7 +12,7 @@ module Tochtli
 
       def assert_published(message_class, attributes={})
         publication = @connection.get_publication
-        refute_nil publication, "No message published"
+        assert !publication.nil?, "No message published"
         @message = publication[:message]
         assert_kind_of message_class, @message
         attributes.each do |attr_name, value|

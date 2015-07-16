@@ -1,3 +1,5 @@
+require_relative 'test_case'
+
 module Tochtli
   # Ensure all queues are temporary
   BaseController.queue_durable     = false
@@ -5,6 +7,8 @@ module Tochtli
 
   module Test
     module IntegrationHelpers
+      extend UnitTestSupport if defined?(::Test::Unit)
+
       def before_setup
         super
         @logger             = Tochtli.logger

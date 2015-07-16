@@ -1,21 +1,29 @@
+require_relative 'test_case'
+
 module Tochtli
   module Test
     module ControllerHelpers
+      module ControllerClassSupport
+        def included(base)
+          super
+          base.class_eval do
+            extend Uber::InheritableAttr
+            inheritable_attr :controller_class
+
+            def self.tests(controller_class)
+              self.controller_class = controller_class
+            end
+          end
+        end
+      end
+
+      extend UnitTestSupport if defined?(::Test::Unit)
+      extend ControllerClassSupport
       include Tochtli::Test::Helpers
 
       class RoutingNotFound < StandardError
       end
 
-      def self.included(base)
-        base.class_eval do
-          extend Uber::InheritableAttr
-          inheritable_attr :controller_class
-
-          def self.tests(controller_class)
-            self.controller_class = controller_class
-          end
-        end
-      end
 
       def before_setup
         super
