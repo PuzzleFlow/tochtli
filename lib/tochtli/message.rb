@@ -1,3 +1,5 @@
+require 'securerandom'
+
 module Tochtli
   class Message
     extend Uber::InheritableAttr
