@@ -151,8 +151,15 @@ module Tochtli
     private
 
     def on_return(return_info, properties, payload)
-      error_message = "Message #{properties[:message_id]} dropped: #{return_info[:reply_text]} [#{return_info[:reply_code]}]"
-      reply_queue.handle_reply MessageDropped.new(error_message, payload), properties[:message_id]
+      unless properties[:correlation_id]
+        error_message = "Message #{properties[:message_id]} dropped: #{return_info[:reply_text]} [#{return_info[:reply_code]}]"
+        reply_queue.handle_reply MessageDropped.new(error_message, payload), properties[:message_id]
+      else # a reply dropped - client reply queue probably does not exist any more
+        logger.debug "Reply on message #{properties[:correlation_id]} dropped: #{return_info[:reply_text]} [#{return_info[:reply_code]}]"
+      end
+    rescue
+      logger.error "Internal error (on_return): #{$!}"
+      logger.error $!.backtrace.join("\n")
     end
 
     def create_channel_wrap(thread=Thread.current)
