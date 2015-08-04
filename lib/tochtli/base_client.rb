@@ -20,7 +20,7 @@ module Tochtli
     end
 
     def publish(*args)
-      rabbit_client.publish(args)
+      rabbit_client.publish(*args)
     end
 
     class InternalServiceError < StandardError
