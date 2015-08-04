@@ -163,7 +163,7 @@ module Tochtli
 
       raise "The 'reply_to' queue name is not specified" unless reply_to
 
-      logger.debug "\tSending  replay on #{message_id} to #{reply_to}: #{reply_message.inspect}."
+      logger.debug "\tSending  reply on #{message_id} to #{reply_to}: #{reply_message.inspect}."
 
       @rabbit_connection.publish(reply_to,
                                  reply_message,

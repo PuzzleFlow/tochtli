@@ -64,16 +64,19 @@ module Tochtli
 
     def logger
       unless @logger
-        raise "Tochtli.logger not set." unless defined?(Rails)
-        @logger       = Logger.new(File.join(Rails.root, 'log/service.log'))
-        @logger.level = Rails.env.production? ? Logger::WARN : Logger::DEBUG
+        if defined?(Rails)
+          @logger       = Logger.new(File.join(Rails.root, 'log/service.log'))
+          @logger.level = Rails.env.production? ? Logger::WARN : Logger::DEBUG
+        else
+	        @logger       = Logger.new(STDERR)
+	        @logger.level = Logger::WARN
+				end
       end
       @logger
     end
 
     def cache
-      unless @cache
-        raise "Tochtli.cache not set." unless defined?(Rails)
+      if !@cache && defined?(Rails)
         @cache = Rails.cache
       end
       @cache

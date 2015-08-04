@@ -15,7 +15,7 @@ module Tochtli
       @controller_classes << controller_class
     end
 
-    def setup(options)
+    def setup(options={})
       @logger            = options.fetch(:logger, Tochtli.logger)
       @cache             = options.fetch(:cache, Tochtli.cache)
       @rabbit_connection = options[:connection]
@@ -25,7 +25,6 @@ module Tochtli
       end
     end
 
-    #def start(rabbit_or_config=nil, logger=nil)
     def start(*controllers)
       options = controllers.extract_options!
       setup(options) unless @rabbit_connection
