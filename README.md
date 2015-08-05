@@ -1,17 +1,13 @@
 [![Build Status](https://travis-ci.org/PuzzleFlow/tochtli.svg?branch=master)](https://travis-ci.org/PuzzleFlow/tochtli)
 
-# Tochtli
+# What's Tochtli?
 
-Tochtli standardizes the way of services implementation to minimize the impact of API change on application code.
-  It uses RabbitMQ as a message broker with [bunny](https://github.com/ruby-amqp/bunny) client. 
- 
+Tochtli is a set of conventions and tools that simplifies the implementation of components communicating over the RabbitMQ broker.
+  Internally it depends on [bunny](https://github.com/ruby-amqp/bunny) gem.
+
 ## Idea
 
-```
-app <-> client -> request (message) -> service queue -> request (message)  -> controller <-> service
-           ^                                                                      |
-           |---- response (message) <-  reply queue  <- response (message) <-------
-```
+![Tochtli Diagram](assets/communication.png)
 
 The communication between application and service looks like on the above picture.
   The [application](application) acts with the [client](client) which is a regular object. 
