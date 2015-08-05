@@ -10,56 +10,36 @@ Tochtli is a set of conventions and tools that simplifies the implementation of 
 ![Tochtli Diagram](assets/communication.png)
 
 The communication between application and service looks like on the above picture.
-  The [application](application) acts with the [client](client) which is a regular object. 
-  The client methods exposes the service API. 
-  The request (a [message](message)) is sent by the client to the well known [service queue](queue).
-  RabbitMQ is used as a message broker and delivers the request to the [service controller](controller).
-  The controller implements the actions that are performed on the request and may result in the response.
-  The response message is published on the reply queue and sent back to the client which returns the expected result to the application.
+  The _application_ calls the _client_ (regular object) methods which expose the _service API_. 
+  The _request_ (a message) is created and sent by the _client_ to the _service queue_ (dedicated queue per service controller).
+  _RabbitMQ_ is used as a message broker and delivers the _request_ to the _service controller_.
+  The _controller_ implements the actions that are performed on the _request_ and may result in the _response_.
+  The _response_ message is published on the _reply queue_ (private for a client connection). 
+  The _client_ receives the _response_ and returns the expected result to the _application_.
+  The client methods can be implemented in the blocking and non-blocking (asynchronous) way.
 
-### Layers
+## Layers
   
-```
-----------------------------------    ------------------------------|---------------------
- Application                     |    | Service                     | Application Layer
----------------------------------|    |-----------------------------|---------------------
- Client                          |    | Controller                  | Client Layer
---------------------------------------------------------------------|---------------------
- Messages, Cache, Configurations                                    | Common Layer
---------------------------------------------------------------------|---------------------
- RabbitMQ, HTTP, Redis, Memcache, etc.                              | Tools Layer
---------------------------------------------------------------------|---------------------
-```
+![Tochtli Layers](assets/layers.png)
 
-To fulfill the idea of resistance on the service API change the layered structure is proposed.
-  Of course, like in any layered structure, the communication is allowed only with neighbour layers.
-  Therefore, application is not allowed to operate on messages layer which is a private for service implementation.
-  The client layer exposes the high-level service API and works on common layer where messages are defined (low-level API).
-  At the bottom, there is the tools layer where RabbitMQ is an example. 
+The stable service interface really helps to reduce costs of a inevitable change that should only affect the internal implementation.
+   In the proposed above layered structure the application interacts only with the public client class methods.
+   It's not very hard to implement client methods in a such way that they will allow for future changes which won't cause compatibility issues.
+   The expected resistance on the service API changes is a reason way application has no access to the messages definition.
+   Only clients and service controllers operate on the message layer (the common layer).
+   The bottom layer contains tools that allow for communication between the client and the server.
+   There is an option for the message broker agnosticism in the future, because client and service implementation should not directly depend on the particular tool (ex. bunny).
 
-### Application
+# What's next?
 
-The application is the piece of code that is using the service functionality through the API exposed by the client. 
+Read more about Tochtli and go through the tutorial on [Tochtli homepage](http://puzzleflow.github.io/tochtli).
 
-### Service
+# Contributing
 
-The service is a core implementation of the service functionality invoked by the service controller.
-
-### Client
-
-The client is a simple object that exposes the service functionality to the application with simple methods.
-
-### Controller
-
-The controller is a reactor that listens on the message queue and invokes the service functionality.
-
-### Message
-
-The message is a serializable object that holds the piece of information that is transmitted via message queue. 
-
-### Tool
-
-The main tool used here is a message broker (RabbitMQ). It can be also a cache server, database or web services.
+- Fork the project.
+- Make your feature addition or bug fix.
+- Add tests for it. This is important so I don't break it in a future version unintentionally.
+- Send me a pull request.
 
 # License
 
