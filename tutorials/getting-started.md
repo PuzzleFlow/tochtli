@@ -5,7 +5,7 @@ title: Getting started
 
 # Getting started
 
-Okay, let's see Tochtli in action. In this first excersise we will create a server that create website snapshots using [screencap](https://github.com/maxwell/screencap) gem. But before we go any further, let's check the prerequisites (that are not covered by this tutorial). I assume that you:
+Okay, let's see Tochtli in action. In the first exercise we will implement a server that creates website snapshots using [screencap](https://github.com/maxwell/screencap) gem. But before we go any further, let's check the prerequisites (that are not covered by this tutorial). I assume that you:
 
 * Have RabbitMQ set up and running with default configuration
 * Have Ruby >= 2.0 installed
