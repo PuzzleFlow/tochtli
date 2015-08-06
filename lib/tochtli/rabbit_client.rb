@@ -25,6 +25,10 @@ module Tochtli
       @rabbit_connection.publish message.routing_key, message, options
     end
 
+    def wait_for_confirms
+      @rabbit_connection.channel.wait_for_confirms
+    end
+
     def reply_queue(*args)
       rabbit_connection.reply_queue(*args)
     end

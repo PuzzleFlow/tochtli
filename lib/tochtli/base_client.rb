@@ -23,6 +23,10 @@ module Tochtli
       rabbit_client.publish(*args)
     end
 
+    def wait_for_confirms
+      rabbit_client.wait_for_confirms
+    end
+
     class InternalServiceError < StandardError
       attr_reader :service_error
 
