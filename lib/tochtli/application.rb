@@ -91,7 +91,7 @@ module Tochtli
     def create_message(message_class, properties, payload)
       message            = message_class.new(nil, properties)
       message.attributes = JSON.parse(payload)
-      raise InvalidMessageError.new(message.errors.full_messages.join(", "), message) if message.invalid?
+      raise InvalidMessageError.new(message.errors.join(", "), message) if message.invalid?
       message
     end
   end
