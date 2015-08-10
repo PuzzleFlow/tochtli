@@ -23,9 +23,11 @@ module LogAnalyzer
   class CurrentStatus < Tochtli::Message
     route_to 'log.status'
 
-    attribute :errors, Integer
-    attribute :warnings, Integer
-    attribute :all, Integer
+    attribute :fatal, Integer, default: 0
+    attribute :error, Integer, default: 0
+    attribute :warn, Integer, default: 0
+    attribute :info, Integer, default: 0
+    attribute :debug, Integer, default: 0
     attribute :timestamp, Time
   end
 end

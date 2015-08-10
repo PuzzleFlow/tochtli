@@ -8,8 +8,9 @@ module LogAnalyzer
       publish NewLog.new(path: path)
     end
 
-    def react_on_events(severities, handler)
-      raise "Events handler already started" if EventsController.handler
+    def react_on_events(severities, handler=nil, &block)
+	    handler = block unless handler
+			raise "Events handler already started" if EventsController.handler
       EventsController.handler = handler
       severities               = Array(severities)
       severities.each do |severity|
@@ -17,13 +18,14 @@ module LogAnalyzer
         EventsController.bind routing_key
         EventsController.on EventOccurred, :handle, routing_key: routing_key
       end
-      EventsController.start
+      Tochtli::ControllerManager.start EventsController
     end
 
-    def monitor_status(monitor)
-      raise "Monitor already started" if MonitorController.handler
+    def monitor_status(monitor=nil, &block)
+	    monitor = block unless monitor
+      raise "Monitor already started" if MonitorController.monitor
       MonitorController.monitor = monitor
-      MonitorController.start
+      Tochtli::ControllerManager.start MonitorController
     end
   end
 
@@ -49,7 +51,25 @@ module LogAnalyzer
     self.queue_exclusive = true
 
     on CurrentStatus do
-      self.class.monitor.call(message.errors, message.warnings, message.all, message.timestamp)
+      self.class.monitor.call(message.to_hash)
     end
   end
 end
+
+Tochtli::ControllerManager.setup
+client = LogAnalyzer::Client.new
+
+case ARGV[0]
+	when 's'
+		client.send_new_log ARGV[1]
+		exit
+	when 'm'
+		client.monitor_status {|status| p status }
+	when 'n'
+		client.react_on_events [:fatal, :error], lambda {|severity, timestamp, message|
+			puts "[#{timestamp}] Got #{severity}: #{message}"
+		}
+end
+
+puts 'Press Ctrl-C to stop monitor...'
+sleep

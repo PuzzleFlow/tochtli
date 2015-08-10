@@ -1,5 +1,5 @@
-# Getting started
+# Log Analyzer
 
-The first example is a server that creates website snapshots using [screencap](https://github.com/maxwell/screencap) gem.
+The second example is a log analyzer with status monitor and event handler.
 
-See [Getting started tutorial](http://puzzleflow.github.io/tochtli/tutorials/getting-started.html) for details.
+See [Client notification tutorial](http://puzzleflow.github.io/tochtli/tutorials/client-notification.html) for details.
