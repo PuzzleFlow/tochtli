@@ -47,7 +47,7 @@ module Tochtli
 
         @message, @reply = nil
 
-        unless @dispatcher.process_message(delivery_info, properties, payload)
+        unless @dispatcher.process_message(delivery_info, properties, payload, {})
           if (reply = @connection.publications.first) && reply[:message].is_a?(Tochtli::ErrorMessage)
             raise "Process error: #{reply[:message].message}"
           else
