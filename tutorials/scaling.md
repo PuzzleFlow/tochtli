@@ -5,7 +5,7 @@ title: Scaling
 
 # Scaling
 
-In [previous tutorial]({{ site.baseurl }}/tutorials/getting-started.html) we learned how to create basic service for making screenshots of web pages with Tochtli. However, how will it behave when many clients want to work with it at the same time? Let's modify our client code to find out.
+In [the previous tutorial]({{ site.baseurl }}/tutorials/getting-started.html) we learned how to create basic service for making screenshots of web pages with Tochtli. However, how will it behave when many clients want to work with it at the same time? Let's modify our client code to find out.
 
 {% highlight ruby %}
 threads = []
@@ -17,7 +17,7 @@ end
 threads.each(&:join)
 {% endhighlight %}
 
-There is a small change here, allowing to get appropiriate number of output file – one per each client. I also modified server to print into STDOUT when processing of a request starts and ends, to see what happens. Now when we run ` bundle exec ruby client.rb http://google.com googleN.png`. Whoops, no concurrency here! The server processes one message at the time and after finishing it, moves to another. Completing 20 requests in our example takes quite some time and it is possible that some requests will fail due to timeouts. Not to scalable, but we can do two things to improve it.
+There is a small change here, allowing to get appropriate number of output file – one per each client. I also modified server to print into STDOUT when processing of a request starts and ends, to see what happens. Now when we run ` bundle exec ruby client.rb http://google.com googleN.png`. Whoops, no concurrency here! The server processes one message at the time and after finishing it, moves to another. Completing 20 requests in our example takes quite some time and it is possible that some requests will fail due to timeouts. Not to scalable, but we can do two things to improve it.
 
 ## Horizontal scaling
 
@@ -63,3 +63,4 @@ Finished processing google13.png
 ```
 
 So, as we see, we now have true concurrent processing within one node!
+Next lesson will show [how to listen on notifications in client]({{ site.baseurl }}/tutorials/client-notifications.html).
