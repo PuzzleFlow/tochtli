@@ -154,7 +154,8 @@ It was simple. Isn't it?
 ## The First Test
 
 At first let's start the server with the command: `bundle exec ruby server.rb` and client: `bundle exec ruby client.rb sample.log` for
-the log file `sample.log`: 
+the log file `sample.log`:
+ 
 ```
 # Logfile created on 2015-08-10 10:06:45 +0200 by logger.rb/47272
 D, [2015-08-10T10:07:02.366427 #4624] DEBUG -- : Sample debug
