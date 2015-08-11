@@ -20,7 +20,7 @@ module LogAnalyzer
 
     def create
       parser   = LogParser.new(message.path)
-      notifier = EventNotifier.new(self.class.dispatcher.rabbit_connection)
+      notifier = EventNotifier.new(self.rabbit_connection)
       parser.each do |event|
         severity = event[:severity]
         notifier.notify event if EventNotifier.significant?(severity)
