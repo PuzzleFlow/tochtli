@@ -11,6 +11,7 @@ unless defined?(ActiveSupport)
   require 'facets/module/cattr'
   require 'facets/array/extract_options'
   require 'facets/hash/symbolize_keys'
+  require 'facets/hash/except'
   require 'facets/string/underscore'
   require 'facets/array/extract_options'
   require 'facets/string/camelcase'

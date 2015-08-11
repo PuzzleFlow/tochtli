@@ -26,8 +26,11 @@ module Tochtli
     end
 
     def start(*controllers)
-      options = controllers.extract_options!
-      setup(options) unless @rabbit_connection
+	    options       = controllers.extract_options!
+	    setup_options = options.except!(:logger, :cache, :connection)
+	    queue_name    = options.delete(:queue_name)
+
+	    setup(setup_options) unless set_up?
 
       if controllers.empty? || controllers.include?(:all)
         controllers = @controller_classes
@@ -35,10 +38,10 @@ module Tochtli
 
       controllers.each do |controller_class|
         raise ArgumentError, "Controller expected, got: #{controller_class.inspect}" unless controller_class.is_a?(Class) && controller_class < Tochtli::BaseController
-        unless controller_class.started?
+        unless controller_class.started?(queue_name)
           @logger.info "Starting #{controller_class}..." if @logger
-          controller_class.setup(@rabbit_connection, @cache, @logger)
-          controller_class.start
+          controller_class.setup(@rabbit_connection, @cache, @logger) unless controller_class.set_up?
+          controller_class.start queue_name, options
         end
       end
     end
@@ -54,18 +57,36 @@ module Tochtli
     end
 
     def restart(options={})
-      active_controllers = @controller_classes.select(&:started?)
-      stop
-      start *active_controllers, options
+	    options[:rabbit_connection] ||= @rabbit_connection
+	    options[:logger]            ||= @logger
+	    options[:cache]             ||= @cache
+
+	    setup options
+	    restart_active_controllers
+    end
+
+    def set_up?
+	    !@rabbit_connection.nil?
     end
 
     def running?
       @rabbit_connection && @rabbit_connection.open?
     end
 
+    protected
+
+    def restart_active_controllers
+	    @controller_classes.each do |controller_class|
+		    if controller_class.started?
+			    @logger.info "Restarting #{controller_class}..." if @logger
+			    controller_class.restart
+		    end
+	    end
+    end
+
     class << self
       def method_missing(method, *args)
-        if [:register, :setup, :start, :stop, :restart, :running?, :logger, :rabbit_connection, :cache].include?(method)
+	      if instance.respond_to?(method)
           instance.send(method, *args)
         else
           super

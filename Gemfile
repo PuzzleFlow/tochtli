@@ -4,6 +4,7 @@ gem 'bunny', '>= 1.7.0'
 gem 'uber'
 gem 'virtus'
 gem 'facets', require: false
+gem 'hooks'
 
 group :development do
   gem 'dalli', '~> 2.6.4'

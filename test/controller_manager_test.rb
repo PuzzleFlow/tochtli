@@ -55,4 +55,21 @@ class ControllerManagerTest < Minitest::Test
   def test_state_monitor
     Tochtli::ControllerManager.start(FirstController, connection: @connection, logger: @logger)
   end
+
+	def test_multiple_queues
+		Tochtli::ControllerManager.setup(connection: @connection, logger: @logger)
+		Tochtli::ControllerManager.start(FirstController, queue_name: 'first_queue')
+		Tochtli::ControllerManager.start(FirstController, queue_name: 'second_queue')
+
+		assert_equal ["first_queue", "second_queue"], FirstController.dispatcher.queues.map(&:name).sort
+	end
+
+	def test_restart_multiple_queues
+		Tochtli::ControllerManager.setup(connection: @connection, logger: @logger)
+		Tochtli::ControllerManager.start(FirstController, queue_name: 'first_queue')
+		Tochtli::ControllerManager.start(FirstController, queue_name: 'second_queue')
+		Tochtli::ControllerManager.restart
+
+		assert_equal ["first_queue", "second_queue"], FirstController.dispatcher.queues.map(&:name).sort
+	end
 end

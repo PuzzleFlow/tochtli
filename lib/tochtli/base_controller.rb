@@ -1,6 +1,10 @@
+require 'hooks'
+
 module Tochtli
   class BaseController
     extend Uber::InheritableAttribute
+    include Hooks
+    include Hooks::InstanceHooks
 
     inheritable_attr :routing_keys
     inheritable_attr :message_handlers
@@ -8,7 +12,7 @@ module Tochtli
 
     self.work_pool_size = 1 # default work pool size per controller instance
 
-    attr_reader :logger, :message, :delivery_info
+    attr_reader :logger, :env, :message, :delivery_info
 
     # Each controller can overwrite the queue name (default: controller.name.underscore)
     inheritable_attr :queue_name
@@ -34,10 +38,10 @@ module Tochtli
     # Message dispatcher created on start
     inheritable_attr :dispatcher
 
-    protected
-
-    # @private before setup callback
-    inheritable_attr :before_setup_block
+    define_hooks :before_setup, :after_setup,
+                 :before_start, :after_start,
+                 :before_stop, :after_stop,
+                 :before_restart, :after_restart
 
     class << self
       def inherited(controller)
@@ -71,40 +75,46 @@ module Tochtli
         self.message_handlers.delete(routing_key)
       end
 
-      def before_setup(&block)
-        self.before_setup_block = block
-      end
 
       def setup(rabbit_connection, cache=nil, logger=nil)
-        self.before_setup_block.call if self.before_setup_block
+        run_hook :before_setup, rabbit_connection
         self.dispatcher = Dispatcher.new(self, rabbit_connection, cache, logger || Tochtli.logger)
+        run_hook :after_setup, rabbit_connection
       end
 
-      def start(queue_name=nil)
-        self.dispatcher.start(queue_name || self.queue_name)
+      def start(queue_name=nil, initial_env={})
+				run_hook :before_start, queue_name, initial_env
+        self.dispatcher.start(queue_name || self.queue_name, initial_env)
+				run_hook :after_start, queue_name, initial_env
       end
 
       def set_up?
         !!self.dispatcher
       end
 
-      def started?
-        self.dispatcher && !self.dispatcher.queues.empty?
+      def started?(queue_name=nil)
+        self.dispatcher && self.dispatcher.started?(queue_name)
       end
 
       def stop(options={})
-        self.dispatcher.shutdown(options) if started?
-        self.dispatcher = nil
+	      if started?
+					queues = self.dispatcher.queues
+		      run_hook :before_stop, queues
+
+					self.dispatcher.shutdown(options)
+	        self.dispatcher = nil
+
+					run_hook :after_stop, queues
+				end
       end
 
       def restart(options={})
-        connection = self.dispatcher.rabbit_connection
-        logger     = self.dispatcher.logger
-        cache      = self.dispatcher.cache
-
-        stop(timeout: options.fetch(:timeout, 15))
-        setup(connection, cache, logger)
-        start
+	      if started?
+		      queues = self.dispatcher.queues
+		      run_hook :before_restart, queues
+		      self.dispatcher.restart options
+		      run_hook :after_restart, queues
+				end
       end
 
       def find_message_route(routing_key)
@@ -184,16 +194,27 @@ module Tochtli
         @application       = Tochtli.application.to_app
         @queues            = {}
         @process_counter   = ProcessCounter.new
+        @initial_env       = nil
       end
 
-      def start(queue_name)
-        subscribe_queue(queue_name)
+      def start(queue_name, initial_env={})
+        subscribe_queue(queue_name, initial_env)
       end
 
-      def process_message(delivery_info, properties, payload)
+      def restart(options={})
+	      queues = @queues.dup
+
+	      shutdown options
+
+	      queues.each do |queue_name, queue_opts|
+		      start queue_name, queue_opts[:initial_env]
+	      end
+      end
+
+      def process_message(delivery_info, properties, payload, initial_env)
         register_process_start
 
-        env = {
+        env = initial_env.merge(
             delivery_info:     delivery_info,
             properties:        properties,
             payload:           payload,
@@ -201,7 +222,7 @@ module Tochtli
             rabbit_connection: rabbit_connection,
             cache:             cache,
             logger:            logger
-        }
+        )
 
         @application.call(env)
 
@@ -213,33 +234,40 @@ module Tochtli
         register_process_end
       end
 
-      def subscribe_queue(queue_name)
+      def subscribe_queue(queue_name, initial_env={})
         queue    = controller_class.create_queue(@rabbit_connection, queue_name)
         consumer = queue.subscribe do |delivery_info, metadata, payload|
-          process_message delivery_info, metadata, payload
+          process_message delivery_info, metadata, payload, initial_env
         end
 
         @queues[queue_name] = {
-            queue:    queue,
-            consumer: consumer
+            queue:       queue,
+            consumer:    consumer,
+            initial_env: initial_env
         }
       end
 
       # Performs a graceful shutdown of dispatcher i.e. waits for all processes to end.
       # If timeout is reached, forces the shutdown. Useful with dynamic reconfiguration of work pool size. 
       def shutdown(options={})
-        timeout = options[:timeout] || 15
-
-        wait_for_processes timeout
-
+        wait_for_processes options.fetch(:timeout, 15)
         stop
       end
 
-      def stop
-        @queues.each_value { |qh| qh[:consumer].cancel }
-        @consumer.cancel if @consumer
+      def stop(queues=nil)
+        @queues.each_value { |queue_opts| queue_opts[:consumer].cancel }
       rescue Bunny::ConnectionClosedError
         # ignore closed connection error
+      ensure
+	      @queues = {}
+      end
+
+      def started?(queue_name=nil)
+	      if queue_name
+		      @queues.has_key?(queue_name)
+	      else
+		      !@queues.empty?
+	      end
       end
 
       def queues

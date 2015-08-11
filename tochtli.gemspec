@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Rafal Bigaj"]
-  s.date = "2015-07-14"
+  s.date = "2015-08-11"
   s.description = "Lightweight framework for service oriented applications based on bunny (RabbitMQ)"
   s.email = "rafal.bigaj@puzzleflow.com"
   s.extra_rdoc_files = [
@@ -24,6 +24,19 @@ Gem::Specification.new do |s|
     "README.md",
     "Rakefile",
     "VERSION",
+    "assets/communication.png",
+    "assets/layers.png",
+    "examples/01-screencap-service/Gemfile",
+    "examples/01-screencap-service/README.md",
+    "examples/01-screencap-service/client.rb",
+    "examples/01-screencap-service/common.rb",
+    "examples/01-screencap-service/server.rb",
+    "examples/02-log-analyzer/Gemfile",
+    "examples/02-log-analyzer/README.md",
+    "examples/02-log-analyzer/client.rb",
+    "examples/02-log-analyzer/common.rb",
+    "examples/02-log-analyzer/sample.log",
+    "examples/02-log-analyzer/server.rb",
     "lib/tochtli.rb",
     "lib/tochtli/active_record_connection_cleaner.rb",
     "lib/tochtli/application.rb",
@@ -35,7 +48,6 @@ Gem::Specification.new do |s|
     "lib/tochtli/rabbit_client.rb",
     "lib/tochtli/rabbit_connection.rb",
     "lib/tochtli/reply_queue.rb",
-    "lib/tochtli/service_cache.rb",
     "lib/tochtli/simple_validation.rb",
     "lib/tochtli/test.rb",
     "lib/tochtli/test/client.rb",
@@ -43,6 +55,7 @@ Gem::Specification.new do |s|
     "lib/tochtli/test/integration.rb",
     "lib/tochtli/test/memory_cache.rb",
     "lib/tochtli/test/test_case.rb",
+    "lib/tochtli/test/test_unit.rb",
     "lib/tochtli/version.rb",
     "test/base_client_test.rb",
     "test/controller_functional_test.rb",
@@ -76,6 +89,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<uber>, [">= 0"])
       s.add_runtime_dependency(%q<virtus>, [">= 0"])
       s.add_runtime_dependency(%q<facets>, [">= 0"])
+      s.add_runtime_dependency(%q<hooks>, [">= 0"])
       s.add_development_dependency(%q<dalli>, ["~> 2.6.4"])
       s.add_development_dependency(%q<jeweler>, ["~> 2.0.1"])
       s.add_development_dependency(%q<mini_cache>, [">= 0"])
@@ -87,6 +101,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<uber>, [">= 0"])
       s.add_dependency(%q<virtus>, [">= 0"])
       s.add_dependency(%q<facets>, [">= 0"])
+      s.add_dependency(%q<hooks>, [">= 0"])
       s.add_dependency(%q<dalli>, ["~> 2.6.4"])
       s.add_dependency(%q<jeweler>, ["~> 2.0.1"])
       s.add_dependency(%q<mini_cache>, [">= 0"])
@@ -99,6 +114,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<uber>, [">= 0"])
     s.add_dependency(%q<virtus>, [">= 0"])
     s.add_dependency(%q<facets>, [">= 0"])
+    s.add_dependency(%q<hooks>, [">= 0"])
     s.add_dependency(%q<dalli>, ["~> 2.6.4"])
     s.add_dependency(%q<jeweler>, ["~> 2.0.1"])
     s.add_dependency(%q<mini_cache>, [">= 0"])
