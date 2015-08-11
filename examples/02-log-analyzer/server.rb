@@ -13,10 +13,9 @@ module LogAnalyzer
 
     cattr_accessor :monitor
 
-    def self.start(queue_name=nil)
-			super
-			self.monitor = StatusMonitor.new(self.dispatcher.rabbit_connection)
-			self.monitor.start
+    after_setup do |rabbit_connection|
+	    self.monitor = StatusMonitor.new(rabbit_connection)
+	    self.monitor.start
     end
 
     def create
@@ -80,7 +79,7 @@ module LogAnalyzer
     end
 
     def update_status(status)
-      publish CurrentStatus.new(status)
+      publish CurrentStatus.new(status), mandatory: false
     end
   end
 
