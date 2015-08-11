@@ -180,6 +180,10 @@ module Tochtli
                                  correlation_id: message_id)
     end
 
+    def rabbit_connection
+	    self.class.dispatcher.rabbit_connection if self.class.set_up?
+    end
+
     class MessageRoute < Struct.new(:message_class, :action)
     end
 
