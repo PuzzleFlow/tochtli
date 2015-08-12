@@ -327,3 +327,227 @@ To start the event listener run the command `bundle exec ruby client.rb c client
 [2015-08-10 10:07:02 +0200] Got fatal: Sample fatal
 ...
 ```
+
+## System Monitor
+
+The last uncovered requirement is periodical (every 10s) publication of status information on public channel.
+ This is very common case for monitoring systems. As always at first we will introduce the message definition.
+ 
+{% highlight ruby %}
+module LogAnalyzer
+  class CurrentStatus < Tochtli::Message
+    route_to 'log.status'
+
+    attribute :fatal, Integer, default: 0
+    attribute :error, Integer, default: 0
+    attribute :warn, Integer, default: 0
+    attribute :info, Integer, default: 0
+    attribute :debug, Integer, default: 0
+    attribute :timestamp, Time
+  end
+end
+{% endhighlight %}
+
+It consists of attributes containing the number of messages with a related severity (fatal, error, ...) and the timestamp.
+ To be able to publish this message in server code we would extend the existing server's client class.
+  
+{% highlight ruby %}
+module LogAnalyzer
+  class EventNotifier < Tochtli::BaseClient
+    def update_status(status)
+      publish CurrentStatus.new(status), mandatory: false
+    end
+  end
+end
+{% endhighlight %}
+
+The `update_status` method published non mandatory message (as previously) because the situation when no listener is active is normal.
+
+The next step is implementation of the core status monitor that gathers statistics and publish status information periodically.
+
+{% highlight ruby %}
+module LogAnalyzer
+  class StatusMonitor
+    include MonitorMixin
+
+    def initialize(rabbit_connection)
+      super()
+      @notifier = EventNotifier.new(rabbit_connection)
+      @status = Hash.new(0)
+    end
+
+    def start
+      Thread.new(&method(:monitor))
+    end
+
+    def note(severity)
+      synchronize do
+        @status[severity] += 1
+      end
+    end
+
+    protected
+
+    def reset_status
+      synchronize do
+        status = @status
+        @status = Hash.new(0)
+        status
+      end
+    end
+
+    def monitor
+      loop do
+        current_status = reset_status
+        current_status[:timestamp] = Time.now
+		    @notifier.update_status current_status
+        sleep 10
+      end
+    end
+  end
+end
+{% endhighlight %}
+
+In the above code there are 2 interesting methods. The first `start` run the new monitoring thread. 
+ The second `note` updates the current monitor statistics. Synchronization is added for thread safety.
+ Internally the `EventNotifier` client class, initialized with the rabbit connection, is used to publish periodical messages.
+ 
+Finally, we have to find the nice place to start the monitor and glue it with the server's log analyzer.
+ To do so we would use the `Tochtli::BaseController` hooks. Each controller class has access to the following hooks:
+ 
+1. `before_setup` - run at very beginning before the controller connection is setup
+2. `after_setup` - run after initial setup
+3. `before_start` - run right before the controller queue is created and bound
+4. `after_start` - run after queue preparation
+5. `before_restart` - run before the restart action
+6. `after_restart` - run after the queue binding and handlers restart
+
+For our case the `after_setup` hook is suitable. 
+ We have an access to the rabbit connection then which is required to initialize the `EventNotifier` client object.
+
+{% highlight ruby %}
+module LogAnalyzer
+  class LogController < Tochtli::BaseController
+    bind 'log.analyzer.*'
+
+    on NewLog, :create
+
+    cattr_accessor :monitor
+
+    after_setup do |rabbit_connection|
+	    self.monitor = StatusMonitor.new(rabbit_connection)
+	    self.monitor.start
+    end
+
+    def create
+      parser   = LogParser.new(message.path)
+      notifier = EventNotifier.new(self.rabbit_connection)
+      parser.each do |event|
+        severity = event[:severity]
+        notifier.notify event if EventNotifier.significant?(severity)
+        self.monitor.note severity
+      end
+      notifier.wait_for_confirms
+    end
+  end
+end
+{% endhighlight %}
+
+Additionally, the `create` action has been updated with the single line: `self.monitor.note severity` 
+ that updates status monitor statistics for every log entry. 
+ 
+The last step required for the status monitor functionality is client API implementation that will allow to listen on status updates.
+ Like with events listener we have to create a controller class that will be bound with the status queue collection status updates.
+
+{% highlight ruby %}
+module LogAnalyzer
+  class MonitorController < Tochtli::BaseController
+    bind 'log.status'
+
+    self.queue_name        = '' # auto generate
+    self.queue_durable     = false
+    self.queue_exclusive   = true
+    self.queue_auto_delete = true
+
+    on CurrentStatus do
+	    monitor.call(message.to_hash)
+    end
+
+    protected
+
+    def monitor
+	    raise "Internal Error: monitor not set for MonitorController" unless env.has_key?(:monitor)
+	    env[:monitor]
+    end
+  end
+end
+{% endhighlight %}
+
+Everything looks well known except queue parameters set in the class definition. We can read from the code that
+ the controller class would have auto generated name (empty string), would not be durable but exclusive and auto deleted.
+ The auto generated name allow us to create different queues for each client instances. 
+ The created queue would be temporary because the nature of the status information is ephemeral.
+ 
+Let's update the client API to allow to attach handler on status update.
+
+{% highlight ruby %}
+module LogAnalyzer
+  class Client < Tochtli::BaseClient
+    def monitor_status(monitor=nil, &block)
+	    monitor = block unless monitor
+      Tochtli::ControllerManager.start MonitorController, env: { monitor: monitor }
+    end
+  end
+end
+{% endhighlight %}
+
+This is a definition of the third and the last client method.
+ The final client runner code would look like:
+ 
+{% highlight ruby %}
+client = LogAnalyzer::Client.new
+command = ARGV[0]
+
+def hold
+	puts 'Press Ctrl-C to stop...'
+	sleep
+end
+
+
+case command
+	when 's'
+		client.send_new_log ARGV[1]
+	when 'm'
+		client.monitor_status {|status| p status }
+		hold
+	when 'c'
+		client.react_on_events ARGV[1], [:fatal, :error], lambda {|severity, timestamp, message|
+			puts "[#{timestamp}] Got #{severity}: #{message}"
+		}
+		hold
+	else
+		puts "Unknown command: #{command.inspect}"
+		puts
+		puts "Usage: bundle exec ruby client [command] [params]"
+		puts
+		puts "Commands:"
+		puts "  s [path]      - send log from file to server"
+		puts "  m             - start status monitor"
+		puts "  c [client ID] - catch fatal and error events"
+end
+{% endhighlight %}
+
+That's it. Start your server. Start the status monitor and events handler. 
+ Submit new log files to the server and observe the number. At the end you should see something like:
+  
+```
+$ ruby client.rb m
+Press Ctrl-C to stop...
+{:fatal=>0, :error=>0, :warn=>0, :info=>0, :debug=>0, :timestamp=>2015-08-12 15:41:16 +0200}
+{:fatal=>478, :error=>1500, :warn=>2364, :info=>5930, :debug=>9728, :timestamp=>2015-08-12 15:41:26 +0200}
+{:fatal=>239, :error=>750, :warn=>1182, :info=>2965, :debug=>4864, :timestamp=>2015-08-12 15:41:36 +0200}
+...
+```
+
+That's all folks for this tutorial. The client notifications are working exactly as expected.
+You can find the client and server code in [the second tochtli example](https://github.com/PuzzleFlow/tochtli/tree/master/examples/02-log-analyzer).
