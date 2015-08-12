@@ -46,7 +46,7 @@ module Tochtli
     class << self
       def inherited(controller)
         controller.routing_keys     = Set.new
-        controller.message_handlers = Hash.new
+        controller.message_handlers = Array.new
         controller.queue_name       = controller.name.underscore.gsub('::', '/')
         ControllerManager.register(controller)
       end
@@ -68,11 +68,11 @@ module Tochtli
         routing_key = opts[:routing_key] || message_class.routing_key
         raise "Topic not set for message: #{message_class}" unless routing_key
 
-        self.message_handlers[routing_key] = MessageRoute.new(message_class, method)
+        self.message_handlers << MessageRoute.new(message_class, method, routing_key)
       end
 
       def off(routing_key)
-        self.message_handlers.delete(routing_key)
+        self.message_handlers.delete_if {|route| route.routing_key == routing_key }
       end
 
 
@@ -82,9 +82,9 @@ module Tochtli
         run_hook :after_setup, rabbit_connection
       end
 
-      def start(queue_name=nil, initial_env={})
+      def start(queue_name=nil, routing_keys=nil, initial_env={})
 				run_hook :before_start, queue_name, initial_env
-        self.dispatcher.start(queue_name || self.queue_name, initial_env)
+        self.dispatcher.start(queue_name || self.queue_name, routing_keys || self.routing_keys, initial_env)
 				run_hook :after_start, queue_name, initial_env
       end
 
@@ -119,12 +119,12 @@ module Tochtli
 
       def find_message_route(routing_key)
         raise "Routing not set up" if self.message_handlers.empty?
-        self.message_handlers[routing_key]
+        self.message_handlers.find {|handler| handler.pattern =~ routing_key }
       end
 
-      def create_queue(rabbit_connection, queue_name=nil)
+      def create_queue(rabbit_connection, queue_name=nil, routing_keys=nil)
         queue_name    = self.queue_name unless queue_name
-        routing_keys  = self.routing_keys
+        routing_keys  = self.routing_keys unless routing_keys
         channel       = rabbit_connection.create_channel(self.work_pool_size)
         exchange_name = self.exchange_name || rabbit_connection.exchange_name
         exchange      = channel.send(self.exchange_type, exchange_name, durable: self.exchange_durable)
@@ -184,7 +184,10 @@ module Tochtli
 	    self.class.dispatcher.rabbit_connection if self.class.set_up?
     end
 
-    class MessageRoute < Struct.new(:message_class, :action)
+    class MessageRoute < Struct.new(:message_class, :action, :routing_key, :pattern)
+			def initialize(message_class, action, routing_key)
+				super message_class, action, routing_key, KeyPattern.new(routing_key)
+			end
     end
 
     class Dispatcher
@@ -201,8 +204,8 @@ module Tochtli
         @initial_env       = nil
       end
 
-      def start(queue_name, initial_env={})
-        subscribe_queue(queue_name, initial_env)
+      def start(queue_name, routing_keys, initial_env={})
+        subscribe_queue(queue_name, routing_keys, initial_env)
       end
 
       def restart(options={})
@@ -238,8 +241,8 @@ module Tochtli
         register_process_end
       end
 
-      def subscribe_queue(queue_name, initial_env={})
-        queue    = controller_class.create_queue(@rabbit_connection, queue_name)
+      def subscribe_queue(queue_name, routing_keys, initial_env={})
+        queue    = controller_class.create_queue(@rabbit_connection, queue_name, routing_keys)
         consumer = queue.subscribe do |delivery_info, metadata, payload|
           process_message delivery_info, metadata, payload, initial_env
         end
@@ -321,5 +324,37 @@ module Tochtli
         end
       end
     end
+
+    class KeyPattern
+			ASTERIX_EXP = '[a-zA-Z0-9]+'
+			HASH_EXP = '[a-zA-Z0-9\.]*'
+
+	    def initialize(pattern)
+				@str = pattern
+				@simple = !pattern.include?('*') && !pattern.include?('#')
+				if @simple
+					@pattern = pattern
+				else
+					@pattern = Regexp.new('^' + pattern.gsub('.', '\\.').
+							gsub('*', ASTERIX_EXP).gsub(/(\\\.)?#(\\\.)?/, HASH_EXP) + '$')
+				end
+	    end
+
+	    def =~(key)
+				if @simple
+					@pattern == key
+				else
+					@pattern =~ key
+				end
+	    end
+
+	    def !~(key)
+		    !(self =~ key)
+	    end
+
+	    def to_s
+		    @str
+	    end
+		end
   end
 end

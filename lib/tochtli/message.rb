@@ -11,8 +11,8 @@ module Tochtli
 
     attr_reader :id, :properties
 
-    def self.route_to(routing_key=nil)
-      self.routing_key = routing_key
+    def self.route_to(routing_key=nil, &block)
+      self.routing_key = routing_key || block
     end
 
     # Compatibility with version 0.3
@@ -89,7 +89,7 @@ module Tochtli
 
     def routing_key
 			if self.class.routing_key.is_a?(Proc)
-				self.class.routing_key.call(self)
+				self.instance_eval(&self.class.routing_key)
 			else
         self.class.routing_key
 			end

@@ -11,14 +11,11 @@ class ControllerFunctionalTest < Minitest::Test
   end
 
   class CustomTopicMessage < Tochtli::Message
+	  route_to { "fn.test.#{key}.#{action}" }
+
     attribute :resource, String
 
-    attr_accessor :key
-
-    def routing_key
-      raise "Key not set" unless @key
-      "fn.test.#{key}.accept"
-    end
+    attr_accessor :key, :action
   end
 
   class TestEchoReply < Tochtli::Message
@@ -30,7 +27,7 @@ class ControllerFunctionalTest < Minitest::Test
   end
 
   class TestController < Tochtli::BaseController
-    bind prefix: 'fn.test', routing_key: 'fn.test.#'
+    bind 'fn.test.#'
 
     on TestMessage, :echo
     on CustomTopicMessage, routing_key: 'fn.test.1234.accept' do
@@ -41,6 +38,10 @@ class ControllerFunctionalTest < Minitest::Test
       raise "Should not reach this code"
     end
     off 'fn.test.off.accept'
+
+    on CustomTopicMessage, routing_key: 'fn.test.*.reject' do
+	    reply TestCustomReply.new(:message => "#{message.resource} rejected")
+    end
 
     def echo
       reply TestEchoReply.new(:original_text => message.text)
@@ -59,7 +60,7 @@ class ControllerFunctionalTest < Minitest::Test
   end
 
   def test_accept_command
-    message = CustomTopicMessage.new(key: '1234', resource: 'Red car')
+    message = CustomTopicMessage.new(action: 'accept', key: '1234', resource: 'Red car')
 
     publish message
 
@@ -68,10 +69,19 @@ class ControllerFunctionalTest < Minitest::Test
   end
 
   def test_off_key
-    message = CustomTopicMessage.new(key: 'off', resource: 'Red car')
+    message = CustomTopicMessage.new(action: 'accept', key: 'off', resource: 'Red car')
 
     assert_raises RoutingNotFound do
       publish message
     end
+  end
+
+  def test_reject_command
+    message = CustomTopicMessage.new(action: 'reject', key: '1234', resource: 'Red car')
+
+     publish message
+
+     assert_kind_of TestCustomReply, @reply
+     assert_equal "Red car rejected", @reply.message
   end
 end

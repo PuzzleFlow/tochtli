@@ -29,6 +29,8 @@ module Tochtli
 	    options       = controllers.extract_options!
 	    setup_options = options.except!(:logger, :cache, :connection)
 	    queue_name    = options.delete(:queue_name)
+	    routing_keys  = options.delete(:routing_keys)
+	    initial_env   = options.delete(:env) || {}
 
 	    setup(setup_options) unless set_up?
 
@@ -41,7 +43,7 @@ module Tochtli
         unless controller_class.started?(queue_name)
           @logger.info "Starting #{controller_class}..." if @logger
           controller_class.setup(@rabbit_connection, @cache, @logger) unless controller_class.set_up?
-          controller_class.start queue_name, options
+          controller_class.start queue_name, routing_keys, initial_env
         end
       end
     end
