@@ -13,7 +13,7 @@ module LogAnalyzer
   end
 
   class EventOccurred < Tochtli::Message
-    route_to lambda {|msg| "log.events.#{msg.severity}" }
+    route_to { "log.events.#{severity}" }
 
     attribute :severity, String
     attribute :timestamp, Time

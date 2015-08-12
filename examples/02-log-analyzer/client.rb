@@ -8,15 +8,14 @@ module LogAnalyzer
       publish NewLog.new(path: path)
     end
 
-    def react_on_events(severities, handler=nil, &block)
+    def react_on_events(client_id, severities, handler=nil, &block)
 	    handler = block unless handler
       severities = Array(severities)
-      severities.each do |severity|
-        routing_key = "log.events.#{severity}"
-        EventsController.bind routing_key
-        EventsController.on EventOccurred, :handle, routing_key: routing_key
-      end
-      Tochtli::ControllerManager.start EventsController, handler: handler, queue_name: '' # auto generate - queue name passed to start
+	    routing_keys = severities.map {|severity| "log.events.#{severity}" }
+      Tochtli::ControllerManager.start EventsController,
+                                       queue_name: "log_analyzer/events/#{client_id}", # custom queue name
+                                       routing_keys: routing_keys, # make custom binding (only selected severities)
+                                       env: { handler: handler }
     end
 
     def monitor_status(monitor=nil, &block)
@@ -28,6 +27,8 @@ module LogAnalyzer
   protected
 
   class EventsController < Tochtli::BaseController
+	  on EventOccurred, :handle, routing_key: 'log.events.*'
+
     def handle
 	    handler.call(message.severity, message.timestamp, message.message)
     end
@@ -77,7 +78,7 @@ case command
 		client.monitor_status {|status| p status }
 		hold
 	when 'c'
-		client.react_on_events [:fatal, :error], lambda {|severity, timestamp, message|
+		client.react_on_events ARGV[1], [:fatal, :error], lambda {|severity, timestamp, message|
 			puts "[#{timestamp}] Got #{severity}: #{message}"
 		}
 		hold
@@ -87,8 +88,8 @@ case command
 		puts "Usage: bundle exec ruby client [command] [params]"
 		puts
 		puts "Commands:"
-		puts "  s [path] - send log from file to server"
-		puts "  m        - start status monitor"
-		puts "  c        - catch fatal and error events"
+		puts "  s [path]      - send log from file to server"
+		puts "  m             - start status monitor"
+		puts "  c [client ID] - catch fatal and error events"
 end
 
