@@ -192,6 +192,10 @@ a:hover {
   padding: 0 .2em;
 }
 
+.post p code {
+	font-size: 0.85em;
+}
+
 .post pre code {
   border: none;
 }
