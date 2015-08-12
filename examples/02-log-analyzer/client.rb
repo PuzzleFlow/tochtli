@@ -20,7 +20,7 @@ module LogAnalyzer
 
     def monitor_status(monitor=nil, &block)
 	    monitor = block unless monitor
-      Tochtli::ControllerManager.start MonitorController, monitor: monitor
+      Tochtli::ControllerManager.start MonitorController, env: { monitor: monitor }
     end
   end
 

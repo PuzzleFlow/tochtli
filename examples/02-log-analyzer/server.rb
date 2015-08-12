@@ -89,7 +89,6 @@ module LogAnalyzer
     def initialize(rabbit_connection)
       super()
       @notifier = EventNotifier.new(rabbit_connection)
-
       @status = Hash.new(0)
     end
 
@@ -103,15 +102,15 @@ module LogAnalyzer
       end
     end
 
-    def reset_status
-      synchronize do
-        status = @status
-        @status = Hash.new(0)
-        status
-      end
-    end
-
     protected
+
+    def reset_status
+	    synchronize do
+		    status = @status
+		    @status = Hash.new(0)
+		    status
+	    end
+    end
 
     def monitor
       loop do
