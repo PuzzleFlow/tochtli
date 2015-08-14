@@ -5,11 +5,11 @@ Thread.abort_on_exception = true
 
 class ControllerIntegrationTest < Minitest::Test
   include Tochtli::Test::Integration
-  
+
   class TestMessage < Tochtli::Message
     route_to 'test.controller.echo'
 
-    attribute :text, String
+    attribute :text, type: String
   end
 
   class ErrorMessage < Tochtli::Message
@@ -23,7 +23,7 @@ class ControllerIntegrationTest < Minitest::Test
   class SleepyMessage < Tochtli::Message
     route_to 'test.controller.sleepy'
 
-    attribute :duration, Float
+    attribute :duration, type: Float
   end
 
   class DroppedMessage < Tochtli::Message
@@ -31,7 +31,7 @@ class ControllerIntegrationTest < Minitest::Test
   end
 
   class TestEchoReply < Tochtli::Message
-    attribute :original_text, String
+    attribute :original_text, type: String
   end
 
   class TestController < Tochtli::BaseController

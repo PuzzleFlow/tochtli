@@ -2,31 +2,28 @@ require_relative 'test_helper'
 
 class MessageTest < Minitest::Test
   include Tochtli::Test::Helpers
-  
+
   class SimpleMessage < Tochtli::Message
     route_to 'test.controller.simple'
 
-    attribute :text, String
-    attribute :timestamp, Time
-    attribute :optional, String, required: false
+    attribute :text, type: String
+    attribute :timestamp, type: Time
+    attribute :optional, type: String, presence: false, format: /\A[a-z!]+\z/i
 
     def validate
       setup_timestamp
-      unless optional.nil? || optional =~ /\A[a-z!]+\z/i
-        add_error "Invalid optional attribute: #{optional}"
-      end
       super
     end
 
     def setup_timestamp
-      @timestamp ||= Time.now
+      self.timestamp ||= Time.now
     end
   end
 
   class OpenMessage < Tochtli::Message
     ignore_extra_attributes
 
-    attribute :text, String
+    attribute :text, type: String
   end
 
   def test_routing_key
@@ -50,7 +47,7 @@ class MessageTest < Minitest::Test
   def test_invalid_attribute
     message = SimpleMessage.new(text: 'Hello', optional: 'world 123')
     assert message.invalid?, "Message passed validation when it should not"
-    assert_equal "Invalid optional attribute: world 123", message.errors[0]
+    refute_nil message.errors.for(:optional).empty?
   end
 
   def test_validation_callback_without_value
@@ -68,8 +65,8 @@ class MessageTest < Minitest::Test
 
   def test_undefined_attribute_error
     message = SimpleMessage.new(text: 'Hello', extra: 'from Paris')
-    assert message.invalid? # Undefined attribute :extra
-    assert_equal "Unexpected attributes: extra", message.errors[0]
+    refute message.valid?, 'Message should not be valid' # Undefined attribute :extra
+    refute message.errors.for(:extra).empty?
   end
 
   def test_ignore_excess_attribute

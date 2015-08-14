@@ -3,27 +3,34 @@ require 'benchmark'
 
 class ControllerFunctionalTest < Minitest::Test
   include Tochtli::Test::Controller
-  
+
   class TestMessage < Tochtli::Message
     route_to 'fn.test.echo'
 
-    attribute :text, String
+    attribute :text, type: String
   end
 
   class CustomTopicMessage < Tochtli::Message
 	  route_to { "fn.test.#{key}.#{action}" }
 
-    attribute :resource, String
+    attribute :resource, type: String
 
     attr_accessor :key, :action
+
+    def initialize(attributes={}, properties=nil)
+      attrs = attributes || {}
+      @key = attrs.delete(:key)
+      @action = attrs.delete(:action)
+      super(attributes, properties)
+    end
   end
 
   class TestEchoReply < Tochtli::Message
-    attribute :original_text, String
+    attribute :original_text, type: String
   end
 
   class TestCustomReply < Tochtli::Message
-    attribute :message, String
+    attribute :message, type: String
   end
 
   class TestController < Tochtli::BaseController

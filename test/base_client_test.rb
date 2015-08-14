@@ -58,11 +58,11 @@ class BaseClientTest < Minitest::Test
   end
 
   class FakeMessage < Tochtli::Message
-    attribute :test_attr, String, required: false
+    attribute :test_attr, type: String, presence: false
   end
 
   class FakeReply < Tochtli::Message
-    attribute :result, String
+    attribute :result, type: String
   end
 
 end

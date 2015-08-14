@@ -3,8 +3,7 @@ require 'securerandom'
 module Tochtli
   class Message
     extend Uber::InheritableAttr
-    include Virtus.model
-    include Tochtli::SimpleValidation
+    include Lotus::Validations
 
     inheritable_attr :routing_key
     inheritable_attr :extra_attributes_policy
@@ -21,7 +20,7 @@ module Tochtli
       required = options.fetch(:validate, true)
 
       attributes.each do |name|
-        attribute name, String, required: required
+        attribute name, type: String, presence: required
       end
     end
 
@@ -50,15 +49,23 @@ module Tochtli
     end
 
     def attributes=(attributes)
-      super
+      attributes.each do |key,val|
+        self.send("#{key}=", val)
+      end
+
       store_extra_attributes(attributes)
+    end
+
+    # public api method for private #read_attributes from Lotus::Validations
+    def attributes
+      read_attributes
     end
 
     def store_extra_attributes(attributes)
       @extra_attributes ||= {}
       if attributes
         attributes.each do |name, value|
-          unless allowed_writer_methods.include?("#{name}=")
+          unless self.class.defined_attributes.include?(name.to_s)
             @extra_attributes[name] = value
           end
         end
@@ -67,20 +74,15 @@ module Tochtli
 
     def validate_extra_attributes
       if self.class.extra_attributes_policy != :ignore && !@extra_attributes.empty?
-        add_error "Unexpected attributes: #{@extra_attributes.keys.map(&:to_s).join(', ')}"
-      end
-    end
-
-    def validate_attributes_presence
-      nil_attributes = attribute_set.select { |a| a.required? && self[a.name].nil? }.map(&:name)
-      unless nil_attributes.empty?
-        add_error "Required attributes: #{nil_attributes.map(&:to_s).join(', ')} not specified"
+        @extra_attributes.each do |extra|
+          errors.add(:extra, 'Extra attributes are not allowed')
+        end
       end
     end
 
     def validate
+      super
       validate_extra_attributes
-      validate_attributes_presence
     end
 
     def self.generate_id
@@ -96,7 +98,7 @@ module Tochtli
     end
 
     def to_hash
-      attributes.inject({}) do |hash, (name, value)|
+      read_attributes.inject({}) do |hash, (name, value)|
           value = value.map(&:to_hash) if value.is_a?(Array)
           hash[name] = value
           hash

@@ -5,7 +5,7 @@ require 'bunny'
 require 'json'
 
 require 'uber/inheritable_attr'
-require 'virtus'
+require 'lotus/validations'
 
 unless defined?(ActiveSupport)
   require 'facets/module/cattr'
