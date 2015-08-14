@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'bunny', '>= 1.7.0'
+gem 'bunny', '~> 1.7.0'
 gem 'uber'
 gem 'virtus'
 gem 'facets', require: false
