@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/PuzzleFlow/tochtli.svg?branch=master)](https://travis-ci.org/PuzzleFlow/tochtli)
+[![Gem Version](https://badge.fury.io/rb/tochtli.svg)](http://badge.fury.io/rb/tochtli)
 
 # What's Tochtli?
 
