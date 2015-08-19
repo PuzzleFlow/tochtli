@@ -16,6 +16,7 @@ module Tochtli
         @client             = Tochtli::RabbitClient.new(nil, @logger)
         @connection         = @client.rabbit_connection
         @controller_manager = Tochtli::ControllerManager.instance
+        @controller_manager.stop # restart all controllers - some can be started with functional tests on test connections
         @controller_manager.setup(connection: @connection, logger: @logger)
         @controller_manager.start(:all)
 
