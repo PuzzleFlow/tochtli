@@ -1,3 +1,3 @@
 module Tochtli
-  VERSION = "0.3.0"
+  VERSION = File.readlines(File.expand_path('../../../VERSION', __FILE__))[0].chomp unless defined?(VERSION)
 end

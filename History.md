@@ -1,3 +1,15 @@
+## 0.5.0 / 2015-08-19
+
+  * Usage examples
+  * Key pattern support for a controller routing (ex. on Message, :action, routing_key: 'my.key.*')
+  * Tochtli::BaseController#rabbit_connection delegation
+  * Tochtli::BaseController callbacks: (before|after)_(setup|start|stop|restart) with `hooks` gem
+  * Tochtli::BaseController#restart supports multiple queues
+  * Tochtli::Message#routing_key as a block
+  * Default Tochtli.logger logs on STDERR with WARN level
+  * Tochtli.cache is not obligatory
+  * Get rid of Tochtli::Test cases - replace with concerns (ex. include Tochtli::Test::Client not inherit from)
+
 ## 0.4.0 / 2015-07-10
 
   * Remove ActiveSupport dependencies (use Facets if Rails not loaded)
