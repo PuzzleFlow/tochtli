@@ -76,6 +76,7 @@ Gem::Specification.new do |s|
     "test/rabbit_client_test.rb",
     "test/rabbit_connection_test.rb",
     "test/test_helper.rb",
+    "test/version_test.rb",
     "tochtli.gemspec"
   ]
   s.homepage = "http://github.com/puzzleflow/tochtli"
