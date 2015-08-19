@@ -9,25 +9,25 @@ module LogAnalyzer
   class NewLog < Tochtli::Message
     route_to 'log.analyzer.new'
 
-    attribute :path, String
+    attribute :path
   end
 
   class EventOccurred < Tochtli::Message
     route_to { "log.events.#{severity}" }
 
-    attribute :severity, String
-    attribute :timestamp, Time
-    attribute :message, String
+    attribute :severity
+    attribute :timestamp, type: Time
+    attribute :message
   end
 
   class CurrentStatus < Tochtli::Message
     route_to 'log.status'
 
-    attribute :fatal, Integer, default: 0
-    attribute :error, Integer, default: 0
-    attribute :warn, Integer, default: 0
-    attribute :info, Integer, default: 0
-    attribute :debug, Integer, default: 0
+    attribute :fatal, type: Integer, default: 0
+    attribute :error, type: Integer, default: 0
+    attribute :warn, type: Integer, default: 0
+    attribute :info, type: Integer, default: 0
+    attribute :debug, type: Integer, default: 0
     attribute :timestamp, Time
   end
 end

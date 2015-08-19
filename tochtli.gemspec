@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Rafal Bigaj"]
-  s.date = "2015-08-11"
+  s.date = "2015-08-19"
   s.description = "Lightweight framework for service oriented applications based on bunny (RabbitMQ)"
   s.email = "rafal.bigaj@puzzleflow.com"
   s.extra_rdoc_files = [
@@ -48,7 +48,6 @@ Gem::Specification.new do |s|
     "lib/tochtli/rabbit_client.rb",
     "lib/tochtli/rabbit_connection.rb",
     "lib/tochtli/reply_queue.rb",
-    "lib/tochtli/simple_validation.rb",
     "lib/tochtli/test.rb",
     "lib/tochtli/test/client.rb",
     "lib/tochtli/test/controller.rb",
@@ -69,6 +68,7 @@ Gem::Specification.new do |s|
     "test/dummy/config/rabbit.yml",
     "test/dummy/db/.gitkeep",
     "test/dummy/log/.gitkeep",
+    "test/key_matcher_test.rb",
     "test/log/.gitkeep",
     "test/message_test.rb",
     "test/rabbit_client_test.rb",
@@ -87,7 +87,7 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<bunny>, [">= 1.7.0"])
       s.add_runtime_dependency(%q<uber>, [">= 0"])
-      s.add_runtime_dependency(%q<virtus>, [">= 0"])
+      s.add_runtime_dependency(%q<lotus-validations>, [">= 0"])
       s.add_runtime_dependency(%q<facets>, [">= 0"])
       s.add_runtime_dependency(%q<hooks>, [">= 0"])
       s.add_development_dependency(%q<dalli>, ["~> 2.6.4"])
@@ -99,7 +99,7 @@ Gem::Specification.new do |s|
     else
       s.add_dependency(%q<bunny>, [">= 1.7.0"])
       s.add_dependency(%q<uber>, [">= 0"])
-      s.add_dependency(%q<virtus>, [">= 0"])
+      s.add_dependency(%q<lotus-validations>, [">= 0"])
       s.add_dependency(%q<facets>, [">= 0"])
       s.add_dependency(%q<hooks>, [">= 0"])
       s.add_dependency(%q<dalli>, ["~> 2.6.4"])
@@ -112,7 +112,7 @@ Gem::Specification.new do |s|
   else
     s.add_dependency(%q<bunny>, [">= 1.7.0"])
     s.add_dependency(%q<uber>, [">= 0"])
-    s.add_dependency(%q<virtus>, [">= 0"])
+    s.add_dependency(%q<lotus-validations>, [">= 0"])
     s.add_dependency(%q<facets>, [">= 0"])
     s.add_dependency(%q<hooks>, [">= 0"])
     s.add_dependency(%q<dalli>, ["~> 2.6.4"])

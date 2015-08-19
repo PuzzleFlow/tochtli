@@ -1,3 +1,2 @@
 source 'https://rubygems.org'
-gem 'screencap'
-gem 'tochtli', path: '../..' # github: 'puzzleflow/tochtli'
+gem 'tochtli', path: '../..'
