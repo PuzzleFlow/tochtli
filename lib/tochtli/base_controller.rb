@@ -83,9 +83,9 @@ module Tochtli
       end
 
       def start(queue_name=nil, routing_keys=nil, initial_env={})
-				run_hook :before_start, queue_name, initial_env
+        run_hook :before_start, queue_name, initial_env
         self.dispatcher.start(queue_name || self.queue_name, routing_keys || self.routing_keys, initial_env)
-				run_hook :after_start, queue_name, initial_env
+        run_hook :after_start, queue_name, initial_env
       end
 
       def set_up?
@@ -97,24 +97,30 @@ module Tochtli
       end
 
       def stop(options={})
-	      if started?
-					queues = self.dispatcher.queues
-		      run_hook :before_stop, queues
+        if started?
+          queues = self.dispatcher.queues
+          run_hook :before_stop, queues
+        end
+        
+        if self.dispatcher
+          self.dispatcher.shutdown(options)
+          self.dispatcher = nil
 
-					self.dispatcher.shutdown(options)
-	        self.dispatcher = nil
+          run_hook :after_stop, queues
 
-					run_hook :after_stop, queues
-				end
+          true
+        else
+          false
+        end
       end
 
       def restart(options={})
-	      if started?
-		      queues = self.dispatcher.queues
-		      run_hook :before_restart, queues
-		      self.dispatcher.restart options
-		      run_hook :after_restart, queues
-				end
+        if started?
+          queues = self.dispatcher.queues
+          run_hook :before_restart, queues
+          self.dispatcher.restart options
+          run_hook :after_restart, queues
+        end
       end
 
       def find_message_route(routing_key)
@@ -181,13 +187,13 @@ module Tochtli
     end
 
     def rabbit_connection
-	    self.class.dispatcher.rabbit_connection if self.class.set_up?
+      self.class.dispatcher.rabbit_connection if self.class.set_up?
     end
 
     class MessageRoute < Struct.new(:message_class, :action, :routing_key, :pattern)
-			def initialize(message_class, action, routing_key)
-				super message_class, action, routing_key, KeyPattern.new(routing_key)
-			end
+      def initialize(message_class, action, routing_key)
+        super message_class, action, routing_key, KeyPattern.new(routing_key)
+      end
     end
 
     class Dispatcher
@@ -209,13 +215,13 @@ module Tochtli
       end
 
       def restart(options={})
-	      queues = @queues.dup
+        queues = @queues.dup
 
-	      shutdown options
+        shutdown options
 
-	      queues.each do |queue_name, queue_opts|
-		      start queue_name, queue_opts[:initial_env]
-	      end
+        queues.each do |queue_name, queue_opts|
+          start queue_name, queue_opts[:initial_env]
+        end
       end
 
       def process_message(delivery_info, properties, payload, initial_env)
@@ -266,15 +272,15 @@ module Tochtli
       rescue Bunny::ConnectionClosedError
         # ignore closed connection error
       ensure
-	      @queues = {}
+        @queues = {}
       end
 
       def started?(queue_name=nil)
-	      if queue_name
-		      @queues.has_key?(queue_name)
-	      else
-		      !@queues.empty?
-	      end
+        if queue_name
+          @queues.has_key?(queue_name)
+        else
+          !@queues.empty?
+        end
       end
 
       def queues
@@ -326,35 +332,35 @@ module Tochtli
     end
 
     class KeyPattern
-			ASTERIX_EXP = '[a-zA-Z0-9]+'
-			HASH_EXP = '[a-zA-Z0-9\.]*'
+      ASTERIX_EXP = '[a-zA-Z0-9]+'
+      HASH_EXP = '[a-zA-Z0-9\.]*'
 
-	    def initialize(pattern)
-				@str = pattern
-				@simple = !pattern.include?('*') && !pattern.include?('#')
-				if @simple
-					@pattern = pattern
-				else
-					@pattern = Regexp.new('^' + pattern.gsub('.', '\\.').
-							gsub('*', ASTERIX_EXP).gsub(/(\\\.)?#(\\\.)?/, HASH_EXP) + '$')
-				end
-	    end
+      def initialize(pattern)
+        @str = pattern
+        @simple = !pattern.include?('*') && !pattern.include?('#')
+        if @simple
+          @pattern = pattern
+        else
+          @pattern = Regexp.new('^' + pattern.gsub('.', '\\.').
+              gsub('*', ASTERIX_EXP).gsub(/(\\\.)?#(\\\.)?/, HASH_EXP) + '$')
+        end
+      end
 
-	    def =~(key)
-				if @simple
-					@pattern == key
-				else
-					@pattern =~ key
-				end
-	    end
+      def =~(key)
+        if @simple
+          @pattern == key
+        else
+          @pattern =~ key
+        end
+      end
 
-	    def !~(key)
-		    !(self =~ key)
-	    end
+      def !~(key)
+        !(self =~ key)
+      end
 
-	    def to_s
-		    @str
-	    end
-		end
+      def to_s
+        @str
+      end
+    end
   end
 end
