@@ -88,11 +88,11 @@ module Tochtli
     end
 
     def routing_key
-			if self.class.routing_key.is_a?(Proc)
-				self.instance_eval(&self.class.routing_key)
-			else
+      if self.class.routing_key.is_a?(Proc)
+        self.instance_eval(&self.class.routing_key)
+      else
         self.class.routing_key
-			end
+      end
     end
 
     def to_hash

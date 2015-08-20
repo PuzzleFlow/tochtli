@@ -14,8 +14,8 @@ module LogAnalyzer
     cattr_accessor :monitor
 
     after_setup do |rabbit_connection|
-	    self.monitor = StatusMonitor.new(rabbit_connection)
-	    self.monitor.start
+      self.monitor = StatusMonitor.new(rabbit_connection)
+      self.monitor.start
     end
 
     def create
@@ -68,11 +68,11 @@ module LogAnalyzer
   end
 
   class EventNotifier < Tochtli::BaseClient
-		SIGNIFICANT_SEVERITIES = [:fatal, :error, :warn]
+    SIGNIFICANT_SEVERITIES = [:fatal, :error, :warn]
 
-		def self.significant?(severity)
-			SIGNIFICANT_SEVERITIES.include?(severity)
-		end
+    def self.significant?(severity)
+      SIGNIFICANT_SEVERITIES.include?(severity)
+    end
 
     def notify(event)
       publish EventOccurred.new(event), mandatory: false
@@ -105,18 +105,18 @@ module LogAnalyzer
     protected
 
     def reset_status
-	    synchronize do
-		    status = @status
-		    @status = Hash.new(0)
-		    status
-	    end
+      synchronize do
+        status = @status
+        @status = Hash.new(0)
+        status
+      end
     end
 
     def monitor
       loop do
         current_status = reset_status
         current_status[:timestamp] = Time.now
-		    @notifier.update_status current_status
+        @notifier.update_status current_status
         sleep 10
       end
     end

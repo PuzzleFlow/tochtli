@@ -69,9 +69,9 @@ module Tochtli
           @logger       = Logger.new(File.join(Rails.root, 'log/service.log'))
           @logger.level = Rails.env.production? ? Logger::WARN : Logger::DEBUG
         else
-	        @logger       = Logger.new(STDERR)
-	        @logger.level = Logger::WARN
-				end
+          @logger       = Logger.new(STDERR)
+          @logger.level = Logger::WARN
+        end
       end
       @logger
     end

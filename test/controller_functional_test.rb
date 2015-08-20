@@ -11,7 +11,7 @@ class ControllerFunctionalTest < Minitest::Test
   end
 
   class CustomTopicMessage < Tochtli::Message
-	  route_to { "fn.test.#{key}.#{action}" }
+    route_to { "fn.test.#{key}.#{action}" }
 
     attribute :resource, String
 
@@ -40,7 +40,7 @@ class ControllerFunctionalTest < Minitest::Test
     off 'fn.test.off.accept'
 
     on CustomTopicMessage, routing_key: 'fn.test.*.reject' do
-	    reply TestCustomReply.new(:message => "#{message.resource} rejected")
+      reply TestCustomReply.new(:message => "#{message.resource} rejected")
     end
 
     def echo

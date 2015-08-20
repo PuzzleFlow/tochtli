@@ -3,17 +3,17 @@ require_relative 'common'
 Tochtli.logger.progname = 'SERVER'
 
 class ScreenerController < Tochtli::BaseController
-	bind 'screener.*'
+  bind 'screener.*'
 
-	on CreateScreenMessage, :create
+  on CreateScreenMessage, :create
 
-	def create
-		start_time = Time.now
-		f = Screencap::Fetcher.new(message.url)
-		f.fetch output: File.join(__dir__, 'images', message.file)
-		total_time = Time.now - start_time
-		reply CreateScreenReplyMessage.new(time: total_time)
-	end
+  def create
+    start_time = Time.now
+    f = Screencap::Fetcher.new(message.url)
+    f.fetch output: File.join(__dir__, 'images', message.file)
+    total_time = Time.now - start_time
+    reply CreateScreenReplyMessage.new(time: total_time)
+  end
 end
 
 Tochtli::ControllerManager.setup
