@@ -1,3 +1,7 @@
+## 0.5.1 / 2015-08-19
+
+  * [Integration Tests] Fix controller manager restart - some controllers are fixed to the test connection after functional tests
+
 ## 0.5.0 / 2015-08-19
 
   * Usage examples
