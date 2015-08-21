@@ -164,14 +164,3 @@ module Tochtli
     end
   end
 end
-
-
-####
-# TEMPORARY see: https://github.com/apotonick/uber/pull/10
-####
-
-class Uber::InheritableAttr::Clone
-  def self.uncloneable
-    [Symbol, TrueClass, FalseClass, NilClass, Numeric]
-  end
-end

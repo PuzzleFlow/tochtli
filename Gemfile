@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'bunny', '~> 1.7.0'
-gem 'uber'
+gem 'uber', '>= 0.0.14'
 gem 'virtus'
 gem 'facets', require: false
 gem 'hooks'
@@ -29,4 +29,3 @@ group :development do
     gem 'minitest-reporters', '>= 0.5.0'
   end
 end
-

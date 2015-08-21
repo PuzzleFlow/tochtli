@@ -8,7 +8,7 @@ module Tochtli
 
     inheritable_attr :routing_keys
     inheritable_attr :message_handlers
-    inheritable_attr :work_pool_size
+    inheritable_attr :work_pool_size, clone: false
 
     self.work_pool_size = 1 # default work pool size per controller instance
 
@@ -101,7 +101,7 @@ module Tochtli
           queues = self.dispatcher.queues
           run_hook :before_stop, queues
         end
-        
+
         if self.dispatcher
           self.dispatcher.shutdown(options)
           self.dispatcher = nil
@@ -261,7 +261,7 @@ module Tochtli
       end
 
       # Performs a graceful shutdown of dispatcher i.e. waits for all processes to end.
-      # If timeout is reached, forces the shutdown. Useful with dynamic reconfiguration of work pool size. 
+      # If timeout is reached, forces the shutdown. Useful with dynamic reconfiguration of work pool size.
       def shutdown(options={})
         wait_for_processes options.fetch(:timeout, 15)
         stop
