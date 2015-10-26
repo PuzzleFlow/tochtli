@@ -35,6 +35,20 @@ The stable service interface really helps to reduce costs of a inevitable change
 
 Read more about Tochtli and go through the tutorial on [Tochtli homepage](http://puzzleflow.github.io/tochtli).
 
+# Tests
+
+Run rabbitmq using foreman:
+
+```
+bundle exec foreman start
+```
+
+In another shell run tests:
+
+```
+bundle exec rake test
+```
+
 # Contributing
 
 - Fork the project.

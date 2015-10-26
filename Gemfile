@@ -29,3 +29,7 @@ group :development do
     gem 'minitest-reporters', '>= 0.5.0'
   end
 end
+
+group :development, :test do
+  gem 'foreman'
+end
