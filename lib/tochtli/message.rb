@@ -27,12 +27,12 @@ module Tochtli
 
     def self.required_attributes(*attributes)
       options = attributes.extract_options!
-      self.attributes *attributes, options.merge(validate: true)
+      self.attributes(*attributes, options.merge(validate: true))
     end
 
     def self.optional_attributes(*attributes)
       options = attributes.extract_options!
-      self.attributes *attributes, options.merge(validate: false)
+      self.attributes(*attributes, options.merge(validate: false))
     end
 
     def self.ignore_extra_attributes

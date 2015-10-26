@@ -121,7 +121,7 @@ module Tochtli
     def publish(routing_key, message, options={})
       begin
         payload = message.to_json
-      rescue Exception
+      rescue StandardError
         logger.error "Unable to serialize message: #{message.inspect}"
         logger.error $!
         raise "Unable to serialize message to JSON: #{$!}"
@@ -168,7 +168,7 @@ module Tochtli
 
       channel  = create_channel(@work_pool_size)
       exchange = create_exchange(channel)
-      exchange.on_return &method(:on_return)
+      exchange.on_return(&method(:on_return))
 
       channel_wrap                    = ChannelWrap.new(channel, exchange)
       @channel_pool[thread.object_id] = channel_wrap

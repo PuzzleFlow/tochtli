@@ -43,7 +43,7 @@ module Tochtli
   class ErrorHandler < Middleware
     def call(env)
       @app.call(env)
-    rescue Exception => ex
+    rescue StandardError => ex
       properties = env[:properties] || {}
       controller = env[:controller]
       logger     = env[:logger]
