@@ -239,7 +239,7 @@ module Tochtli
 
         @application.call(env)
 
-      rescue Exception => ex
+      rescue StandardError => ex
         logger.error "\nUNEXPECTED EXCEPTION: #{ex.class.name} (#{ex.message})"
         logger.error ex.backtrace.join("\n")
         false
