@@ -56,7 +56,7 @@ module Tochtli
 
     def on_delivery(delivery_info, metadata, payload)
       class_name       = metadata.type.camelize.gsub(/[^a-zA-Z0-9\:]/, '_') # basic sanity
-      reply_class      = Object.const_get(class_name)
+      reply_class      = get_constant(class_name)
       reply            = reply_class.new({}, metadata)
       attributes       = JSON.parse(payload)
       reply.attributes = attributes
@@ -108,6 +108,15 @@ module Tochtli
         raise "Internal error, timeout handler not found for message: #{original_message.id}, #{original_message.inspect}"
       end
     end
+
+    private
+
+    def get_constant(class_name)
+      class_name.split('::').inject(Object) do |mod, class_name|
+        mod.const_get(class_name)
+      end
+    end
+
 
     class Consumer < ::Bunny::Consumer
       def initialize(reply_queue, *args)

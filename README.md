@@ -37,7 +37,7 @@ Read more about Tochtli and go through the tutorial on [Tochtli homepage](http:/
 
 # Tests
 
-Run rabbitmq using foreman:
+Run rabbitmq using foreman (copy `Procfile.example` to `Procfile` before if needed):
 
 ```
 bundle exec foreman start
