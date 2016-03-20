@@ -56,7 +56,7 @@ module Tochtli
 
     def on_delivery(delivery_info, metadata, payload)
       class_name       = metadata.type.camelize.gsub(/[^a-zA-Z0-9\:]/, '_') # basic sanity
-      reply_class      = eval(class_name)
+      reply_class      = Object.const_get(class_name)
       reply            = reply_class.new({}, metadata)
       attributes       = JSON.parse(payload)
       reply.attributes = attributes
@@ -65,7 +65,7 @@ module Tochtli
 
       handle_reply reply
 
-    rescue Exception
+    rescue StandardError
       logger.error $!
       logger.error $!.backtrace.join("\n")
     end
@@ -79,13 +79,13 @@ module Tochtli
           timeout_thread.join # make sure timeout thread is dead
         end
 
-        if !reply.is_a?(Tochtli::ErrorMessage) && !reply.is_a?(Exception)
+        if !reply.is_a?(Tochtli::ErrorMessage) && !reply.is_a?(StandardError)
 
           begin
 
             handler.call(reply)
 
-          rescue Exception
+          rescue StandardError
             logger.error $!
             logger.error $!.backtrace.join("\n")
             handler.on_error($!)
@@ -118,7 +118,7 @@ module Tochtli
       def recover_from_network_failure
         super
         @reply_queue.reconnect(@channel)
-      rescue Exception
+      rescue StandardError
         logger = channel.connection.logger
         logger.error $!
         logger.error $!.backtrace.join("\n")
