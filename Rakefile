@@ -32,7 +32,8 @@ Jeweler::RubygemsDotOrgTasks.new
 Rake::TestTask.new(:test) do |test|
   test.libs << 'lib' << 'test'
   test.pattern = 'test/**/*_test.rb'
-  test.verbose = true
+  test.verbose = false
+  test.warning = false
 end
 
 desc "Code coverage detail"
