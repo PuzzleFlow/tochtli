@@ -5,8 +5,8 @@ rvm:
   - 2.3.0
   - rbx-2
 env:
-  - RAILS_VER=3.2.19
-  - RAILS_VER=4.2.1
+  - RAILS_VER=3.2.22.2
+  - RAILS_VER=4.2.6
   - NO_RAILS=1
 services:
   - rabbitmq
@@ -15,4 +15,4 @@ matrix:
     - rvm: rbx-2
   exclude:
     - rvm: 2.3.0
-      env: RAILS_VER=3.2.19
+      env: RAILS_VER=3.2.22.2
