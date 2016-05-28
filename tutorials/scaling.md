@@ -17,7 +17,7 @@ end
 threads.each(&:join)
 {% endhighlight %}
 
-There is a small change here, allowing to get appropriate number of output file – one per each client. I also modified server to print into STDOUT when processing of a request starts and ends, to see what happens. Now when we run ` bundle exec ruby client.rb http://google.com googleN.png`. Whoops, no concurrency here! The server processes one message at the time and after finishing it, moves to another. Completing 20 requests in our example takes quite some time and it is possible that some requests will fail due to timeouts. Not to scalable, but we can do two things to improve it.
+There is a small change here, allowing to get appropriate number of output file – one per each client. I also modified server to print into STDOUT when processing of a request starts and ends, to see what happens. Now when we run ` bundle exec ruby client.rb http://google.com googleN.png`. Whoops, no concurrency here! The server processes one message at the time and after finishing it, moves to another. Completing 20 requests in our example takes quite some time and it is possible that some requests will fail due to timeouts. Not too scalable, but we can do two things to improve it.
 
 ## Horizontal scaling
 
@@ -27,7 +27,7 @@ First thing that comes to mind is to fire up more servers. This will, actually, 
 
 ## Work pools
 
-The solution mentioned above is simple and _simple_ is good, but frequently not good enough. Fortunately, Tochtli has a built-in mechanism for more concurrent processing. I talking about work pools here. Work pools are set per controller **class** and default size of them is 1. You can easily change by setting appropriate class attribute (it's `ActiveSupport`'s `class_attribute`, so it works nicely with inheritance, you don't need to worry).
+The solution mentioned above is simple and _simple_ is good, but frequently not good enough. Fortunately, Tochtli has a built-in mechanism for more concurrent processing. I'm talking about work pools here. Work pools are set per controller **class** and default size of them is 1. You can easily change by setting appropriate class attribute (it's `ActiveSupport`'s `class_attribute`, so it works nicely with inheritance, you don't need to worry).
 
 {% highlight ruby %}
 class ScreenerController < Tochtli::BaseController
