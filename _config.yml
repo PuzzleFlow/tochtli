@@ -1,4 +1,4 @@
 name: Flex
 markdown: redcarpet
-highlighter: pygments
+highlighter: rouge
 baseurl: /tochtli
