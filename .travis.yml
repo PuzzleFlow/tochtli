@@ -1,11 +1,9 @@
 language: ruby
 rvm:
-  - 2.1.8
-  - 2.2.4
-  - 2.3.0
+  - 2.4.3
+  - 2.5.0-preview1
   - rbx-2
 env:
-  - RAILS_VER=3.2.22.2
   - RAILS_VER=4.2.6
   - NO_RAILS=1
 services:
@@ -13,6 +11,3 @@ services:
 matrix:
   allow_failures:
     - rvm: rbx-2
-  exclude:
-    - rvm: 2.3.0
-      env: RAILS_VER=3.2.22.2
