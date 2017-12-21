@@ -8,10 +8,10 @@ gem 'hooks'
 
 group :development do
   gem 'dalli', '~> 2.6.4'
-  gem 'jeweler', '~> 2.0.1'
+  gem 'jeweler', '~> 2.3.7'
 
   gem 'mini_cache'
-  gem 'yard', '~> 0.8'
+  gem 'yard', '~> 0.9.11'
 
   if ENV['RAILS_VER']
     gem 'sqlite3'

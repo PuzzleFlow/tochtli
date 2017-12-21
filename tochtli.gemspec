@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Rafal Bigaj"]
-  s.date = "2015-08-20"
+  s.date = "2017-12-21"
   s.description = "Lightweight framework for service oriented applications based on bunny (RabbitMQ)"
   s.email = "rafal.bigaj@puzzleflow.com"
   s.extra_rdoc_files = [
@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
     ".travis.yml",
     "Gemfile",
     "History.md",
+    "Procfile.example",
     "README.md",
     "Rakefile",
     "VERSION",
@@ -57,7 +58,6 @@ Gem::Specification.new do |s|
     "lib/tochtli/test/test_case.rb",
     "lib/tochtli/test/test_unit.rb",
     "lib/tochtli/version.rb",
-    "log_generator.rb",
     "test/base_client_test.rb",
     "test/controller_functional_test.rb",
     "test/controller_integration_test.rb",
@@ -81,49 +81,52 @@ Gem::Specification.new do |s|
   ]
   s.homepage = "http://github.com/puzzleflow/tochtli"
   s.licenses = ["MIT"]
-  s.rubygems_version = "2.4.8"
+  s.rubygems_version = "2.5.1"
   s.summary = "Tochtli a core components for SOA"
 
   if s.respond_to? :specification_version then
     s.specification_version = 4
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<bunny>, ["~> 1.7.0"])
-      s.add_runtime_dependency(%q<uber>, [">= 0"])
+      s.add_runtime_dependency(%q<bunny>, ["~> 2.3.0"])
+      s.add_runtime_dependency(%q<uber>, [">= 0.0.14"])
       s.add_runtime_dependency(%q<virtus>, [">= 0"])
       s.add_runtime_dependency(%q<facets>, [">= 0"])
       s.add_runtime_dependency(%q<hooks>, [">= 0"])
       s.add_development_dependency(%q<dalli>, ["~> 2.6.4"])
-      s.add_development_dependency(%q<jeweler>, ["~> 2.0.1"])
+      s.add_development_dependency(%q<jeweler>, ["~> 2.3.7"])
       s.add_development_dependency(%q<mini_cache>, [">= 0"])
-      s.add_development_dependency(%q<yard>, ["~> 0.8"])
+      s.add_development_dependency(%q<yard>, ["~> 0.9.11"])
       s.add_development_dependency(%q<minitest>, [">= 4.7.5"])
       s.add_development_dependency(%q<minitest-reporters>, [">= 0.5.0"])
+      s.add_development_dependency(%q<foreman>, [">= 0"])
     else
-      s.add_dependency(%q<bunny>, ["~> 1.7.0"])
-      s.add_dependency(%q<uber>, [">= 0"])
+      s.add_dependency(%q<bunny>, ["~> 2.3.0"])
+      s.add_dependency(%q<uber>, [">= 0.0.14"])
       s.add_dependency(%q<virtus>, [">= 0"])
       s.add_dependency(%q<facets>, [">= 0"])
       s.add_dependency(%q<hooks>, [">= 0"])
       s.add_dependency(%q<dalli>, ["~> 2.6.4"])
-      s.add_dependency(%q<jeweler>, ["~> 2.0.1"])
+      s.add_dependency(%q<jeweler>, ["~> 2.3.7"])
       s.add_dependency(%q<mini_cache>, [">= 0"])
-      s.add_dependency(%q<yard>, ["~> 0.8"])
+      s.add_dependency(%q<yard>, ["~> 0.9.11"])
       s.add_dependency(%q<minitest>, [">= 4.7.5"])
       s.add_dependency(%q<minitest-reporters>, [">= 0.5.0"])
+      s.add_dependency(%q<foreman>, [">= 0"])
     end
   else
-    s.add_dependency(%q<bunny>, ["~> 1.7.0"])
-    s.add_dependency(%q<uber>, [">= 0"])
+    s.add_dependency(%q<bunny>, ["~> 2.3.0"])
+    s.add_dependency(%q<uber>, [">= 0.0.14"])
     s.add_dependency(%q<virtus>, [">= 0"])
     s.add_dependency(%q<facets>, [">= 0"])
     s.add_dependency(%q<hooks>, [">= 0"])
     s.add_dependency(%q<dalli>, ["~> 2.6.4"])
-    s.add_dependency(%q<jeweler>, ["~> 2.0.1"])
+    s.add_dependency(%q<jeweler>, ["~> 2.3.7"])
     s.add_dependency(%q<mini_cache>, [">= 0"])
-    s.add_dependency(%q<yard>, ["~> 0.8"])
+    s.add_dependency(%q<yard>, ["~> 0.9.11"])
     s.add_dependency(%q<minitest>, [">= 4.7.5"])
     s.add_dependency(%q<minitest-reporters>, [">= 0.5.0"])
+    s.add_dependency(%q<foreman>, [">= 0"])
   end
 end
 
